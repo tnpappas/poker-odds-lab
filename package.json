@@ -1,0 +1,21 @@
+{
+  "name": "poker-odds-lab",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npm run test --workspace=packages/poker-engine",
+    "dev": "npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "start:api": "npm run start --workspace=apps/api",
+    "build": "npm run build --workspace=apps/web",
+    "typecheck": "npm run typecheck --workspace=apps/api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
