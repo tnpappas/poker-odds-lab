@@ -10,7 +10,7 @@ export interface User {
   email: string;
   username: string | null;
   plan: Plan;
-  stripeCustomerId: string | null;
+  polarCustomerId: string | null;
   createdAt: string;
 }
 
@@ -108,8 +108,8 @@ export interface Storage {
   getOrCreateUser(clerkId: string, email: string, username?: string): Promise<User>;
   upsertUserFromWebhook(clerkId: string, email: string, username?: string): Promise<User>;
   setPlan(userId: string, plan: Plan): Promise<void>;
-  setStripeCustomer(userId: string, stripeCustomerId: string): Promise<void>;
-  findUserByStripeCustomer(stripeCustomerId: string): Promise<User | null>;
+  setPolarCustomer(userId: string, polarCustomerId: string): Promise<void>;
+  findUserByPolarCustomer(polarCustomerId: string): Promise<User | null>;
   deleteUser(userId: string): Promise<boolean>;
 
   createSession(userId: string, mode: SessionMode): Promise<Session>;

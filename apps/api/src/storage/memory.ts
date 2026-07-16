@@ -20,7 +20,7 @@ export class MemoryStorage implements Storage {
   async getOrCreateUser(clerkId: string, email: string, username?: string): Promise<User> {
     const existingId = this.byClerk.get(clerkId);
     if (existingId) return this.users.get(existingId)!;
-    const user: User = { id: randomUUID(), clerkId, email, username: username ?? null, plan: 'free', stripeCustomerId: null, createdAt: now() };
+    const user: User = { id: randomUUID(), clerkId, email, username: username ?? null, plan: 'free', polarCustomerId: null, createdAt: now() };
     this.users.set(user.id, user);
     this.byClerk.set(clerkId, user.id);
     return user;
@@ -42,14 +42,14 @@ export class MemoryStorage implements Storage {
     if (u) u.plan = plan;
   }
 
-  async setStripeCustomer(userId: string, stripeCustomerId: string): Promise<void> {
+  async setPolarCustomer(userId: string, polarCustomerId: string): Promise<void> {
     const u = this.users.get(userId);
-    if (u) u.stripeCustomerId = stripeCustomerId;
+    if (u) u.polarCustomerId = polarCustomerId;
   }
 
-  async findUserByStripeCustomer(stripeCustomerId: string): Promise<User | null> {
+  async findUserByPolarCustomer(polarCustomerId: string): Promise<User | null> {
     for (const u of this.users.values()) {
-      if (u.stripeCustomerId === stripeCustomerId) return u;
+      if (u.polarCustomerId === polarCustomerId) return u;
     }
     return null;
   }

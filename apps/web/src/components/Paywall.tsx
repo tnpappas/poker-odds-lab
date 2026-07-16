@@ -4,9 +4,7 @@ import { useGameStore } from '../store/useGameStore';
 import { api, apiEnabled, type CheckoutPlan } from '../lib/api';
 
 const TIERS: { name: string; price: string; note: string; plan: CheckoutPlan; highlight?: boolean }[] = [
-  { name: 'Lifetime', price: '$29.99', note: 'one-time — no subscription', plan: 'lifetime', highlight: true },
-  { name: 'Pro Annual', price: '$59.99/yr', note: 'save 50%', plan: 'annual' },
-  { name: 'Pro Monthly', price: '$9.99/mo', note: 'cancel anytime', plan: 'monthly' },
+  { name: 'Lifetime', price: '$24.99', note: 'one-time — pay once, unlock everything forever', plan: 'lifetime', highlight: true },
 ];
 
 export function Paywall({ reason, onClose }: { reason: string; onClose: () => void }) {
@@ -28,7 +26,7 @@ export function Paywall({ reason, onClose }: { reason: string; onClose: () => vo
       setBusy(null);
       setError(result.error ?? 'Could not start checkout.');
     }
-    // On success the browser is redirected to Stripe Checkout.
+    // On success the browser is redirected to Polar checkout.
   }
 
   return (

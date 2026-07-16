@@ -65,13 +65,13 @@ export interface ApiDecision {
 export type CheckoutPlan = 'lifetime' | 'monthly' | 'annual';
 
 /**
- * Start a real Stripe Checkout and redirect the browser to it.
+ * Start a real Polar checkout and redirect the browser to it.
  * Uses the Clerk bearer token when configured, else the dev header.
  */
 async function startCheckout(plan: CheckoutPlan): Promise<{ ok: boolean; error?: string }> {
   if (!apiEnabled) return { ok: false, error: 'API not configured' };
   try {
-    const res = await fetch(`${API_URL}/api/stripe/checkout`, {
+    const res = await fetch(`${API_URL}/api/billing/checkout`, {
       method: 'POST',
       headers: await authHeaders(),
       body: JSON.stringify({ plan }),

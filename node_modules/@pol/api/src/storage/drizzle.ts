@@ -15,7 +15,7 @@ type AdversaryRow = typeof schema.adversaryProfiles.$inferSelect;
 const today = () => new Date().toISOString().slice(0, 10);
 
 function mapUser(r: UserRow): User {
-  return { id: r.id, clerkId: r.clerkId, email: r.email, username: r.username, plan: r.plan as Plan, stripeCustomerId: r.stripeCustomerId, createdAt: r.createdAt.toISOString() };
+  return { id: r.id, clerkId: r.clerkId, email: r.email, username: r.username, plan: r.plan as Plan, polarCustomerId: r.polarCustomerId, createdAt: r.createdAt.toISOString() };
 }
 function mapSession(r: SessionRow): Session {
   return {
@@ -63,12 +63,12 @@ export class DrizzleStorage implements Storage {
     await this.db.update(schema.users).set({ plan }).where(eq(schema.users.id, userId));
   }
 
-  async setStripeCustomer(userId: string, stripeCustomerId: string): Promise<void> {
-    await this.db.update(schema.users).set({ stripeCustomerId }).where(eq(schema.users.id, userId));
+  async setPolarCustomer(userId: string, polarCustomerId: string): Promise<void> {
+    await this.db.update(schema.users).set({ polarCustomerId }).where(eq(schema.users.id, userId));
   }
 
-  async findUserByStripeCustomer(stripeCustomerId: string): Promise<User | null> {
-    const r = await this.db.select().from(schema.users).where(eq(schema.users.stripeCustomerId, stripeCustomerId)).limit(1);
+  async findUserByPolarCustomer(polarCustomerId: string): Promise<User | null> {
+    const r = await this.db.select().from(schema.users).where(eq(schema.users.polarCustomerId, polarCustomerId)).limit(1);
     return r[0] ? mapUser(r[0]) : null;
   }
 

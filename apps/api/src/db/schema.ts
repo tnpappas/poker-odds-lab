@@ -6,7 +6,7 @@ export const users = pgTable('users', {
   email: text('email').notNull(),
   username: text('username'),
   plan: text('plan').notNull().default('free'), // 'free' | 'pro' | 'lifetime'
-  stripeCustomerId: text('stripe_customer_id'), // set on first successful checkout
+  polarCustomerId: text('polar_customer_id'), // set on first successful Polar checkout
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

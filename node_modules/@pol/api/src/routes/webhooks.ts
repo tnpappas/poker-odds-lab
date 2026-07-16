@@ -1,20 +1,32 @@
 import { Router, type Request, type Response } from 'express';
 import express from 'express';
 import { Webhook } from 'svix';
+import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
 import { storage } from '../storage/index';
-import { stripe } from '../lib/stripe';
+import { planForProduct } from '../lib/polar';
 import { logger } from '../lib/logger';
 import type { Plan } from '../storage/types';
 
 export const webhooks = Router();
 
 // These routes are mounted BEFORE express.json() in app.ts and parse the raw
-// body themselves — signature verification requires the exact bytes Stripe/Clerk
+// body themselves — signature verification requires the exact bytes Polar/Clerk
 // signed, which a prior JSON parse would destroy.
 const rawJson = express.raw({ type: 'application/json' });
 
 const clerkWebhookSecret = process.env.CLERK_WEBHOOK_SECRET;
-const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const polarWebhookSecret = process.env.POLAR_WEBHOOK_SECRET;
+
+// Minimal shape we read off Polar order/subscription payloads.
+interface PolarBillingObject {
+  metadata?: Record<string, unknown>;
+  customerId?: string;
+  externalCustomerId?: string | null;
+  customer?: { id?: string; externalId?: string | null } | null;
+  productId?: string;
+  product?: { id?: string } | null;
+  status?: string;
+}
 
 // ---- Clerk user lifecycle -> keep our users table in sync ---------------
 webhooks.post('/webhooks/clerk', rawJson, async (req: Request, res: Response) => {
@@ -57,49 +69,75 @@ webhooks.post('/webhooks/clerk', rawJson, async (req: Request, res: Response) =>
   res.json({ received: true });
 });
 
-// ---- Stripe payment events -> upgrade/downgrade plan --------------------
-webhooks.post('/stripe/webhooks', rawJson, async (req: Request, res: Response) => {
-  if (!stripe || !stripeWebhookSecret) {
-    return res.status(501).json({ error: 'Stripe webhook not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET.' });
+// ---- Polar payment events -> upgrade/downgrade plan ---------------------
+// Helpers to read the internal user id / customer id / plan from a Polar object.
+function readUserId(o: PolarBillingObject): string | undefined {
+  return (o.metadata?.userId as string | undefined) ?? o.externalCustomerId ?? o.customer?.externalId ?? undefined;
+}
+function readCustomerId(o: PolarBillingObject): string | undefined {
+  return o.customerId ?? o.customer?.id ?? undefined;
+}
+function readProductId(o: PolarBillingObject): string | undefined {
+  return o.productId ?? o.product?.id ?? undefined;
+}
+
+webhooks.post('/polar/webhooks', rawJson, async (req: Request, res: Response) => {
+  if (!polarWebhookSecret) {
+    return res.status(501).json({ error: 'Polar webhook not configured. Set POLAR_WEBHOOK_SECRET.' });
   }
 
-  const sig = req.header('stripe-signature') ?? '';
-  let evt;
+  let event: ReturnType<typeof validateEvent>;
   try {
-    evt = stripe.webhooks.constructEvent(req.body as Buffer, sig, stripeWebhookSecret);
-  } catch {
-    return res.status(400).json({ error: 'Invalid Stripe webhook signature' });
+    event = validateEvent(req.body as Buffer, req.headers as Record<string, string>, polarWebhookSecret);
+  } catch (err) {
+    if (err instanceof WebhookVerificationError) {
+      return res.status(403).json({ error: 'Invalid Polar webhook signature' });
+    }
+    throw err;
   }
 
-  switch (evt.type) {
-    case 'checkout.session.completed': {
-      const s = evt.data.object;
-      const userId = (s.metadata?.userId as string | undefined) ?? (s.client_reference_id ?? undefined);
-      const plan: Plan = s.metadata?.plan === 'lifetime' ? 'lifetime' : 'pro';
+  switch (event.type) {
+    // A one-time purchase or a subscription's paid invoice.
+    case 'order.paid': {
+      const o = event.data as unknown as PolarBillingObject;
+      const userId = readUserId(o);
+      const plan: Plan = planForProduct(readProductId(o)) ?? 'pro';
       if (userId) {
-        if (typeof s.customer === 'string') await storage.setStripeCustomer(userId, s.customer);
+        const customerId = readCustomerId(o);
+        if (customerId) await storage.setPolarCustomer(userId, customerId);
         await storage.setPlan(userId, plan);
       }
       break;
     }
-    case 'customer.subscription.deleted': {
-      // Subscription ended -> revoke pro access (lifetime buyers keep access).
-      const customerId = evt.data.object.customer;
-      if (typeof customerId === 'string') {
-        const user = await storage.findUserByStripeCustomer(customerId);
-        if (user && user.plan !== 'lifetime') await storage.setPlan(user.id, 'free');
+    // Subscription became active -> grant pro.
+    case 'subscription.active': {
+      const s = event.data as unknown as PolarBillingObject;
+      const userId = readUserId(s);
+      if (userId) {
+        const customerId = readCustomerId(s);
+        if (customerId) await storage.setPolarCustomer(userId, customerId);
+        await storage.setPlan(userId, 'pro');
       }
       break;
     }
-    case 'invoice.payment_failed': {
-      // Surface for observability; Stripe's own dunning handles retries.
-      const customerId = (evt.data.object as { customer?: unknown }).customer;
-      logger.warn('stripe invoice.payment_failed', { customer: String(customerId) });
+    // Access actually ended -> revoke pro (lifetime buyers keep access).
+    case 'subscription.revoked': {
+      const s = event.data as unknown as PolarBillingObject;
+      const customerId = readCustomerId(s);
+      const user = customerId ? await storage.findUserByPolarCustomer(customerId) : null;
+      if (user && user.plan !== 'lifetime') {
+        await storage.setPlan(user.id, 'free');
+      } else {
+        const userId = readUserId(s);
+        if (userId) await storage.setPlan(userId, 'free');
+      }
       break;
     }
     default:
+      // Log unhandled types at debug for visibility; ignore otherwise.
+      logger.debug('polar webhook ignored', { type: event.type });
       break;
   }
 
-  res.json({ received: true });
+  res.status(202).send('');
 });

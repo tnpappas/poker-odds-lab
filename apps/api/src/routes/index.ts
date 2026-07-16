@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { storage } from '../storage/index';
 import { requireUser } from '../middleware/auth';
 import { detectLeaks } from '../services/leakDetector';
-import { stripe, priceIdFor } from '../lib/stripe';
+import { polar, productIdFor } from '../lib/polar';
 
 export const api = Router();
 
@@ -143,52 +143,43 @@ api.delete('/account', async (req, res) => {
   res.status(204).end();
 });
 
-// ---- Payments (Stripe) --------------------------------------------------
+// ---- Payments (Polar.sh) ------------------------------------------------
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
 const checkoutSchema = z.object({ plan: z.enum(['lifetime', 'monthly', 'annual']) });
 
-// Create a Stripe Checkout session for the chosen plan.
-api.post('/stripe/checkout', async (req, res) => {
-  if (!stripe) {
-    return res.status(501).json({ error: 'Stripe is not configured. Set STRIPE_SECRET_KEY.' });
+// Create a Polar hosted checkout and return its URL for the browser to open.
+api.post('/billing/checkout', async (req, res) => {
+  if (!polar) {
+    return res.status(501).json({ error: 'Polar is not configured. Set POLAR_ACCESS_TOKEN.' });
   }
   const { plan } = checkoutSchema.parse(req.body);
-  const price = priceIdFor(plan);
-  if (!price) {
-    return res.status(500).json({ error: `Missing price id for plan "${plan}". Set the STRIPE_*_PRICE_ID env var.` });
+  const productId = productIdFor(plan);
+  if (!productId) {
+    return res.status(500).json({ error: `Missing product id for plan "${plan}". Set the POLAR_*_PRODUCT_ID env var.` });
   }
 
   const user = req.user!;
-  const session = await stripe.checkout.sessions.create(
-    {
-      mode: plan === 'lifetime' ? 'payment' : 'subscription',
-      line_items: [{ price, quantity: 1 }],
-      // Reuse an existing customer when we have one; otherwise Stripe creates it.
-      ...(user.stripeCustomerId ? { customer: user.stripeCustomerId } : { customer_email: user.email }),
-      client_reference_id: user.id,
-      metadata: { userId: user.id, plan },
-      success_url: `${FRONTEND_URL}/?checkout=success`,
-      cancel_url: `${FRONTEND_URL}/?checkout=cancel`,
-    },
-    // Idempotency: a retried POST with the same key won't create a duplicate session.
-    { idempotencyKey: `checkout:${user.id}:${plan}` },
-  );
+  const checkout = await polar.checkouts.create({
+    products: [productId],
+    successUrl: `${FRONTEND_URL}/?checkout=success`,
+    customerEmail: user.email,
+    // Ties the Polar customer to our internal user id; echoed back on webhooks.
+    externalCustomerId: user.id,
+    metadata: { userId: user.id, plan },
+  });
 
-  res.json({ url: session.url });
+  res.json({ url: checkout.url });
 });
 
-// Open the Stripe Billing Portal so the user can manage/cancel their subscription.
-api.get('/stripe/portal', async (req, res) => {
-  if (!stripe) {
-    return res.status(501).json({ error: 'Stripe is not configured. Set STRIPE_SECRET_KEY.' });
+// Open the Polar customer portal so the user can manage/cancel their subscription.
+api.get('/billing/portal', async (req, res) => {
+  if (!polar) {
+    return res.status(501).json({ error: 'Polar is not configured. Set POLAR_ACCESS_TOKEN.' });
   }
-  const customerId = req.user!.stripeCustomerId;
+  const customerId = req.user!.polarCustomerId;
   if (!customerId) {
     return res.status(400).json({ error: 'No billing account yet. Complete a purchase first.' });
   }
-  const session = await stripe.billingPortal.sessions.create({
-    customer: customerId,
-    return_url: FRONTEND_URL,
-  });
-  res.json({ url: session.url });
+  const session = await polar.customerSessions.create({ customerId });
+  res.json({ url: session.customerPortalUrl });
 });

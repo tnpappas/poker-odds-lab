@@ -40,25 +40,25 @@ focused afternoon.
       button; sign up, and confirm the user appears in Clerk and in your Neon
       `users` table.
 
-## 3. Payments — Stripe
+## 3. Payments — Polar.sh
 
-- [ ] Create three Prices in the Stripe dashboard (Products):
-  - [ ] Lifetime — one-time, $29.99
-  - [ ] Pro Monthly — recurring monthly, $9.99
-  - [ ] Pro Annual — recurring yearly, $59.99
-- [ ] Copy the price IDs and secret key into `apps/api/.env`:
-      `STRIPE_SECRET_KEY`, `STRIPE_LIFETIME_PRICE_ID`, `STRIPE_MONTHLY_PRICE_ID`,
-      `STRIPE_ANNUAL_PRICE_ID`.
-- [ ] Copy the publishable key into `apps/web/.env` as
-      `VITE_STRIPE_PUBLISHABLE_KEY`.
-- [ ] In Stripe → Webhooks, add an endpoint at
-      `https://<your-api-domain>/api/stripe/webhooks` subscribed to
-      `checkout.session.completed`, `customer.subscription.deleted`,
-      `invoice.payment_failed`. Copy its signing secret into
-      `STRIPE_WEBHOOK_SECRET`.
-- [ ] Smoke test in Stripe **test mode**: sign in, click a plan on the paywall,
-      complete checkout with card `4242 4242 4242 4242`, and confirm the user's
-      `plan` flips to `pro`/`lifetime` in the database and the PRO badge appears.
+Products already exist in your Polar account. You just need the IDs and keys.
+
+- [ ] Copy each product's ID from the Polar dashboard (Products → each product):
+  - [ ] Lifetime → `POLAR_LIFETIME_PRODUCT_ID`
+  - [ ] Pro Monthly → `POLAR_MONTHLY_PRODUCT_ID`
+  - [ ] Pro Annual → `POLAR_ANNUAL_PRODUCT_ID`
+- [ ] Create an **Organization Access Token** (Polar → Settings → Developers) and
+      put it in `apps/api/.env` as `POLAR_ACCESS_TOKEN`.
+- [ ] Set `POLAR_SERVER=production` (or `sandbox` while testing).
+- [ ] In Polar → Settings → Webhooks, add an endpoint at
+      `https://<your-api-domain>/api/polar/webhooks`, set a secret, and subscribe
+      to `order.paid`, `subscription.active`, `subscription.revoked`. Put the
+      secret in `POLAR_WEBHOOK_SECRET`.
+- [ ] No frontend key needed — Polar uses hosted checkout (a redirect).
+- [ ] Smoke test using Polar **sandbox**: sign in, click a plan on the paywall,
+      complete the Polar checkout with a test card, and confirm the user's `plan`
+      flips to `pro`/`lifetime` in the database and the PRO badge appears.
 
 ## 4. Observability — Sentry (optional but recommended)
 

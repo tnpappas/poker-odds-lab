@@ -9,9 +9,10 @@ onboarding any paying customer.
 - **Real Clerk auth** (`apps/api/src/middleware/auth.ts`) — verifies the session
   JWT with `@clerk/backend`, resolves the user's email, and **refuses to boot in
   production without `CLERK_SECRET_KEY`** (no more `x-user-id` impersonation).
-- **Stripe billing** (`apps/api/src/routes/index.ts`, `apps/api/src/lib/stripe.ts`)
-  — real Checkout for lifetime/monthly/annual with idempotency keys, plus a
-  Billing Portal endpoint. A `stripe_customer_id` column was added to `users`.
+- **Polar.sh billing** (`apps/api/src/routes/index.ts`, `apps/api/src/lib/polar.ts`)
+  — Polar hosted checkout for lifetime/monthly/annual, plus a customer-portal
+  endpoint. A `polar_customer_id` column was added to `users`. (Endpoints:
+  `POST /api/billing/checkout`, `GET /api/billing/portal`.)
 - **Verified webhooks** (`apps/api/src/routes/webhooks.ts`) — Clerk (Svix) and
   Stripe signatures are now verified; unsigned/forged payloads are rejected.
   Webhooks are mounted before the JSON body parser so raw bytes are preserved.
@@ -37,8 +38,8 @@ onboarding any paying customer.
 ## Steps you need to do
 
 1. **Install new dependencies** (from repo root): `npm install`.
-   New API deps: `@clerk/backend`, `stripe`, `svix`, `helmet`, `express-rate-limit`,
-   `@sentry/node`. New web dep: `@clerk/clerk-react`.
+   New API deps: `@clerk/backend`, `@polar-sh/sdk`, `svix`, `helmet`,
+   `express-rate-limit`, `@sentry/node`. New web dep: `@clerk/clerk-react`.
 
 2. **Provision the database (Neon).** Create a Neon Postgres project, put its
    connection string in `apps/api/.env` as `DATABASE_URL`, then run
@@ -58,12 +59,12 @@ onboarding any paying customer.
    > mode. If you use a custom session-token JWT template, you can add `email` to
    > the claims to save the API a Clerk lookup on first request (optional).
 
-4. **Stripe.** Create three Prices (lifetime one-time $29.99, monthly $9.99,
-   annual $59.99). Set `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
-   `STRIPE_LIFETIME_PRICE_ID`, `STRIPE_MONTHLY_PRICE_ID`, `STRIPE_ANNUAL_PRICE_ID`.
-   Point a Stripe webhook at `POST /api/stripe/webhooks` for
-   `checkout.session.completed`, `customer.subscription.deleted`,
-   `invoice.payment_failed`.
+4. **Polar.sh.** Products already exist. Set `POLAR_ACCESS_TOKEN` (org access
+   token), `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER` (`production`/`sandbox`), and the
+   three product IDs `POLAR_LIFETIME_PRODUCT_ID`, `POLAR_MONTHLY_PRODUCT_ID`,
+   `POLAR_ANNUAL_PRODUCT_ID`. Point a Polar webhook at `POST /api/polar/webhooks`
+   for `order.paid`, `subscription.active`, `subscription.revoked`. No frontend
+   key is needed (hosted checkout).
 
 5. **CORS / URLs.** Set `FRONTEND_URL` (api) to your real frontend origin(s),
    comma-separated. Set `NODE_ENV=production`. Set `VITE_API_URL` (web) to the
