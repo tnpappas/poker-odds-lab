@@ -144,7 +144,9 @@ api.delete('/account', async (req, res) => {
 });
 
 // ---- Payments (Polar.sh) ------------------------------------------------
-const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
+// FRONTEND_URL may be a comma-separated allowlist (for CORS); the first entry
+// is the primary origin used for checkout success/return redirects.
+const FRONTEND_URL = (process.env.FRONTEND_URL ?? 'http://localhost:5173').split(',')[0].trim();
 const checkoutSchema = z.object({ plan: z.enum(['lifetime', 'monthly', 'annual']) });
 
 // Create a Polar hosted checkout and return its URL for the browser to open.
