@@ -1,17 +1,53 @@
 @import 'tailwindcss';
 
+/* ============================================================================
+   POKER LOGIC LAB — "Elevated Casino Felt" design system
+   Surface: deep felt green.  Frame: walnut rail.  Metal: antique brass.
+   Paper/text: bone.  Friction: oxblood.  Numbers: tabular mono.
+   ========================================================================== */
+
 @theme {
-  --color-felt-950: #070b09;
-  --color-felt-900: #0c110e;
-  --color-felt-800: #141b17;
-  --color-felt-700: #223029;
-  --color-gold-400: #e9c46a;
-  --color-gold-500: #d4a843;
-  --color-chip-red: #e63946;
-  --color-chip-green: #2a9d8f;
-  --color-ink-100: #eef2f0;
-  --color-ink-300: #aebbb4;
-  --color-ink-500: #6b7d75;
+  /* --- Felt surface ramp (backgrounds, dark -> light) --- */
+  --color-felt-950: #071913; /* page base — deep pine felt */
+  --color-felt-900: #0b241a; /* cards */
+  --color-felt-800: #113026; /* raised surfaces */
+  --color-felt-700: #1c4735; /* felt lines / borders */
+  --color-felt-600: #2a5a44; /* hover felt */
+
+  /* --- Walnut rail (the wooden edge of the table) --- */
+  --color-rail-950: #1a0d06;
+  --color-rail-900: #2a1810;
+  --color-rail-800: #3e2718;
+  --color-rail-700: #56371f;
+
+  /* --- Antique brass (metal accent). gold-* kept as aliases for back-compat --- */
+  --color-brass-300: #e7c979;
+  --color-brass-400: #d3ac57;
+  --color-brass-500: #b4863b;
+  --color-gold-400: #d3ac57;
+  --color-gold-500: #b4863b;
+
+  /* --- Bone / ink (text on felt) --- */
+  --color-bone: #f3ecdb;
+  --color-ink-100: #f3ecdb;
+  --color-ink-300: #b6ae9a;
+  --color-ink-500: #7c8a7e;
+
+  /* --- Oxblood (friction / fold / danger) --- */
+  --color-oxblood: #8e2434;
+  --color-oxblood-500: #a62f3f;
+  --color-oxblood-400: #c14352;
+
+  /* --- Equity semantics (chips) --- */
+  --color-chip-green: #35b98a; /* +EV */
+  --color-chip-red: #c33b49; /* -EV */
+  --color-equity-pos: #35b98a;
+  --color-equity-neg: #c33b49;
+
+  /* --- Type system --- */
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-sans: 'Space Grotesk Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 :root {
@@ -24,23 +60,99 @@ body,
   height: 100%;
 }
 
+/* ---- Felt table surface: green base + vignette + woven weave ---- */
 body {
   margin: 0;
-  background:
-    radial-gradient(1200px 600px at 50% -10%, #0f241a40, transparent),
-    var(--color-felt-950);
   color: var(--color-ink-100);
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: 'ss01' 1;
+  background-color: var(--color-felt-950);
+  background-image:
+    radial-gradient(1400px 720px at 50% -12%, rgba(46, 120, 84, 0.16), transparent 70%),
+    radial-gradient(1100px 900px at 100% 0%, rgba(20, 70, 50, 0.14), transparent 65%),
+    linear-gradient(180deg, #08201700 0%, #04100b 100%);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Range slider styling */
+/* Fine felt "nap" texture — a whisper of noise so the green never reads as flat SaaS black. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* ---- Typographic roles ---- */
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+}
+
+/* Every NUMBER in the app lives in tabular mono — this is the signature. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+  letter-spacing: -0.03em;
+}
+
+/* Small-caps utility label (used for section eyebrows) */
+.eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.68rem;
+  color: var(--color-brass-400);
+}
+
+/* Brass "foil" gradient text for the wordmark + accent headline */
+.foil {
+  background: linear-gradient(100deg, #b4863b 0%, #f0d891 42%, #d3ac57 60%, #9c6f2d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Walnut rail surface */
+.rail {
+  background:
+    linear-gradient(180deg, var(--color-rail-800), var(--color-rail-950));
+  border-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Embossed felt card: subtle top highlight + deep shadow so cards feel physical */
+.felt-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0) 40%),
+    var(--color-felt-900);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 40px -22px rgba(0, 0, 0, 0.9);
+}
+
+/* Brass hairline used to separate sections like a table inlay */
+.inlay {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(211, 172, 87, 0.5), transparent);
+}
+
+/* ---- Range slider: felt track, brass thumb (equity gradient = meaning) ---- */
 input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--color-chip-green), var(--color-gold-400), var(--color-chip-red));
+  background: linear-gradient(90deg, var(--color-oxblood-400), var(--color-brass-400), var(--color-chip-green));
   outline: none;
 }
 input[type='range']::-webkit-slider-thumb {
@@ -49,22 +161,45 @@ input[type='range']::-webkit-slider-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--color-ink-100);
-  border: 3px solid var(--color-gold-500);
+  background: radial-gradient(circle at 35% 30%, #f0d891, #b4863b 70%);
+  border: 2px solid #3e2718;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 input[type='range']::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--color-ink-100);
-  border: 3px solid var(--color-gold-500);
+  background: radial-gradient(circle at 35% 30%, #f0d891, #b4863b 70%);
+  border: 2px solid #3e2718;
   cursor: pointer;
 }
 
+/* ---- Motion primitives ---- */
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(233, 196, 106, 0.5); }
-  70% { box-shadow: 0 0 0 12px rgba(233, 196, 106, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(233, 196, 106, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(211, 172, 87, 0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(211, 172, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(211, 172, 87, 0); }
+}
+
+@keyframes deal-in {
+  0% { opacity: 0; transform: translateY(10px) rotate(-2deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+@keyframes felt-breathe {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.08); }
+}
+
+/* Respect reduced-motion: neutralize decorative animation/transition. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -2,6 +2,8 @@ import { NavLink, Outlet, Link } from 'react-router-dom';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import { useGameStore } from './store/useGameStore';
 import { clerkEnabled } from './lib/auth';
+import { BrandMark } from './components/ui';
+import { Spade, Heart, Diamond, Club } from './components/icons';
 
 const NAV = [
   { to: '/visualizer', label: 'Visualizer' },
@@ -9,7 +11,7 @@ const NAV = [
   { to: '/blitz', label: 'Blitz' },
   { to: '/calculator', label: 'Calculator' },
   { to: '/icm', label: 'Tournament' },
-  { to: '/adversary-lab', label: 'Adversary Lab' },
+  { to: '/adversary-lab', label: 'Adversary' },
   { to: '/dashboard', label: 'Dashboard' },
 ];
 
@@ -19,29 +21,43 @@ export function App() {
 
   return (
     <div className="min-h-full flex flex-col">
-      <header className="sticky top-0 z-20 backdrop-blur bg-felt-950/80 border-b border-felt-800">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-extrabold">
-            <span className="text-gold-400">♠</span>
-            <span>Poker Logic Lab</span>
+      <header className="sticky top-0 z-30 rail border-b backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <Link to="/" aria-label="Poker Logic Lab — home">
+            <BrandMark />
           </Link>
-          <nav className="hidden sm:flex gap-1">
+
+          <nav className="hidden lg:flex items-center gap-0.5">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to}
                 className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-lg text-sm font-medium transition ${isActive ? 'bg-felt-700 text-gold-400' : 'text-ink-300 hover:text-ink-100 hover:bg-felt-800'}`}>
+                  `px-3 py-1.5 rounded-lg text-sm transition ${
+                    isActive
+                      ? 'text-brass-300 bg-black/25'
+                      : 'text-ink-300 hover:text-ink-100 hover:bg-black/20'
+                  }`}>
                 {n.label}
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-ink-300 hidden xs:inline">SP <span className={`font-bold ${skillPoints >= 0 ? 'text-chip-green' : 'text-chip-red'}`}>{Math.round(skillPoints)}</span></span>
-            {plan === 'pro' && <span className="text-xs px-2 py-0.5 rounded-full bg-gold-500/20 text-gold-400 border border-gold-500/40">PRO</span>}
+
+          <div className="flex items-center gap-3">
+            <span className="hidden xs:flex items-center gap-1.5 text-xs text-ink-500">
+              <span className="eyebrow !tracking-[0.15em] !text-[0.6rem]">SP</span>
+              <span className={`num font-semibold text-sm ${skillPoints >= 0 ? 'text-chip-green' : 'text-chip-red'}`}>
+                {skillPoints >= 0 ? '+' : ''}{Math.round(skillPoints)}
+              </span>
+            </span>
+            {plan !== 'free' && (
+              <span className="eyebrow !text-[0.6rem] px-2 py-0.5 rounded-full bg-brass-500/15 text-brass-300 border border-brass-400/40">
+                Pro
+              </span>
+            )}
             {clerkEnabled && (
               <>
                 <SignedOut>
                   <SignInButton mode="modal">
-                    <button className="text-xs px-3 py-1.5 rounded-lg bg-gold-500 text-felt-950 font-semibold hover:bg-gold-400 transition">
+                    <button className="text-xs px-3.5 py-1.5 rounded-lg bg-brass-400 text-rail-950 font-semibold hover:bg-brass-300 transition">
                       Sign in
                     </button>
                   </SignInButton>
@@ -59,11 +75,22 @@ export function App() {
         <Outlet />
       </main>
 
+      {/* Desktop footer — table inlay + suit rule */}
+      <footer className="hidden lg:block mt-16 border-t border-felt-800/60">
+        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between text-xs text-ink-500">
+          <span className="num">© {new Date().getFullYear()} Poker Logic Lab</span>
+          <span className="flex items-center gap-2 opacity-70">
+            <Spade size={12} /><Heart size={12} className="text-oxblood-400" /><Diamond size={12} className="text-brass-400" /><Club size={12} className="text-chip-green" />
+          </span>
+          <span className="eyebrow !text-[0.6rem]">Scored on EV, not luck</span>
+        </div>
+      </footer>
+
       {/* Mobile bottom nav */}
-      <nav className="sm:hidden sticky bottom-0 z-20 backdrop-blur bg-felt-950/90 border-t border-felt-800 grid grid-cols-4 text-[11px]">
-        {NAV.map((n) => (
+      <nav className="lg:hidden sticky bottom-0 z-30 rail border-t backdrop-blur-md grid grid-cols-5 text-[10px]">
+        {NAV.slice(0, 5).map((n) => (
           <NavLink key={n.to} to={n.to}
-            className={({ isActive }) => `py-3 text-center text-xs font-medium ${isActive ? 'text-gold-400' : 'text-ink-300'}`}>
+            className={({ isActive }) => `py-3 text-center font-medium ${isActive ? 'text-brass-300' : 'text-ink-300'}`}>
             {n.label}
           </NavLink>
         ))}
