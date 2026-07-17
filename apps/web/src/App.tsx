@@ -23,7 +23,7 @@ export function App() {
     <div className="min-h-full flex flex-col">
       <header className="sticky top-0 z-30 rail border-b backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link to="/" aria-label="Poker Logic Lab — home">
+          <Link to="/" aria-label="Poker Logic Lab home">
             <BrandMark />
           </Link>
 
