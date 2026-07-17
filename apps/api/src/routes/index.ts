@@ -51,9 +51,19 @@ const uid = (req: Request) => req.user!.id;
 // ---- Current user / entitlement ----------------------------------------
 // Drives the client-side purchase gate. `entitled` is true once the user has
 // bought (plan is set to 'pro' or 'lifetime' by the Polar webhook).
+//
+// Owner allowlist: any email in the OWNER_EMAILS env var (comma-separated) is
+// treated as a lifetime member without paying — used for testing/admin access.
+const OWNER_EMAILS = (process.env.OWNER_EMAILS ?? '')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
 api.get('/me', (req, res) => {
   const u = req.user!;
-  res.json({ id: u.id, email: u.email, plan: u.plan, entitled: u.plan !== 'free' });
+  const isOwner = OWNER_EMAILS.includes(u.email.toLowerCase());
+  const plan = isOwner ? 'lifetime' : u.plan;
+  res.json({ id: u.id, email: u.email, plan, entitled: plan !== 'free', owner: isOwner });
 });
 
 // ---- Sessions -----------------------------------------------------------
