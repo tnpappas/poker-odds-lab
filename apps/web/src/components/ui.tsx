@@ -1,21 +1,15 @@
 /** Small domain primitives so the design language lives in one place. */
 import type { ReactNode } from 'react';
-import { Spade } from './icons';
+import { LOGO_DATA_URI } from '../brand';
 
-/** The wordmark: brass-ringed spade + Fraunces logotype. */
+/** The wordmark: the real Poker Logic Lab spade-flask-brain mark + logotype. */
 export function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
     <span className="flex items-center gap-2.5">
-      <span className="relative grid place-items-center h-8 w-8 rounded-full shrink-0"
-        style={{
-          background: 'radial-gradient(circle at 34% 28%, #14342550, #071913)',
-          boxShadow: 'inset 0 0 0 1.5px rgba(211,172,87,0.55), 0 2px 8px rgba(0,0,0,0.5)',
-        }}>
-        <Spade size={16} className="text-brass-400" />
-      </span>
+      <img src={LOGO_DATA_URI} alt="Poker Logic Lab" width={34} height={34} className="h-[34px] w-[34px] shrink-0" />
       {!compact && (
-        <span className="font-display text-[1.05rem] font-semibold tracking-tight leading-none">
-          Poker <span className="foil">Logic</span> Lab
+        <span className="font-sans text-[1.02rem] font-semibold tracking-tight leading-none text-ink-100">
+          Poker Logic Lab
         </span>
       )}
     </span>
@@ -31,11 +25,19 @@ export function StatReadout({
 }: {
   label: string;
   value: ReactNode;
-  tone?: 'default' | 'pos' | 'neg' | 'brass';
+  tone?: 'default' | 'pos' | 'neg' | 'brand' | 'brass';
   size?: 'sm' | 'md' | 'lg';
 }) {
   const color =
-    tone === 'pos' ? 'text-chip-green' : tone === 'neg' ? 'text-chip-red' : tone === 'brass' ? 'text-brass-300' : 'text-ink-100';
+    tone === 'pos'
+      ? 'text-chip-green'
+      : tone === 'neg'
+        ? 'text-chip-red'
+        : tone === 'brand'
+          ? 'text-brand-400'
+          : tone === 'brass'
+            ? 'text-brass-300'
+            : 'text-ink-100';
   const vSize = size === 'lg' ? 'text-3xl' : size === 'sm' ? 'text-base' : 'text-xl';
   return (
     <div className="flex flex-col gap-1">

@@ -62,7 +62,7 @@ export function Home() {
             className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.02] tracking-tight">
             Stop losing to
             <br className="hidden sm:block" /> better math.
-            <span className="block foil">Start winning<br className="hidden sm:block" /> with better reads.</span>
+            <span className="block accent">Start winning<br className="hidden sm:block" /> with better reads.</span>
           </motion.h1>
 
           <p className="text-ink-300 mt-6 max-w-md text-[15px] leading-relaxed">
@@ -72,11 +72,11 @@ export function Home() {
 
           <div className="flex flex-wrap gap-3 mt-8">
             <Link to="/replay"
-              className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brass-400 text-rail-950 font-semibold hover:bg-brass-300 transition shadow-[0_10px_30px_-10px_rgba(211,172,87,0.6)]">
+              className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition shadow-[0_10px_30px_-12px_rgba(196,31,42,0.8)]">
               <Spade size={16} /> Play a hand
             </Link>
             <Link to="/visualizer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-felt-700 text-ink-100 hover:border-brass-400/70 hover:bg-felt-800 transition">
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-felt-700 text-ink-100 hover:border-brand-400/70 hover:bg-felt-800 transition">
               Explore equity
             </Link>
           </div>

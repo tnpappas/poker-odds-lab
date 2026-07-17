@@ -33,8 +33,8 @@ export function App() {
                 className={({ isActive }) =>
                   `px-3 py-1.5 rounded-lg text-sm transition ${
                     isActive
-                      ? 'text-brass-300 bg-black/25'
-                      : 'text-ink-300 hover:text-ink-100 hover:bg-black/20'
+                      ? 'text-brand-400 bg-white/[0.06]'
+                      : 'text-ink-300 hover:text-ink-100 hover:bg-white/[0.04]'
                   }`}>
                 {n.label}
               </NavLink>
@@ -57,7 +57,7 @@ export function App() {
               <>
                 <SignedOut>
                   <SignInButton mode="modal">
-                    <button className="text-xs px-3.5 py-1.5 rounded-lg bg-brass-400 text-rail-950 font-semibold hover:bg-brass-300 transition">
+                    <button className="text-xs px-3.5 py-1.5 rounded-lg bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
                       Sign in
                     </button>
                   </SignInButton>
@@ -90,7 +90,7 @@ export function App() {
       <nav className="lg:hidden sticky bottom-0 z-30 rail border-t backdrop-blur-md grid grid-cols-5 text-[10px]">
         {NAV.slice(0, 5).map((n) => (
           <NavLink key={n.to} to={n.to}
-            className={({ isActive }) => `py-3 text-center font-medium ${isActive ? 'text-brass-300' : 'text-ink-300'}`}>
+            className={({ isActive }) => `py-3 text-center font-medium ${isActive ? 'text-brand-400' : 'text-ink-300'}`}>
             {n.label}
           </NavLink>
         ))}

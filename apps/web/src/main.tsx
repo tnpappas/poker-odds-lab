@@ -6,7 +6,18 @@ import '@fontsource-variable/fraunces';
 import '@fontsource-variable/space-grotesk';
 import '@fontsource-variable/jetbrains-mono';
 import './index.css';
+import { LOGO_DATA_URI } from './brand';
 import { AuthProvider } from './lib/auth';
+
+// Use the real brand mark as the browser favicon.
+{
+  const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]') ?? document.createElement('link');
+  link.rel = 'icon';
+  link.type = 'image/png';
+  link.href = LOGO_DATA_URI;
+  document.head.appendChild(link);
+}
+
 import { App } from './App';
 import { Home } from './pages/Home';
 import { Visualizer } from './features/visualizer/Visualizer';
