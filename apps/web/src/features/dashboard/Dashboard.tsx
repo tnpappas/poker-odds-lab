@@ -83,18 +83,27 @@ export function Dashboard() {
 
   if (decisions.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <h1 className="text-2xl font-bold mb-2">Your EV Report</h1>
-        <p className="text-ink-300 mb-6">No hands yet. Play a few to unlock your leak analysis.</p>
-        <Link to="/replay" className="px-6 py-3 rounded-xl bg-gold-500 text-felt-950 font-bold hover:bg-gold-400 transition">Play a hand →</Link>
+      <div className="max-w-3xl mx-auto px-5 sm:px-6 py-14">
+        <div className="eyebrow mb-3">Start here</div>
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">Welcome to the lab</h1>
+        <p className="text-ink-300 mt-4 max-w-xl leading-relaxed">
+          This dashboard fills in as you play. It tracks how good your decisions are and finds your leaks automatically.
+          Brand new to poker? Do these three things in order.
+        </p>
+        <div className="grid sm:grid-cols-3 gap-4 mt-8">
+          <StartCard n="01" title="Learn the basics" desc="Five minutes on the core ideas: equity, pot odds, EV, and reading ranges." to="/guide" cta="How it works" />
+          <StartCard n="02" title="Play a hand" desc="Make real call, fold, or raise decisions and get the reason behind each one." to="/replay" cta="Play a hand" primary />
+          <StartCard n="03" title="See the numbers" desc="Explore the win odds for every starting hand on the visual grid." to="/visualizer" cta="Explore equity" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 pb-16">
-      <header className="my-6">
-        <h1 className="text-2xl font-bold">Your EV Report — Last 7 Days</h1>
+      <header className="my-6 flex items-end justify-between gap-3">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Your EV report, last 7 days</h1>
+        <Link to="/guide" className="text-xs text-ink-500 hover:text-ink-300 shrink-0">New here? Read the guide</Link>
       </header>
 
       <div className={`grid ${readError != null ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'} gap-3 mb-6`}>
@@ -121,7 +130,7 @@ export function Dashboard() {
                 <div key={card.id} className="flex items-center justify-between gap-3 rounded-xl bg-felt-950/60 p-3">
                   <div className="min-w-0">
                     <div className="font-semibold flex items-center gap-2">
-                      <span>{card.severity > 0.66 ? '\ud83d\udd34' : card.severity > 0.33 ? '\ud83d\udfe1' : '\ud83d\udfe2'}</span>
+                      <span className="inline-block h-2 w-2 rounded-full shrink-0" style={{ background: sevColor(card.severity) }} />
                       {meta.label}
                       {card.reps > 0 && <span className="text-[10px] uppercase text-ink-500">· streak {card.reps}</span>}
                     </div>
@@ -142,14 +151,14 @@ export function Dashboard() {
         <div className="rounded-2xl bg-felt-900 border border-felt-700 p-5">
           <h2 className="font-bold mb-4">Leaks detected</h2>
           {leaks.length === 0 ? (
-            <p className="text-ink-300 text-sm">No significant leaks yet — keep playing for a deeper read (need ~6+ replay hands).</p>
+            <p className="text-ink-300 text-sm">No significant leaks yet. Keep playing for a deeper read (about 6 or more replay hands).</p>
           ) : (
             <div className="space-y-3">
               {leaks.map((l) => (
                 <div key={l.type} className="rounded-xl bg-felt-950/60 p-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold">
-                      {l.severity > 0.66 ? '🔴' : l.severity > 0.33 ? '🟡' : '🟢'} {l.label}
+                    <span className="font-semibold flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rounded-full shrink-0" style={{ background: sevColor(l.severity) }} /> {l.label}
                     </span>
                     <span className="text-xs uppercase text-ink-500">{l.severity > 0.66 ? 'High' : l.severity > 0.33 ? 'Medium' : 'Low'}</span>
                   </div>
@@ -191,7 +200,30 @@ function Big({ label, value, color }: { label: string; value: string; color?: st
   return (
     <div className="rounded-2xl bg-felt-900 border border-felt-700 py-4 text-center">
       <div className="text-xs text-ink-500">{label}</div>
-      <div className={`text-2xl font-bold ${color ?? 'text-ink-100'}`}>{value}</div>
+      <div className={`num text-2xl font-bold ${color ?? 'text-ink-100'}`}>{value}</div>
+    </div>
+  );
+}
+
+function sevColor(sev: number): string {
+  if (sev > 0.66) return 'var(--color-chip-red)';
+  if (sev > 0.33) return 'var(--color-brass-400)';
+  return 'var(--color-chip-green)';
+}
+
+/** First-run "start here" step card. */
+function StartCard({ n, title, desc, to, cta, primary }: { n: string; title: string; desc: string; to: string; cta: string; primary?: boolean }) {
+  return (
+    <div className="felt-card rounded-2xl p-5 flex flex-col">
+      <span className="num text-brand-400 text-sm">{n}</span>
+      <h3 className="font-display text-lg font-semibold tracking-tight mt-2">{title}</h3>
+      <p className="text-ink-300 text-sm mt-1 leading-relaxed">{desc}</p>
+      <Link to={to}
+        className={`mt-4 inline-flex items-center justify-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition ${
+          primary ? 'bg-brand-500 text-white hover:bg-brand-400' : 'border border-felt-700 text-ink-100 hover:border-brand-400/60'
+        }`}>
+        {cta} <span aria-hidden>→</span>
+      </Link>
     </div>
   );
 }
