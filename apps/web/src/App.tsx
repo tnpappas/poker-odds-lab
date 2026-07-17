@@ -1,9 +1,32 @@
+import { useEffect } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
 import { useGameStore } from './store/useGameStore';
 import { clerkEnabled } from './lib/auth';
+import { api } from './lib/api';
 import { BrandMark } from './components/ui';
 import { Spade, Heart, Diamond, Club } from './components/icons';
+
+/** Verifies entitlement against the server whenever Clerk auth state changes. */
+function PlanSync() {
+  const setPlan = useGameStore((s) => s.setPlan);
+  const { isLoaded, isSignedIn } = useAuth();
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setPlan('free');
+      return;
+    }
+    let active = true;
+    api.getMe().then((me) => {
+      if (active) setPlan(me?.plan ?? 'free');
+    });
+    return () => {
+      active = false;
+    };
+  }, [isLoaded, isSignedIn, setPlan]);
+  return null;
+}
 
 const NAV = [
   { to: '/visualizer', label: 'Visualizer' },
@@ -21,6 +44,7 @@ export function App() {
 
   return (
     <div className="min-h-full flex flex-col">
+      {clerkEnabled && <PlanSync />}
       <header className="sticky top-0 z-30 rail border-b backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link to="/" aria-label="Poker Logic Lab home">
@@ -63,6 +87,12 @@ export function App() {
                   </SignInButton>
                 </SignedOut>
                 <SignedIn>
+                  {plan === 'free' && (
+                    <Link to="/replay"
+                      className="text-xs px-3.5 py-1.5 rounded-lg bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
+                      Unlock
+                    </Link>
+                  )}
                   <UserButton afterSignOutUrl="/" />
                 </SignedIn>
               </>

@@ -27,6 +27,11 @@ import { Dashboard } from './features/dashboard/Dashboard';
 import { Calculator } from './features/calculator/Calculator';
 import { IcmTrainer } from './features/icm/IcmTrainer';
 import { AdversaryLab } from './features/adversary-lab/AdversaryLab';
+import { RequirePurchase } from './components/RequirePurchase';
+import type { ReactNode } from 'react';
+
+// Every tool is gated behind purchase; the landing page stays public.
+const gate = (el: ReactNode) => <RequirePurchase>{el}</RequirePurchase>;
 
 const router = createBrowserRouter([
   {
@@ -34,13 +39,13 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <Home /> },
-      { path: 'visualizer', element: <Visualizer /> },
-      { path: 'replay', element: <Replay /> },
-      { path: 'blitz', element: <Blitz /> },
-      { path: 'adversary-lab', element: <AdversaryLab /> },
-      { path: 'calculator', element: <Calculator /> },
-      { path: 'icm', element: <IcmTrainer /> },
-      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'visualizer', element: gate(<Visualizer />) },
+      { path: 'replay', element: gate(<Replay />) },
+      { path: 'blitz', element: gate(<Blitz />) },
+      { path: 'adversary-lab', element: gate(<AdversaryLab />) },
+      { path: 'calculator', element: gate(<Calculator />) },
+      { path: 'icm', element: gate(<IcmTrainer />) },
+      { path: 'dashboard', element: gate(<Dashboard />) },
     ],
   },
 ]);

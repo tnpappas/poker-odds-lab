@@ -29,7 +29,8 @@ const FREE_BLITZ_LIMIT = 5;
 interface GameState {
   decisions: Decision[];
   skillPoints: number;
-  plan: 'free' | 'pro';
+  plan: 'free' | 'pro' | 'lifetime';
+  planLoaded: boolean; // true once entitlement has been checked against the server
   usage: { date: string; replays: number; blitz: number };
   adversaries: SavedAdversary[];
   activeAdversaryId: string | null;
@@ -38,7 +39,7 @@ interface GameState {
   logDecision: (d: Omit<Decision, 'id' | 'ts'>) => void;
   incrementUsage: (mode: 'replay' | 'blitz') => void;
   remaining: (mode: 'replay' | 'blitz') => number;
-  setPlan: (plan: 'free' | 'pro') => void;
+  setPlan: (plan: 'free' | 'pro' | 'lifetime') => void;
   addAdversary: (v: Omit<SavedAdversary, 'id'>) => string;
   updateAdversary: (id: string, patch: Partial<SavedAdversary>) => void;
   deleteAdversary: (id: string) => void;
@@ -73,6 +74,7 @@ export const useGameStore = create<GameState>()(
       decisions: [],
       skillPoints: 0,
       plan: 'free',
+      planLoaded: false,
       usage: freshUsage(),
       adversaries: [],
       activeAdversaryId: null,
@@ -112,14 +114,14 @@ export const useGameStore = create<GameState>()(
 
       remaining: (mode) => {
         const s = get();
-        if (s.plan === 'pro') return Infinity;
+        if (s.plan !== 'free') return Infinity;
         const usage = s.usage.date === today() ? s.usage : freshUsage();
         return mode === 'replay'
           ? Math.max(0, FREE_REPLAY_LIMIT - usage.replays)
           : Math.max(0, FREE_BLITZ_LIMIT - usage.blitz);
       },
 
-      setPlan: (plan) => set({ plan }),
+      setPlan: (plan) => set({ plan, planLoaded: true }),
 
       addAdversary: (v) => {
         const id = crypto.randomUUID();
@@ -145,7 +147,19 @@ export const useGameStore = create<GameState>()(
 
       reset: () => set({ decisions: [], skillPoints: 0, usage: freshUsage() }),
     }),
-    { name: 'pol-game-state' },
+    {
+      name: 'pol-game-state',
+      // Never persist entitlement: plan is always re-verified against the server
+      // on load, so a stale/edited localStorage value can't unlock the tools.
+      partialize: (s) => ({
+        decisions: s.decisions,
+        skillPoints: s.skillPoints,
+        usage: s.usage,
+        adversaries: s.adversaries,
+        activeAdversaryId: s.activeAdversaryId,
+        drills: s.drills,
+      }),
+    },
   ),
 );
 

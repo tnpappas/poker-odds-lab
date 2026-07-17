@@ -89,8 +89,23 @@ async function startCheckout(plan: CheckoutPlan): Promise<{ ok: boolean; error?:
   }
 }
 
+export type Plan = 'free' | 'pro' | 'lifetime';
+
+/** Fetch the signed-in user's entitlement from the server. Null if unavailable. */
+async function getMe(): Promise<{ plan: Plan; entitled: boolean } | null> {
+  if (!apiEnabled) return null;
+  try {
+    const res = await fetch(`${API_URL}/api/me`, { headers: await authHeaders() });
+    if (!res.ok) return null;
+    return (await res.json()) as { plan: Plan; entitled: boolean };
+  } catch {
+    return null;
+  }
+}
+
 export const api = {
   postDecision: (d: ApiDecision) => send('/api/decisions', d),
   incrementUsage: (mode: 'replay' | 'blitz') => send('/api/usage/increment', { mode }),
   startCheckout,
+  getMe,
 };

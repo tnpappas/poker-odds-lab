@@ -1,19 +1,10 @@
 /** Small domain primitives so the design language lives in one place. */
 import type { ReactNode } from 'react';
-import { LOGO_DATA_URI } from '../brand';
+import { LOGO_WORDMARK_DATA_URI } from '../brand';
 
-/** The wordmark: the real Poker Logic Lab spade-flask-brain mark + logotype. */
-export function BrandMark({ compact = false }: { compact?: boolean }) {
-  return (
-    <span className="flex items-center gap-2.5">
-      <img src={LOGO_DATA_URI} alt="Poker Logic Lab" width={34} height={34} className="h-[34px] w-[34px] shrink-0" />
-      {!compact && (
-        <span className="font-sans text-[1.02rem] font-semibold tracking-tight leading-none text-ink-100">
-          Poker Logic Lab
-        </span>
-      )}
-    </span>
-  );
+/** The real Poker Logic Lab horizontal lockup (dark-mode). */
+export function BrandMark() {
+  return <img src={LOGO_WORDMARK_DATA_URI} alt="Poker Logic Lab" className="h-7 sm:h-8 w-auto" />;
 }
 
 /** A labeled tabular-mono number readout — the app's core data unit. */

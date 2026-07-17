@@ -48,6 +48,14 @@ const usageSchema = z.object({ mode: z.enum(['replay', 'blitz']) });
 api.use(requireUser);
 const uid = (req: Request) => req.user!.id;
 
+// ---- Current user / entitlement ----------------------------------------
+// Drives the client-side purchase gate. `entitled` is true once the user has
+// bought (plan is set to 'pro' or 'lifetime' by the Polar webhook).
+api.get('/me', (req, res) => {
+  const u = req.user!;
+  res.json({ id: u.id, email: u.email, plan: u.plan, entitled: u.plan !== 'free' });
+});
+
 // ---- Sessions -----------------------------------------------------------
 api.get('/sessions', async (req, res) => res.json(await storage.listSessions(uid(req))));
 
