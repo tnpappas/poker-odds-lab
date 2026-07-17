@@ -6,6 +6,7 @@ import { clerkEnabled } from './lib/auth';
 import { api } from './lib/api';
 import { BrandMark } from './components/ui';
 import { HowToUse } from './components/HowToUse';
+import { CheckoutSuccess } from './components/CheckoutSuccess';
 import { Spade, Heart, Diamond, Club } from './components/icons';
 
 /** Verifies entitlement against the server whenever Clerk auth state changes. */
@@ -46,6 +47,7 @@ export function App() {
   return (
     <div className="min-h-full flex flex-col">
       {clerkEnabled && <PlanSync />}
+      <CheckoutSuccess />
       <header className="sticky top-0 z-30 rail border-b backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link to="/" aria-label="Poker Logic Lab home">
@@ -116,14 +118,20 @@ export function App() {
         <Outlet />
       </main>
 
-      {/* Desktop footer — table inlay + suit rule */}
-      <footer className="hidden lg:block mt-16 border-t border-felt-800/60">
-        <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between text-xs text-ink-500">
-          <span className="num">© {new Date().getFullYear()} Poker Logic Lab</span>
-          <span className="flex items-center gap-2 opacity-70">
+      {/* Footer — legal + support links (all screen sizes) */}
+      <footer className="mt-16 border-t border-felt-800/60 pb-20 lg:pb-0">
+        <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-500">
+          <span className="num order-2 sm:order-1">© {new Date().getFullYear()} Poker Logic Lab</span>
+          <div className="order-1 sm:order-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <Link to="/guide" className="hover:text-ink-100 transition">How it works</Link>
+            <Link to="/terms" className="hover:text-ink-100 transition">Terms</Link>
+            <Link to="/privacy" className="hover:text-ink-100 transition">Privacy</Link>
+            <Link to="/refunds" className="hover:text-ink-100 transition">Refunds</Link>
+            <a href="mailto:support@pokerlogiclab.com" className="hover:text-ink-100 transition">Support</a>
+          </div>
+          <span className="order-3 hidden md:flex items-center gap-2 opacity-70">
             <Spade size={12} /><Heart size={12} className="text-oxblood-400" /><Diamond size={12} className="text-brass-400" /><Club size={12} className="text-chip-green" />
           </span>
-          <span className="eyebrow !text-[0.6rem]">Scored on EV, not luck</span>
         </div>
       </footer>
 
