@@ -97,6 +97,11 @@ export function Home() {
               </Link>
             </div>
 
+            <Link to="/guide"
+              className="inline-block mt-5 text-sm text-ink-100/80 hover:text-ink-100 underline underline-offset-4 decoration-brand-400/50">
+              New to poker? See how it works →
+            </Link>
+
             <div className="flex items-center gap-5 mt-8 text-ink-300 text-xs">
               <span className="num">169 <span className="font-sans">starting hands</span></span>
               <span className="text-white/25">|</span>

@@ -5,6 +5,7 @@ import { useGameStore } from './store/useGameStore';
 import { clerkEnabled } from './lib/auth';
 import { api } from './lib/api';
 import { BrandMark } from './components/ui';
+import { HowToUse } from './components/HowToUse';
 import { Spade, Heart, Diamond, Club } from './components/icons';
 
 /** Verifies entitlement against the server whenever Clerk auth state changes. */
@@ -63,9 +64,19 @@ export function App() {
                 {n.label}
               </NavLink>
             ))}
+            <NavLink to="/guide"
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-lg text-sm transition ${
+                  isActive
+                    ? 'text-brand-400 bg-white/[0.06]'
+                    : 'text-ink-300 hover:text-ink-100 hover:bg-white/[0.04]'
+                }`}>
+              How it works
+            </NavLink>
           </nav>
 
           <div className="flex items-center gap-3">
+            <HowToUse />
             <span className="hidden xs:flex items-center gap-1.5 text-xs text-ink-500">
               <span className="eyebrow !tracking-[0.15em] !text-[0.6rem]">SP</span>
               <span className={`num font-semibold text-sm ${skillPoints >= 0 ? 'text-chip-green' : 'text-chip-red'}`}>

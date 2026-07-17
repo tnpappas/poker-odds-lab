@@ -20,6 +20,7 @@ import { AuthProvider } from './lib/auth';
 
 import { App } from './App';
 import { Home } from './pages/Home';
+import { Guide } from './pages/Guide';
 import { Visualizer } from './features/visualizer/Visualizer';
 import { Replay } from './features/replay/Replay';
 import { Blitz } from './features/blitz/Blitz';
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <Home /> },
+      { path: 'guide', element: <Guide /> },
       { path: 'visualizer', element: gate(<Visualizer />) },
       { path: 'replay', element: gate(<Replay />) },
       { path: 'blitz', element: gate(<Blitz />) },
