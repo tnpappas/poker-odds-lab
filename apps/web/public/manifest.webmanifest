@@ -1,0 +1,9 @@
+{
+  "name": "Poker Logic Lab",
+  "short_name": "Poker Lab",
+  "description": "Train your poker decisions. Scored on EV, not luck.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b"
+}
