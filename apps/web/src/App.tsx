@@ -8,6 +8,7 @@ import { BrandMark } from './components/ui';
 import { HowToUse } from './components/HowToUse';
 import { CheckoutSuccess } from './components/CheckoutSuccess';
 import { Seo } from './components/Seo';
+import { Analytics } from '@vercel/analytics/react';
 import { Spade, Heart, Diamond, Club } from './components/icons';
 
 /** Verifies entitlement against the server whenever Clerk auth state changes. */
@@ -49,6 +50,7 @@ export function App() {
     <div className="min-h-full flex flex-col">
       {clerkEnabled && <PlanSync />}
       <Seo />
+      <Analytics />
       <CheckoutSuccess />
       <header className="sticky top-0 z-30 rail border-b backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">

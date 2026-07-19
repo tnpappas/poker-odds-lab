@@ -14,6 +14,7 @@
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/space-grotesk": "^5.2.10",
     "@pol/poker-engine": "*",
+    "@vercel/analytics": "^2.0.1",
     "framer-motion": "^11.11.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
