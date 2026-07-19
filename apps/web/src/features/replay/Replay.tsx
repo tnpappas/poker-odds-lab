@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   evaluate7Cards,
@@ -40,6 +41,23 @@ export function Replay() {
   const [readMode, setReadMode] = useState(true);
   const [userMatrix, setUserMatrix] = useState<number[][]>(() => emptyMatrix());
   const [readEquity, setReadEquity] = useState<number | null>(null);
+
+  // First-time explainer for the range-read grid (shown once, then remembered).
+  const [showReadHint, setShowReadHint] = useState(() => {
+    try {
+      return localStorage.getItem('pll_read_hint_seen') !== '1';
+    } catch {
+      return true;
+    }
+  });
+  const dismissReadHint = () => {
+    setShowReadHint(false);
+    try {
+      localStorage.setItem('pll_read_hint_seen', '1');
+    } catch {
+      /* ignore */
+    }
+  };
 
   const logDecision = useGameStore((s) => s.logDecision);
   const incrementUsage = useGameStore((s) => s.incrementUsage);
@@ -205,10 +223,27 @@ export function Replay() {
               Adversary bets <span className="text-ink-100 font-semibold">${node.betSize}</span> on the {node.street}.
             </p>
 
+            {readMode && showReadHint && (
+              <div className="mb-4 rounded-xl border border-gold-500/40 bg-gold-500/10 p-3 text-xs leading-relaxed text-ink-300">
+                <div className="flex items-start justify-between gap-3">
+                  <p>
+                    <span className="text-gold-400 font-semibold">New here? </span>
+                    The grid below is every hand your opponent could be holding. Tap or drag to paint the ones you think
+                    they have, and we’ll show your odds against that exact read. Then decide call, fold, or raise.{' '}
+                    <Link to="/guide" className="text-gold-400 underline hover:text-gold-300">See how it works</Link>.
+                  </p>
+                  <button onClick={dismissReadHint} aria-label="Dismiss" className="shrink-0 text-ink-500 hover:text-ink-300">✕</button>
+                </div>
+              </div>
+            )}
+
             {readMode ? (
               <div className="grid sm:grid-cols-[1fr_1.1fr] gap-4 mb-5">
                 <div>
-                  <div className="text-xs text-ink-500 mb-2">Drag to paint the hands you think adversary has:</div>
+                  <div className="text-xs text-ink-500 mb-2">
+                    Drag to paint the hands you think adversary has:{' '}
+                    <Link to="/guide" className="text-gold-400/80 underline hover:text-gold-400">what’s this?</Link>
+                  </div>
                   <HandGrid weights={userMatrix} editable onPaint={paint} compact />
                   <div className="text-xs text-ink-500 mt-2 text-center">Your read: <span className="text-gold-400 font-semibold">{(readPct * 100).toFixed(0)}% of hands</span></div>
                 </div>
