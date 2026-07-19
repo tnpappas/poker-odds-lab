@@ -128,6 +128,7 @@ export function App() {
           <span className="num order-2 sm:order-1">© {new Date().getFullYear()} Poker Logic Lab</span>
           <div className="order-1 sm:order-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             <Link to="/guide" className="hover:text-ink-100 transition">How it works</Link>
+            <Link to="/blog" className="hover:text-ink-100 transition">Blog</Link>
             <Link to="/terms" className="hover:text-ink-100 transition">Terms</Link>
             <Link to="/privacy" className="hover:text-ink-100 transition">Privacy</Link>
             <Link to="/refunds" className="hover:text-ink-100 transition">Refunds</Link>
