@@ -89,6 +89,25 @@ async function startCheckout(plan: CheckoutPlan): Promise<{ ok: boolean; error?:
   }
 }
 
+/**
+ * Capture a PayPal order after the buyer approves and returns to the site.
+ * Grants access instantly; the webhook is the redundant backup.
+ */
+async function captureCheckout(orderId: string): Promise<{ entitled: boolean } | null> {
+  if (!apiEnabled) return null;
+  try {
+    const res = await fetch(`${API_URL}/api/billing/capture`, {
+      method: 'POST',
+      headers: await authHeaders(),
+      body: JSON.stringify({ orderId }),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as { entitled: boolean };
+  } catch {
+    return null;
+  }
+}
+
 export type Plan = 'free' | 'pro' | 'lifetime';
 
 /** Fetch the signed-in user's entitlement from the server. Null if unavailable. */
@@ -107,5 +126,6 @@ export const api = {
   postDecision: (d: ApiDecision) => send('/api/decisions', d),
   incrementUsage: (mode: 'replay' | 'blitz') => send('/api/usage/increment', { mode }),
   startCheckout,
+  captureCheckout,
   getMe,
 };

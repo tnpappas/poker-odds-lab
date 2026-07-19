@@ -6,9 +6,11 @@ import { useGameStore } from '../store/useGameStore';
 import { Spade } from './icons';
 
 /**
- * Shown when the browser returns from a successful Polar checkout
- * (URL contains ?checkout=success). Confirms the purchase and refreshes
- * entitlement, retrying a few times in case the webhook is still landing.
+ * Shown when the browser returns from a successful checkout.
+ *   - PayPal: URL contains ?checkout=paypal&token=<orderId>. We capture the
+ *     order server-side (instant unlock), then refresh entitlement.
+ *   - Polar (legacy/fallback): URL contains ?checkout=success. The webhook
+ *     grants access, so we just poll entitlement until it lands.
  */
 export function CheckoutSuccess() {
   const [open, setOpen] = useState(false);
@@ -16,24 +18,36 @@ export function CheckoutSuccess() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('checkout') !== 'success') return;
+    const checkout = params.get('checkout');
+    if (checkout !== 'success' && checkout !== 'paypal') return;
+
+    // PayPal appends the approved order id as `token`.
+    const orderId = params.get('token');
 
     setOpen(true);
     // Clean the query string so a refresh doesn't re-trigger this.
     params.delete('checkout');
+    params.delete('token');
+    params.delete('PayerID');
     const qs = params.toString();
     window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''));
 
-    // Poll entitlement a few times; the Polar webhook may still be processing.
     let cancelled = false;
-    const delays = [0, 2500, 5000, 9000];
-    delays.forEach((d) => {
-      setTimeout(async () => {
-        if (cancelled) return;
-        const me = await api.getMe();
-        if (!cancelled && me?.plan) setPlan(me.plan);
-      }, d);
-    });
+    (async () => {
+      // Capture the PayPal order first so access unlocks immediately.
+      if (checkout === 'paypal' && orderId) {
+        await api.captureCheckout(orderId);
+      }
+      // Poll entitlement a few times; the webhook may still be processing.
+      const delays = [0, 2500, 5000, 9000];
+      delays.forEach((d) => {
+        setTimeout(async () => {
+          if (cancelled) return;
+          const me = await api.getMe();
+          if (!cancelled && me?.plan) setPlan(me.plan);
+        }, d);
+      });
+    })();
     return () => { cancelled = true; };
   }, [setPlan]);
 

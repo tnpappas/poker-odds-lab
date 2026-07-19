@@ -4,6 +4,7 @@ import { storage } from '../storage/index';
 import { requireUser } from '../middleware/auth';
 import { detectLeaks } from '../services/leakDetector';
 import { polar, productIdFor } from '../lib/polar';
+import { paypalConfigured, createLifetimeOrder, captureOrder } from '../lib/paypal';
 
 export const api = Router();
 
@@ -161,24 +162,42 @@ api.delete('/account', async (req, res) => {
   res.status(204).end();
 });
 
-// ---- Payments (Polar.sh) ------------------------------------------------
+// ---- Payments -----------------------------------------------------------
 // FRONTEND_URL may be a comma-separated allowlist (for CORS); the first entry
 // is the primary origin used for checkout success/return redirects.
 const FRONTEND_URL = (process.env.FRONTEND_URL ?? 'http://localhost:5173').split(',')[0].trim();
 const checkoutSchema = z.object({ plan: z.enum(['lifetime', 'monthly', 'annual']) });
 
-// Create a Polar hosted checkout and return its URL for the browser to open.
+// Create a hosted checkout and return its URL for the browser to open.
+// Prefers PayPal when configured (merchant of record = the account owner);
+// otherwise falls back to a Polar hosted checkout.
 api.post('/billing/checkout', async (req, res) => {
-  if (!polar) {
-    return res.status(501).json({ error: 'Polar is not configured. Set POLAR_ACCESS_TOKEN.' });
-  }
   const { plan } = checkoutSchema.parse(req.body);
+  const user = req.user!;
+
+  // --- PayPal (preferred when configured) ---
+  if (paypalConfigured) {
+    if (plan !== 'lifetime') {
+      return res.status(400).json({ error: 'Only the lifetime plan is available via PayPal.' });
+    }
+    const order = await createLifetimeOrder({
+      userId: user.id,
+      email: user.email,
+      returnUrl: `${FRONTEND_URL}/?checkout=paypal`,
+      cancelUrl: `${FRONTEND_URL}/?checkout=cancel`,
+    });
+    return res.json({ url: order.approveUrl });
+  }
+
+  // --- Polar (fallback) ---
+  if (!polar) {
+    return res.status(501).json({ error: 'Payments are not configured.' });
+  }
   const productId = productIdFor(plan);
   if (!productId) {
     return res.status(500).json({ error: `Missing product id for plan "${plan}". Set the POLAR_*_PRODUCT_ID env var.` });
   }
 
-  const user = req.user!;
   const checkout = await polar.checkouts.create({
     products: [productId],
     successUrl: `${FRONTEND_URL}/?checkout=success`,
@@ -189,6 +208,28 @@ api.post('/billing/checkout', async (req, res) => {
   });
 
   res.json({ url: checkout.url });
+});
+
+// Capture a PayPal order after the buyer approves and returns. Grants lifetime
+// access to the authenticated user, but only if the order's custom_id matches
+// them (prevents claiming an order id that belongs to someone else). The
+// PAYMENT.CAPTURE.COMPLETED webhook is the redundant, authoritative backup.
+const captureSchema = z.object({ orderId: z.string().min(1).max(64) });
+api.post('/billing/capture', async (req, res) => {
+  if (!paypalConfigured) {
+    return res.status(501).json({ error: 'PayPal is not configured.' });
+  }
+  const { orderId } = captureSchema.parse(req.body);
+  const result = await captureOrder(orderId);
+
+  if (result.completed && result.userId && result.userId !== req.user!.id) {
+    return res.status(403).json({ error: 'This order belongs to a different account.' });
+  }
+  if (result.completed && result.userId === req.user!.id) {
+    await storage.setPlan(req.user!.id, 'lifetime');
+    return res.json({ entitled: true });
+  }
+  return res.status(202).json({ entitled: false, status: 'pending' });
 });
 
 // Open the Polar customer portal so the user can manage/cancel their subscription.

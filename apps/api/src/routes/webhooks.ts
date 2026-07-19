@@ -4,6 +4,7 @@ import { Webhook } from 'svix';
 import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
 import { storage } from '../storage/index';
 import { planForProduct } from '../lib/polar';
+import { verifyWebhookSignature as verifyPaypalWebhook } from '../lib/paypal';
 import { logger } from '../lib/logger';
 import type { Plan } from '../storage/types';
 
@@ -140,4 +141,33 @@ webhooks.post('/polar/webhooks', rawJson, async (req: Request, res: Response) =>
   }
 
   res.status(202).send('');
+});
+
+// ---- PayPal payment events -> grant lifetime access ---------------------
+// The authoritative backup to the capture-on-return call. custom_id carries our
+// internal user id (set on the order's purchase_unit; PayPal propagates it to
+// the capture resource).
+webhooks.post('/paypal/webhooks', rawJson, async (req: Request, res: Response) => {
+  const body = req.body as Buffer;
+  const ok = await verifyPaypalWebhook(req.headers as Record<string, string | undefined>, body);
+  if (!ok) {
+    return res.status(403).json({ error: 'Invalid PayPal webhook signature' });
+  }
+
+  let event: { event_type?: string; resource?: any };
+  try {
+    event = JSON.parse(body.toString('utf8'));
+  } catch {
+    return res.status(400).json({ error: 'Invalid PayPal webhook body' });
+  }
+
+  if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+    const userId: string | undefined =
+      event.resource?.custom_id ?? event.resource?.purchase_units?.[0]?.custom_id;
+    if (userId) await storage.setPlan(userId, 'lifetime');
+  } else {
+    logger.debug('paypal webhook ignored', { type: event.event_type });
+  }
+
+  res.status(200).send('');
 });

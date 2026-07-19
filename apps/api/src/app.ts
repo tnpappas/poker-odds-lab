@@ -40,7 +40,7 @@ export function createApp() {
       ok: true,
       storage: storageBackend,
       auth: process.env.CLERK_SECRET_KEY ? 'clerk' : 'dev',
-      payments: process.env.POLAR_ACCESS_TOKEN ? 'polar' : 'disabled',
+      payments: process.env.PAYPAL_CLIENT_ID ? 'paypal' : process.env.POLAR_ACCESS_TOKEN ? 'polar' : 'disabled',
     });
   });
 
