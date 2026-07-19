@@ -15,7 +15,7 @@ export function Blog() {
   const reduce = useReducedMotion();
   return (
     <div className="max-w-4xl mx-auto px-5 sm:px-6 pb-24 pt-10">
-      <Eyebrow>The Lab Notes</Eyebrow>
+      <Eyebrow>Lab Notes</Eyebrow>
       <motion.h1
         initial={reduce ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

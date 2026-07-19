@@ -16,7 +16,7 @@ const META: Record<string, { title: string; desc: string }> = {
     desc: 'New to poker? A plain-English guide to equity, pot odds, EV, ranges, and reading opponents, plus what every tool in the lab does.',
   },
   '/blog': {
-    title: 'Poker Strategy Blog | Poker Logic Lab',
+    title: 'Lab Notes: Poker Strategy in Plain English | Poker Logic Lab',
     desc: 'Short, practical breakdowns of the poker math and reads that actually move your win rate. Pot odds, equity, EV, ranges, and more, in plain English.',
   },
   '/visualizer': {

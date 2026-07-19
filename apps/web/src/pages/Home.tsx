@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { LOGO_WORDMARK_DATA_URI } from '../brand';
 import { Eyebrow } from '../components/ui';
 import { Spade, Heart, Diamond, Club } from '../components/icons';
+import { POSTS } from '../content/posts';
 
 type SuitProps = { size?: number; className?: string };
 
@@ -151,6 +152,76 @@ export function Home() {
           ))}
         </section>
       </div>
+
+      {/* ---- Lab Notes: free strategy value to pull readers in ---- */}
+      {POSTS.length > 0 && (
+        <div className="max-w-6xl mx-auto px-5 sm:px-6 pb-28">
+          <div className="inlay mb-8" />
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <div>
+              <Eyebrow>Lab Notes</Eyebrow>
+              <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight mt-2 max-w-lg">
+                Sharpen your game between sessions
+              </h2>
+            </div>
+            <Link to="/blog" className="hidden sm:inline-flex whitespace-nowrap text-sm text-brand-400 hover:text-brand-300 font-medium">
+              All notes →
+            </Link>
+          </div>
+
+          {/* Latest note, featured wide */}
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}>
+            <Link
+              to={`/blog/${POSTS[0].slug}`}
+              className="felt-card group flex flex-col rounded-2xl p-7 transition hover:-translate-y-0.5 hover:border-brand-400/40">
+              <div className="flex items-center gap-3 text-xs text-ink-500 mb-3">
+                <Diamond size={16} className="text-brand-400" />
+                <span className="eyebrow !text-[0.6rem] !tracking-[0.18em]">Latest</span>
+                <span aria-hidden>·</span>
+                <span>{POSTS[0].readingTime}</span>
+              </div>
+              <h3 className="font-display text-2xl font-semibold tracking-tight max-w-2xl">{POSTS[0].heading}</h3>
+              <p className="text-ink-300 mt-2 text-[15px] leading-relaxed max-w-2xl">{POSTS[0].description}</p>
+              <span className="mt-5 text-brand-400 text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                Read the breakdown <span aria-hidden>→</span>
+              </span>
+            </Link>
+          </motion.div>
+
+          {/* Older notes, compact grid */}
+          {POSTS.length > 1 && (
+            <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              {POSTS.slice(1, 4).map((p, i) => (
+                <motion.div
+                  key={p.slug}
+                  initial={reduce ? false : { opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.45, delay: reduce ? 0 : Math.min(i * 0.05, 0.2), ease: [0.16, 1, 0.3, 1] }}>
+                  <Link
+                    to={`/blog/${p.slug}`}
+                    className="felt-card group flex flex-col rounded-2xl p-5 h-full transition hover:-translate-y-0.5 hover:border-brand-400/40">
+                    <span className="text-xs text-ink-500">{p.readingTime}</span>
+                    <h3 className="font-display text-lg font-semibold tracking-tight mt-2">{p.heading}</h3>
+                    <p className="text-ink-300 mt-2 text-sm leading-relaxed">{p.description}</p>
+                    <span className="mt-auto pt-4 text-brand-400 text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Read <span aria-hidden>→</span>
+                    </span>
+                  </Link>
+                </motion.div>
+              ))}
+            </section>
+          )}
+
+          <Link to="/blog" className="sm:hidden inline-flex mt-5 text-sm text-brand-400 font-medium">
+            All notes →
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
