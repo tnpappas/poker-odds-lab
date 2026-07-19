@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { getPost } from '../content/posts';
 
 const SITE = 'https://pokerlogiclab.com';
 
@@ -13,6 +14,10 @@ const META: Record<string, { title: string; desc: string }> = {
   '/guide': {
     title: 'How it works | Poker Logic Lab',
     desc: 'New to poker? A plain-English guide to equity, pot odds, EV, ranges, and reading opponents, plus what every tool in the lab does.',
+  },
+  '/blog': {
+    title: 'Poker Strategy Blog | Poker Logic Lab',
+    desc: 'Short, practical breakdowns of the poker math and reads that actually move your win rate. Pot odds, equity, EV, ranges, and more, in plain English.',
   },
   '/visualizer': {
     title: 'Equity Visualizer | Poker Logic Lab',
@@ -60,7 +65,12 @@ function upsertMeta(selector: string, create: () => HTMLElement, content: string
 export function Seo() {
   const { pathname } = useLocation();
   useEffect(() => {
-    const m = META[pathname] ?? DEFAULT;
+    let m = META[pathname] ?? DEFAULT;
+    // Individual blog posts: pull title/description from the post itself.
+    if (pathname.startsWith('/blog/')) {
+      const post = getPost(pathname.slice('/blog/'.length));
+      if (post) m = { title: post.title, desc: post.description };
+    }
     const url = SITE + pathname;
 
     document.title = m.title;

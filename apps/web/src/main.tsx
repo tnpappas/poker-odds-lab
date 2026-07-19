@@ -25,6 +25,8 @@ import { RequirePurchase } from './components/RequirePurchase';
 // Everything except the landing page is loaded on demand to keep first paint fast.
 const Guide = lazy(() => import('./pages/Guide').then((m) => ({ default: m.Guide })));
 const Legal = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Legal })));
+const Blog = lazy(() => import('./pages/Blog').then((m) => ({ default: m.Blog })));
+const BlogPost = lazy(() => import('./pages/BlogPost').then((m) => ({ default: m.BlogPost })));
 const Visualizer = lazy(() => import('./features/visualizer/Visualizer').then((m) => ({ default: m.Visualizer })));
 const Replay = lazy(() => import('./features/replay/Replay').then((m) => ({ default: m.Replay })));
 const Blitz = lazy(() => import('./features/blitz/Blitz').then((m) => ({ default: m.Blitz })));
@@ -52,6 +54,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'guide', element: lazyEl(<Guide />) },
+      { path: 'blog', element: lazyEl(<Blog />) },
+      { path: 'blog/:slug', element: lazyEl(<BlogPost />) },
       { path: 'terms', element: lazyEl(<Legal doc="terms" />) },
       { path: 'privacy', element: lazyEl(<Legal doc="privacy" />) },
       { path: 'refunds', element: lazyEl(<Legal doc="refunds" />) },
