@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
+import { trackPurchase } from '../lib/fbpixel';
 import { useGameStore } from '../store/useGameStore';
 import { Spade } from './icons';
 
@@ -25,6 +26,9 @@ export function CheckoutSuccess() {
     const orderId = params.get('token');
 
     setOpen(true);
+    // Meta Pixel: record the purchase (value + currency). Use the PayPal order
+    // id as the dedup key so a future server-side CAPI event can match it.
+    trackPurchase(orderId ?? undefined);
     // Clean the query string so a refresh doesn't re-trigger this.
     params.delete('checkout');
     params.delete('token');
