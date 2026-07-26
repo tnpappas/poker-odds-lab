@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/useGameStore';
 import { api, apiEnabled, type CheckoutPlan } from '../lib/api';
-import { trackInitiateCheckout } from '../lib/fbpixel';
 
 const TIERS: { name: string; price: string; note: string; plan: CheckoutPlan; highlight?: boolean }[] = [
   { name: 'Lifetime', price: '$24.99', note: 'one-time — pay once, unlock everything forever', plan: 'lifetime', highlight: true },
@@ -22,8 +21,6 @@ export function Paywall({ reason, onClose }: { reason: string; onClose: () => vo
       return;
     }
     setBusy(plan);
-    // Meta Pixel: user is starting a real checkout.
-    trackInitiateCheckout();
     const result = await api.startCheckout(plan);
     if (!result.ok) {
       setBusy(null);
@@ -52,6 +49,11 @@ export function Paywall({ reason, onClose }: { reason: string; onClose: () => vo
             </button>
           ))}
         </div>
+
+        <p className="text-xs text-ink-300 mb-4">
+          Includes every tool in the lab and the complete book,{' '}
+          <span className="text-ink-100">Playing Online Texas Hold&rsquo;em</span> (all 19 chapters), yours to keep.
+        </p>
 
         {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
         {!apiEnabled && (

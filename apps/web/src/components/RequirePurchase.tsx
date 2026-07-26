@@ -55,7 +55,8 @@ function SignInWall() {
       <img src={LOGO_WORDMARK_DATA_URI} alt="Poker Logic Lab" className="h-12 mb-7" />
       <h2 className="font-display text-2xl font-semibold mb-2">Members only</h2>
       <p className="text-ink-300 text-sm mb-7 max-w-sm text-center">
-        Sign in, then unlock lifetime access to train with every tool in the lab.
+        Sign in, then get lifetime access to every tool in the lab, plus the complete book,
+        Playing Online Texas Hold&rsquo;em, all 19 chapters, yours to keep.
       </p>
       <SignInButton mode="modal">
         <button className="px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
