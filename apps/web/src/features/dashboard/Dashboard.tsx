@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { LEAK_META, buildDrillQueue, type LeakType } from '@pol/poker-engine';
 import { useGameStore, type Decision, type Street } from '../../store/useGameStore';
+import { GuideDownloadCard } from '../../components/GuideDownload';
 
 interface Leak {
   type: string;
@@ -84,6 +85,7 @@ export function Dashboard() {
   if (decisions.length === 0) {
     return (
       <div className="max-w-3xl mx-auto px-5 sm:px-6 py-14">
+        <GuideDownloadCard />
         <div className="eyebrow mb-3">Start here</div>
         <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">Welcome to the lab</h1>
         <p className="text-ink-300 mt-4 max-w-xl leading-relaxed">
@@ -101,6 +103,9 @@ export function Dashboard() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 pb-16">
+      <div className="mt-6">
+        <GuideDownloadCard />
+      </div>
       <header className="my-6 flex items-end justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Your EV report, last 7 days</h1>
         <Link to="/guide" className="text-xs text-ink-500 hover:text-ink-300 shrink-0">New here? Read the guide</Link>

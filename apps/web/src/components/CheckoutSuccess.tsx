@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../lib/api';
 import { useGameStore } from '../store/useGameStore';
 import { Spade } from './icons';
+import { BOOK_URL } from './GuideDownload';
 
 /**
  * Shown when the browser returns from a successful checkout.
@@ -68,14 +69,18 @@ export function CheckoutSuccess() {
             <div className="eyebrow mb-2">Payment complete</div>
             <h2 className="font-display text-3xl font-semibold tracking-tight">You’re in.</h2>
             <p className="text-ink-300 mt-3 text-[15px] leading-relaxed">
-              Lifetime access is unlocked. Every tool in the lab is yours now, forever. Time to
-              stop losing to better math.
+              Lifetime access is unlocked. Every tool in the lab is yours now, forever, and your
+              complete guide is ready below. Time to stop losing to better math.
             </p>
             <div className="flex flex-col gap-2 mt-7">
               <Link to="/replay" onClick={() => setOpen(false)}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
                 <Spade size={16} /> Play your first hand
               </Link>
+              <a href={BOOK_URL} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-brass-400/50 text-brass-200 font-semibold hover:border-brass-400 hover:text-brass-100 transition">
+                Download your guide
+              </a>
               <button onClick={() => setOpen(false)} className="text-sm text-ink-500 hover:text-ink-300 mt-1">
                 I’ll explore on my own
               </button>
