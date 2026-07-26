@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { LOGO_WORDMARK_DATA_URI } from '../brand';
 import { Eyebrow } from '../components/ui';
 import { Spade, Heart, Diamond, Club } from '../components/icons';
+import { BOOK_COVER_DATA_URI } from '../components/GuideDownload';
 import { POSTS } from '../content/posts';
 
 type SuitProps = { size?: number; className?: string };
@@ -158,14 +159,11 @@ export function Home() {
         <div className="inlay mb-8" />
         <Eyebrow>Included with lifetime access</Eyebrow>
         <div className="felt-card rounded-2xl p-6 sm:p-8 mt-2 flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-          <span className="grid place-items-center h-20 w-20 rounded-2xl bg-brass-500/15 text-brass-300 shrink-0">
-            <svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M5 4.5h11.5A1.5 1.5 0 0 1 18 6v13.5H7A2 2 0 0 1 5 17.5V4.5Z" />
-              <path d="M5 17.5A2 2 0 0 1 7 15.5h11" />
-              <path d="M8.5 8.5h6M8.5 11.5h4" />
-            </svg>
-          </span>
+          <img
+            src={BOOK_COVER_DATA_URI}
+            alt="Playing Online Texas Hold’em book cover"
+            className="w-32 sm:w-40 rounded-lg shadow-2xl shrink-0 ring-1 ring-white/10"
+          />
           <div className="flex-1 text-center sm:text-left">
             <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">
               Every tool, plus the complete book.
