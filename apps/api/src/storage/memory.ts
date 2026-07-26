@@ -54,6 +54,10 @@ export class MemoryStorage implements Storage {
     return null;
   }
 
+  async getUserById(userId: string): Promise<User | null> {
+    return this.users.get(userId) ?? null;
+  }
+
   async deleteUser(userId: string): Promise<boolean> {
     const u = this.users.get(userId);
     if (!u) return false;

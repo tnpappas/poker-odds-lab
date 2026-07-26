@@ -5,6 +5,7 @@ import { requireUser } from '../middleware/auth';
 import { detectLeaks } from '../services/leakDetector';
 import { polar, productIdFor } from '../lib/polar';
 import { paypalConfigured, createLifetimeOrder, captureOrder } from '../lib/paypal';
+import { tagGhlCustomer } from '../lib/ghl';
 
 export const api = Router();
 
@@ -226,7 +227,10 @@ api.post('/billing/capture', async (req, res) => {
     return res.status(403).json({ error: 'This order belongs to a different account.' });
   }
   if (result.completed && result.userId === req.user!.id) {
+    const firstPurchase = req.user!.plan !== 'lifetime';
     await storage.setPlan(req.user!.id, 'lifetime');
+    // First purchase -> tag the buyer in GHL, which fires the book-delivery email.
+    if (firstPurchase) await tagGhlCustomer(req.user!.email);
     return res.json({ entitled: true });
   }
   return res.status(202).json({ entitled: false, status: 'pending' });

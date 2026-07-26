@@ -110,6 +110,7 @@ export interface Storage {
   setPlan(userId: string, plan: Plan): Promise<void>;
   setPolarCustomer(userId: string, polarCustomerId: string): Promise<void>;
   findUserByPolarCustomer(polarCustomerId: string): Promise<User | null>;
+  getUserById(userId: string): Promise<User | null>;
   deleteUser(userId: string): Promise<boolean>;
 
   createSession(userId: string, mode: SessionMode): Promise<Session>;

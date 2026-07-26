@@ -6,6 +6,7 @@ import { storage } from '../storage/index';
 import { planForProduct } from '../lib/polar';
 import { verifyWebhookSignature as verifyPaypalWebhook } from '../lib/paypal';
 import { logger } from '../lib/logger';
+import { tagGhlCustomer } from '../lib/ghl';
 import type { Plan } from '../storage/types';
 
 export const webhooks = Router();
@@ -164,7 +165,13 @@ webhooks.post('/paypal/webhooks', rawJson, async (req: Request, res: Response) =
   if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
     const userId: string | undefined =
       event.resource?.custom_id ?? event.resource?.purchase_units?.[0]?.custom_id;
-    if (userId) await storage.setPlan(userId, 'lifetime');
+    if (userId) {
+      // Tag the buyer in GHL on the first grant only (fires the book delivery).
+      const user = await storage.getUserById(userId);
+      const firstPurchase = user ? user.plan !== 'lifetime' : true;
+      await storage.setPlan(userId, 'lifetime');
+      if (firstPurchase && user) await tagGhlCustomer(user.email);
+    }
   } else {
     logger.debug('paypal webhook ignored', { type: event.event_type });
   }

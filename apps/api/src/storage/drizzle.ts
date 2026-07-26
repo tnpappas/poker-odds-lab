@@ -72,6 +72,11 @@ export class DrizzleStorage implements Storage {
     return r[0] ? mapUser(r[0]) : null;
   }
 
+  async getUserById(userId: string): Promise<User | null> {
+    const r = await this.db.select().from(schema.users).where(eq(schema.users.id, userId)).limit(1);
+    return r[0] ? mapUser(r[0]) : null;
+  }
+
   async deleteUser(userId: string): Promise<boolean> {
     // Child rows (sessions, hand_decisions, adversary_profiles, user_leaks,
     // daily_usage) are removed automatically via ON DELETE CASCADE.
