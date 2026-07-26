@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/useGameStore';
 import { api, apiEnabled, type CheckoutPlan } from '../lib/api';
+import { trackInitiateCheckout } from '../lib/fbpixel';
 
 const TIERS: { name: string; price: string; note: string; plan: CheckoutPlan; highlight?: boolean }[] = [
   { name: 'Lifetime', price: '$24.99', note: 'one-time — pay once, unlock everything forever', plan: 'lifetime', highlight: true },
@@ -21,6 +22,8 @@ export function Paywall({ reason, onClose }: { reason: string; onClose: () => vo
       return;
     }
     setBusy(plan);
+    // Meta Pixel: user is starting a real checkout.
+    trackInitiateCheckout();
     const result = await api.startCheckout(plan);
     if (!result.ok) {
       setBusy(null);
