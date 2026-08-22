@@ -68,6 +68,30 @@ api.get('/me', (req, res) => {
   res.json({ id: u.id, email: u.email, plan, entitled: plan !== 'free', owner: isOwner });
 });
 
+// ---- Admin (owner only) -------------------------------------------------
+// Lets the owner unlock an account by email without touching the database,
+// for comping a customer or fixing a payment that failed to grant access.
+const grantSchema = z.object({
+  email: z.string().email(),
+  plan: z.enum(['free', 'pro', 'lifetime']).default('lifetime'),
+});
+
+api.post('/admin/grant', async (req, res) => {
+  if (!OWNER_EMAILS.includes(req.user!.email.toLowerCase())) {
+    return res.status(403).json({ error: 'Owner only.' });
+  }
+  const { email, plan } = grantSchema.parse(req.body);
+  const user = await storage.findUserByEmail(email);
+  if (!user) {
+    return res.status(404).json({ error: `No account found for ${email}. They need to sign in once first.` });
+  }
+  const wasEntitled = user.plan !== 'free';
+  await storage.setPlan(user.id, plan);
+  // First time they're being granted access, fire the book-delivery workflow.
+  if (plan !== 'free' && !wasEntitled) await tagGhlCustomer(user.email);
+  res.json({ email: user.email, plan });
+});
+
 // ---- Sessions -----------------------------------------------------------
 api.get('/sessions', async (req, res) => res.json(await storage.listSessions(uid(req))));
 

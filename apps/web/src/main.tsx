@@ -25,6 +25,7 @@ import { RequirePurchase } from './components/RequirePurchase';
 // Everything except the landing page is loaded on demand to keep first paint fast.
 const Guide = lazy(() => import('./pages/Guide').then((m) => ({ default: m.Guide })));
 const Legal = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Legal })));
+const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 const Blog = lazy(() => import('./pages/Blog').then((m) => ({ default: m.Blog })));
 const BlogPost = lazy(() => import('./pages/BlogPost').then((m) => ({ default: m.BlogPost })));
 const Visualizer = lazy(() => import('./features/visualizer/Visualizer').then((m) => ({ default: m.Visualizer })));
@@ -59,6 +60,8 @@ const router = createBrowserRouter([
       { path: 'terms', element: lazyEl(<Legal doc="terms" />) },
       { path: 'privacy', element: lazyEl(<Legal doc="privacy" />) },
       { path: 'refunds', element: lazyEl(<Legal doc="refunds" />) },
+      // Owner-only account tools; intentionally not linked in the nav.
+      { path: 'admin', element: lazyEl(<Admin />) },
       { path: 'visualizer', element: gate(<Visualizer />) },
       { path: 'replay', element: gate(<Replay />) },
       { path: 'blitz', element: gate(<Blitz />) },

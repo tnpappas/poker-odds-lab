@@ -1,4 +1,4 @@
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import * as schema from '../db/schema';
 import {
@@ -69,6 +69,15 @@ export class DrizzleStorage implements Storage {
 
   async findUserByPolarCustomer(polarCustomerId: string): Promise<User | null> {
     const r = await this.db.select().from(schema.users).where(eq(schema.users.polarCustomerId, polarCustomerId)).limit(1);
+    return r[0] ? mapUser(r[0]) : null;
+  }
+
+  async findUserByEmail(email: string): Promise<User | null> {
+    const r = await this.db
+      .select()
+      .from(schema.users)
+      .where(sql`lower(${schema.users.email}) = ${email.trim().toLowerCase()}`)
+      .limit(1);
     return r[0] ? mapUser(r[0]) : null;
   }
 

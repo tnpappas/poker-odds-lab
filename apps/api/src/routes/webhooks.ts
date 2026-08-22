@@ -4,7 +4,7 @@ import { Webhook } from 'svix';
 import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
 import { storage } from '../storage/index';
 import { planForProduct } from '../lib/polar';
-import { verifyWebhookSignature as verifyPaypalWebhook } from '../lib/paypal';
+import { verifyWebhookSignature as verifyPaypalWebhook, captureOrder } from '../lib/paypal';
 import { logger } from '../lib/logger';
 import { tagGhlCustomer } from '../lib/ghl';
 import type { Plan } from '../storage/types';
@@ -148,6 +148,18 @@ webhooks.post('/polar/webhooks', rawJson, async (req: Request, res: Response) =>
 // The authoritative backup to the capture-on-return call. custom_id carries our
 // internal user id (set on the order's purchase_unit; PayPal propagates it to
 // the capture resource).
+
+/**
+ * Grant lifetime access, tagging the buyer in GHL on the first purchase only
+ * (that tag fires the book-delivery workflow). Safe to call more than once.
+ */
+async function grantLifetime(userId: string): Promise<void> {
+  const user = await storage.getUserById(userId);
+  const firstPurchase = user ? user.plan !== 'lifetime' : true;
+  await storage.setPlan(userId, 'lifetime');
+  if (firstPurchase && user) await tagGhlCustomer(user.email);
+}
+
 webhooks.post('/paypal/webhooks', rawJson, async (req: Request, res: Response) => {
   const body = req.body as Buffer;
   const ok = await verifyPaypalWebhook(req.headers as Record<string, string | undefined>, body);
@@ -166,11 +178,33 @@ webhooks.post('/paypal/webhooks', rawJson, async (req: Request, res: Response) =
     const userId: string | undefined =
       event.resource?.custom_id ?? event.resource?.purchase_units?.[0]?.custom_id;
     if (userId) {
-      // Tag the buyer in GHL on the first grant only (fires the book delivery).
-      const user = await storage.getUserById(userId);
-      const firstPurchase = user ? user.plan !== 'lifetime' : true;
-      await storage.setPlan(userId, 'lifetime');
-      if (firstPurchase && user) await tagGhlCustomer(user.email);
+      await grantLifetime(userId);
+      logger.info('paypal capture completed', { userId });
+    } else {
+      logger.warn('paypal capture completed with no custom_id', { id: event.resource?.id });
+    }
+  } else if (event.event_type === 'CHECKOUT.ORDER.APPROVED') {
+    // Safety net. The buyer approved the payment but the browser may never have
+    // completed the capture (tab closed, connection dropped, session not ready).
+    // Capturing here means an approved sale is never silently lost.
+    const orderId: string | undefined = event.resource?.id;
+    const approvedUserId: string | undefined = event.resource?.purchase_units?.[0]?.custom_id;
+    if (orderId) {
+      try {
+        const result = await captureOrder(orderId);
+        const userId = result.userId ?? approvedUserId;
+        if (result.completed && userId) {
+          await grantLifetime(userId);
+          logger.info('paypal order captured by webhook', { orderId, userId });
+        } else if (result.alreadyCaptured) {
+          // The browser already captured it and granted access. Nothing to do.
+          logger.debug('paypal order already captured', { orderId });
+        } else {
+          logger.warn('paypal approved order was not captured', { orderId, userId });
+        }
+      } catch (err) {
+        logger.error('paypal webhook capture failed', { orderId, err: String(err) });
+      }
     }
   } else {
     logger.debug('paypal webhook ignored', { type: event.event_type });

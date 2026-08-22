@@ -96,6 +96,8 @@ export interface CaptureResult {
   orderId: string;
   userId?: string;
   completed: boolean;
+  /** True when PayPal reports the order was already captured by an earlier call. */
+  alreadyCaptured?: boolean;
 }
 
 /** Capture an approved order. Idempotent: an already-captured order is a success. */
@@ -107,8 +109,9 @@ export async function captureOrder(orderId: string): Promise<CaptureResult> {
   });
   const data = (await res.json().catch(() => ({}))) as Record<string, any>;
 
+  let alreadyCaptured = false;
   if (!res.ok) {
-    const alreadyCaptured =
+    alreadyCaptured =
       Array.isArray(data?.details) &&
       data.details.some((d: { issue?: string }) => d.issue === 'ORDER_ALREADY_CAPTURED');
     if (!alreadyCaptured) {
@@ -121,7 +124,7 @@ export async function captureOrder(orderId: string): Promise<CaptureResult> {
   const userId: string | undefined = pu?.custom_id ?? cap?.custom_id;
   const status: string | undefined = data?.status ?? cap?.status;
   const completed = status === 'COMPLETED' || cap?.status === 'COMPLETED';
-  return { orderId, userId, completed };
+  return { orderId, userId, completed, alreadyCaptured };
 }
 
 // --- Webhook signature verification --------------------------------------

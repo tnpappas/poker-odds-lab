@@ -54,6 +54,14 @@ export class MemoryStorage implements Storage {
     return null;
   }
 
+  async findUserByEmail(email: string): Promise<User | null> {
+    const needle = email.trim().toLowerCase();
+    for (const u of this.users.values()) {
+      if (u.email.toLowerCase() === needle) return u;
+    }
+    return null;
+  }
+
   async getUserById(userId: string): Promise<User | null> {
     return this.users.get(userId) ?? null;
   }
