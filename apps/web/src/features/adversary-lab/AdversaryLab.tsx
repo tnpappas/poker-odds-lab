@@ -50,7 +50,7 @@ export function AdversaryLab() {
     [draft],
   );
 
-  if (plan !== 'pro') {
+  if (plan === 'free') {
     return <Paywall reason="Adversary Lab is a Pro feature — model the regulars at your table and learn to exploit them." onClose={() => nav('/')} />;
   }
 
