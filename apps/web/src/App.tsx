@@ -105,7 +105,7 @@ export function App() {
                 </SignedOut>
                 <SignedIn>
                   {plan === 'free' && (
-                    <Link to="/replay"
+                    <Link to="/pricing"
                       className="text-xs px-3.5 py-1.5 rounded-lg bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
                       Unlock
                     </Link>
@@ -127,6 +127,7 @@ export function App() {
         <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-500">
           <span className="num order-2 sm:order-1">© {new Date().getFullYear()} Poker Logic Lab</span>
           <div className="order-1 sm:order-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <Link to="/pricing" className="hover:text-ink-100 transition">Pricing</Link>
             <Link to="/guide" className="hover:text-ink-100 transition">How it works</Link>
             <Link to="/blog" className="hover:text-ink-100 transition">Lab Notes</Link>
             <Link to="/terms" className="hover:text-ink-100 transition">Terms</Link>

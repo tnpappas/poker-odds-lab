@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/useGameStore';
 import { api, apiEnabled, type CheckoutPlan } from '../lib/api';
+import { trackInitiateCheckout } from '../lib/fbpixel';
 
 const TIERS: { name: string; price: string; note: string; plan: CheckoutPlan; highlight?: boolean }[] = [
   { name: 'Lifetime', price: '$24.99', note: 'one-time — pay once, unlock everything forever', plan: 'lifetime', highlight: true },
@@ -15,12 +16,20 @@ export function Paywall({ reason, onClose }: { reason: string; onClose: () => vo
   async function choose(plan: CheckoutPlan) {
     setError(null);
     if (!apiEnabled) {
-      // Local-only mode (no backend): fall back to a demo unlock for testing.
-      setPlan('pro');
-      onClose();
+      // Local dev with no backend: unlock so the tools are testable.
+      // In a production build this must NEVER grant access for free -- that is
+      // how a buyer ends up "in" without ever being charged. Surface the
+      // misconfiguration instead of silently giving the product away.
+      if (import.meta.env.DEV) {
+        setPlan('pro');
+        onClose();
+        return;
+      }
+      setError('Checkout is temporarily unavailable. Please email support@pokerlogiclab.com and we will get you sorted right away.');
       return;
     }
     setBusy(plan);
+    trackInitiateCheckout();
     const result = await api.startCheckout(plan);
     if (!result.ok) {
       setBusy(null);

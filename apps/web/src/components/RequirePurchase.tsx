@@ -53,16 +53,23 @@ function SignInWall() {
   return (
     <Centered>
       <img src={LOGO_WORDMARK_DATA_URI} alt="Poker Logic Lab" className="h-12 mb-7" />
-      <h2 className="font-display text-2xl font-semibold mb-2">Members only</h2>
+      <h2 className="font-display text-2xl font-semibold mb-2">This tool is part of lifetime access</h2>
       <p className="text-ink-300 text-sm mb-7 max-w-sm text-center">
-        Sign in, then get lifetime access to every tool in the lab, plus the complete book,
+        One payment of $24.99 unlocks every tool in the lab, plus the complete book,
         Playing Online Texas Hold&rsquo;em, all 19 chapters, yours to keep.
       </p>
-      <SignInButton mode="modal">
-        <button className="px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
-          Sign in to continue
-        </button>
-      </SignInButton>
+      <Link
+        to="/pricing"
+        className="px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition"
+      >
+        See what is included
+      </Link>
+      <p className="mt-5 text-sm text-ink-500">
+        Already bought it?{' '}
+        <SignInButton mode="modal">
+          <button className="text-brand-400 hover:text-brand-300 font-medium">Sign in</button>
+        </SignInButton>
+      </p>
       <Link to="/" className="mt-4 text-sm text-ink-500 hover:text-ink-300">
         Back to home
       </Link>

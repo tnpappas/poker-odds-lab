@@ -11,6 +11,10 @@ const DEFAULT = {
 
 const META: Record<string, { title: string; desc: string }> = {
   '/': DEFAULT,
+  '/pricing': {
+    title: 'Pricing: Lifetime Access for $24.99 | Poker Logic Lab',
+    desc: 'One payment unlocks every trainer in the lab plus the complete book, Playing Online Texas Hold’em. No subscription. 14-day money-back guarantee.',
+  },
   '/guide': {
     title: 'How it works | Poker Logic Lab',
     desc: 'New to poker? A plain-English guide to equity, pot odds, EV, ranges, and reading opponents, plus what every tool in the lab does.',

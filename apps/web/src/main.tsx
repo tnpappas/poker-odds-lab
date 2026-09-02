@@ -24,6 +24,8 @@ import { RequirePurchase } from './components/RequirePurchase';
 
 // Everything except the landing page is loaded on demand to keep first paint fast.
 const Guide = lazy(() => import('./pages/Guide').then((m) => ({ default: m.Guide })));
+const Pricing = lazy(() => import('./pages/Pricing').then((m) => ({ default: m.Pricing })));
+const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })));
 const Legal = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Legal })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 const Blog = lazy(() => import('./pages/Blog').then((m) => ({ default: m.Blog })));
@@ -55,6 +57,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'guide', element: lazyEl(<Guide />) },
+      // Public purchase page: the only place a logged-out visitor is asked to buy.
+      { path: 'pricing', element: lazyEl(<Pricing />) },
       { path: 'blog', element: lazyEl(<Blog />) },
       { path: 'blog/:slug', element: lazyEl(<BlogPost />) },
       { path: 'terms', element: lazyEl(<Legal doc="terms" />) },
@@ -69,6 +73,8 @@ const router = createBrowserRouter([
       { path: 'calculator', element: gate(<Calculator />) },
       { path: 'icm', element: gate(<IcmTrainer />) },
       { path: 'dashboard', element: gate(<Dashboard />) },
+      // Catch-all: a styled 404 instead of react-router's developer error screen.
+      { path: '*', element: lazyEl(<NotFound />) },
     ],
   },
 ]);
