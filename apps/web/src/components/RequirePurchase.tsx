@@ -66,7 +66,7 @@ function SignInWall() {
       </Link>
       <p className="mt-5 text-sm text-ink-500">
         Already bought it?{' '}
-        <SignInButton mode="modal">
+        <SignInButton mode="modal" signUpForceRedirectUrl="/pricing">
           <button className="text-brand-400 hover:text-brand-300 font-medium">Sign in</button>
         </SignInButton>
       </p>

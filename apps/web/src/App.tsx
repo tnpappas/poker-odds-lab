@@ -97,7 +97,7 @@ export function App() {
             {clerkEnabled && (
               <>
                 <SignedOut>
-                  <SignInButton mode="modal">
+                  <SignInButton mode="modal" signUpForceRedirectUrl="/pricing">
                     <button className="text-xs px-3.5 py-1.5 rounded-lg bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
                       Sign in
                     </button>

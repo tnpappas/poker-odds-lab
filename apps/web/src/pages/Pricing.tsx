@@ -129,7 +129,7 @@ function BuyBlock() {
         </p>
         <p className="text-sm text-ink-500 mt-4 text-center">
           Already bought it?{' '}
-          <SignInButton mode="modal" forceRedirectUrl="/pricing">
+          <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing?buy=1">
             <button className="text-brand-400 hover:text-brand-300 font-medium">Sign in</button>
           </SignInButton>
         </p>
