@@ -76,6 +76,10 @@ export async function createLifetimeOrder(opts: {
           experience_context: {
             brand_name: 'Poker Logic Lab',
             user_action: 'PAY_NOW',
+            // Show the card form first instead of PayPal's login screen. Most
+            // buyers here have no PayPal account and should not be asked for
+            // one; PayPal still offers "Log In" for those who want it.
+            landing_page: 'GUEST_CHECKOUT',
             shipping_preference: 'NO_SHIPPING',
             return_url: opts.returnUrl,
             cancel_url: opts.cancelUrl,

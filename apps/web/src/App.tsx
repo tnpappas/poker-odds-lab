@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { NavLink, Outlet, Link } from 'react-router-dom';
+import { NavLink, Outlet, Link, useLocation } from 'react-router-dom';
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react';
 import { useGameStore } from './store/useGameStore';
 import { clerkEnabled } from './lib/auth';
@@ -45,6 +45,7 @@ const NAV = [
 export function App() {
   const skillPoints = useGameStore((s) => s.skillPoints);
   const plan = useGameStore((s) => s.plan);
+  const { pathname } = useLocation();
 
   return (
     <div className="min-h-full flex flex-col">
@@ -104,7 +105,7 @@ export function App() {
                   </SignInButton>
                 </SignedOut>
                 <SignedIn>
-                  {plan === 'free' && (
+                  {plan === 'free' && pathname !== '/pricing' && (
                     <Link to="/pricing"
                       className="text-xs px-3.5 py-1.5 rounded-lg bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
                       Unlock
