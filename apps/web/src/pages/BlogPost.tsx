@@ -114,7 +114,7 @@ function MemberWall() {
         <h2 className="font-display text-2xl font-semibold tracking-tight">The rest of this Lab Note is dealt to members</h2>
         <p className="text-ink-300 text-sm mt-3 max-w-md mx-auto leading-relaxed">
           One payment unlocks every Lab Note, every tool in the lab, and the complete book,
-          Playing Online Texas Hold&rsquo;em. A new Lab Note is dealt every week.
+          Playing Online Texas Hold&rsquo;em. New Lab Notes are dealt regularly.
         </p>
         <Link to="/pricing"
           className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">

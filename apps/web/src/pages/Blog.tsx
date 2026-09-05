@@ -20,7 +20,7 @@ export function Blog() {
         Short, practical breakdowns of the math and reads that actually move your win rate. No jargon, no fluff.
       </p>
       <p className="text-gold-400 mt-3 text-sm font-medium">
-        A new Lab Note is dealt every week to lifetime members.{' '}
+        New Lab Notes are dealt regularly to lifetime members.{' '}
         <Link to="/pricing" className="underline underline-offset-2 hover:text-ink-100">
           See what is included
         </Link>
