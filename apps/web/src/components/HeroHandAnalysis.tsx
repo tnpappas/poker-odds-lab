@@ -178,31 +178,31 @@ export function HeroHandAnalysis() {
       className="pointer-events-none select-none absolute inset-0 z-[5]"
     >
       {/* ---------- Desktop / tablet: full analysis panel over the right half ---------- */}
-      <div className="hidden md:block absolute right-[3%] lg:right-[5%] top-1/2 -translate-y-1/2 w-[46%] max-w-[560px]">
+      <div className="hidden lg:block absolute right-[4%] top-1/2 -translate-y-1/2 w-[38%] xl:w-[42%] max-w-[520px]">
         {/* Board + hole cards, sitting "on the felt" */}
-        <div key={cycle} className="flex flex-col items-center gap-4">
+        <div key={cycle} className="flex flex-col items-center gap-3">
           <div className="flex gap-1.5">
             {BOARD.map((c, i) => (
-              <PlayingCard key={c} card={c} size="md" faceDown={i >= street.boardCount} delay={0.08 * i} />
+              <PlayingCard key={c} card={c} size="sm" faceDown={i >= street.boardCount} delay={0.08 * i} />
             ))}
           </div>
           <div className="flex items-end gap-2">
             <div className="flex gap-1 -rotate-6 origin-bottom">
-              <PlayingCard card={HERO[0]} size="lg" delay={0.05} />
+              <PlayingCard card={HERO[0]} size="md" delay={0.05} />
             </div>
             <div className="flex gap-1 rotate-6 origin-bottom -ml-3">
-              <PlayingCard card={HERO[1]} size="lg" delay={0.15} />
+              <PlayingCard card={HERO[1]} size="md" delay={0.15} />
             </div>
           </div>
         </div>
 
         {/* HUD */}
-        <div className="mt-5 rounded-2xl p-4 lg:p-5" style={HUD_STYLE}>
+        <div className="mt-4 rounded-2xl p-4" style={HUD_STYLE}>
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className={`${LABEL} mb-1`}>{street.name} · A♠K♥ vs range</div>
               <div className="flex items-baseline gap-2">
-                <span className="num text-ink-100 text-3xl lg:text-4xl font-semibold leading-none">
+                <span className="num text-ink-100 text-3xl font-semibold leading-none">
                   {equity.toFixed(1)}
                   <span className="text-ink-300 text-lg">%</span>
                 </span>
@@ -243,7 +243,7 @@ export function HeroHandAnalysis() {
       </div>
 
       {/* ---------- Phone: compact readout pinned bottom-right ---------- */}
-      <div className="md:hidden absolute right-4 bottom-6 flex flex-col items-end gap-2">
+      <div className="lg:hidden absolute right-4 bottom-6 flex flex-col items-end gap-2">
         <div key={cycle} className="flex gap-1">
           {BOARD.map((c, i) => (
             <PlayingCard key={c} card={c} size="sm" faceDown={i >= street.boardCount} delay={0.06 * i} />
