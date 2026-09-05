@@ -6,6 +6,7 @@ import { Eyebrow } from '../components/ui';
 import { Spade, Heart, Diamond, Club } from '../components/icons';
 import { BOOK_COVER_DATA_URI } from '../components/GuideDownload';
 import { POSTS } from '../content/posts';
+import { HeroHandAnalysis } from '../components/HeroHandAnalysis';
 
 type SuitProps = { size?: number; className?: string };
 
@@ -46,19 +47,32 @@ export function Home() {
     <div>
       {/* ---- Full-bleed casino hero: real logo + headline over the table ---- */}
       <section className="relative min-h-[88vh] flex items-center overflow-hidden">
-        <img
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_3ERX8BQAFxBlSpuY7HbvVMVJWZI/hf_20260717_173443_a6144895-86d8-4e17-97d2-e2f6482a5e4f.png"
-          alt=""
-          aria-hidden="true"
+        {/* Looping table ambience (no cards or numbers baked in; those are rendered live below). */}
+        <video
           className="absolute inset-0 h-full w-full object-cover object-center sm:object-right"
-          style={{ filter: 'brightness(1.32) contrast(1.05) saturate(1.08)' }}
-        />
+          style={{ filter: 'brightness(1.18) contrast(1.04) saturate(1.06)' }}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          poster="/hero/table-poster.jpg"
+          aria-hidden="true"
+          tabIndex={-1}
+        >
+          <source src="/hero/table-loop.webm" type="video/webm" />
+          <source src="/hero/table-loop.mp4" type="video/mp4" />
+        </video>
         {/* Lighter left scrim so the photo is clearly visible while copy stays legible. */}
         <div
           className="absolute inset-0"
           style={{ background: 'linear-gradient(90deg, rgba(6,6,7,0.85) 0%, rgba(6,6,7,0.46) 44%, rgba(6,6,7,0.08) 74%, transparent 100%)' }}
         />
         <div className="absolute inset-x-0 bottom-0 h-36" style={{ background: 'linear-gradient(180deg, transparent, #060607)' }} />
+
+        {/* Live hand analysis, driven by the real engine numbers (see HeroHandAnalysis.tsx). */}
+        <HeroHandAnalysis />
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-6">
           <div className="max-w-xl" style={{ textShadow: '0 2px 24px rgba(0,0,0,0.55)' }}>
