@@ -1,6 +1,15 @@
 /**
- * Blog posts. Each post's `body` is trusted HTML authored by us (rendered with
- * dangerouslySetInnerHTML in BlogPost). To add a post, append an entry here.
+ * Blog posts ("Lab Notes"). Each post's `body` is trusted HTML authored by us
+ * (rendered with dangerouslySetInnerHTML in BlogPost). To add a post, append an
+ * entry here.
+ *
+ * Access model:
+ * - `access: 'free'`    -> the whole article is public.
+ * - `access: 'members'` -> everything before TEASER_MARKER is public (and
+ *   indexable by search engines); everything after it requires lifetime access.
+ *   Members posts MUST contain the marker, otherwise nothing is gated.
+ *
+ * `date` is used for ordering only and is not displayed on the site.
  */
 export interface BlogPost {
   slug: string;
@@ -10,11 +19,15 @@ export interface BlogPost {
   heading: string;
   /** Meta description + card excerpt. */
   description: string;
-  /** ISO date. */
+  /** ISO date. Ordering only. */
   date: string;
   readingTime: string;
+  access: 'free' | 'members';
   body: string;
 }
+
+/** Everything after this marker in a members post is gated. */
+export const TEASER_MARKER = '<!--more-->';
 
 export const POSTS: BlogPost[] = [
   {
@@ -25,6 +38,7 @@ export const POSTS: BlogPost[] = [
       'Learn to calculate pot odds in seconds at the table. A simple two-step method, the bet-size shortcuts worth memorizing, and the 2 and 4 rule, with worked examples.',
     date: '2026-07-19',
     readingTime: '5 min read',
+    access: 'free',
     body: `
 <p>Someone bets into you. You have a draw. The pot is sitting there and everyone is waiting on you. This is the moment that quietly decides whether you win money at poker or slowly bleed it, and most players handle it by guessing.</p>
 <p>You do not have to guess. Pot odds tell you, in a few seconds of mental math, whether calling is a good deal or a leak. Here is the fast way to do it at the table, with no app and no calculator.</p>
@@ -90,10 +104,12 @@ export const POSTS: BlogPost[] = [
       'Pot odds say fold, but the call still makes money. Implied odds explain why. A simple way to size the future money you need, two worked examples, and the four things that shrink it.',
     date: '2026-09-04',
     readingTime: '6 min read',
+    access: 'members',
     body: `
 <p>You have a draw. You run the pot odds the way you should, and the price is not there. Your chance of hitting is smaller than the share of the pot you are being asked to pay for. By the book, that is a fold.</p>
 <p>And yet good players call in that spot all the time, and they are right to. The reason is implied odds. This post explains what they are, how to estimate them in a few seconds, and the situations where they quietly disappear and turn a "fine" call into a leak.</p>
 <p>If pot odds are new to you, read <a href="/blog/how-to-calculate-pot-odds-fast">How to Calculate Pot Odds Fast</a> first. This post builds directly on it.</p>
+<!--more-->
 
 <h2>The gap pot odds leave open</h2>
 <p>Pot odds only look at the money that is in the pot right now. They answer one narrow question: if this were the last bet of the hand, would calling be profitable?</p>
@@ -146,7 +162,89 @@ export const POSTS: BlogPost[] = [
 <p>Learn the price, then learn what the price leaves out. That is the difference between a player who knows pot odds and one who actually wins with them.</p>
 `.trim(),
   },
+  {
+    slug: 'how-to-put-an-opponent-on-a-range',
+    title: 'How to Put an Opponent on a Range (A Beginner Method) | Poker Logic Lab',
+    heading: 'How to Put an Opponent on a Range, Step by Step',
+    description:
+      'Stop trying to guess the exact hand. Learn the three-question method for building an opponent range from position, board, and bet size, with a full hand walked through from preflop to turn.',
+    date: '2026-09-05',
+    readingTime: '7 min read',
+    access: 'members',
+    body: `
+<p>You have probably heard a commentator say "he puts him on ace king" and thought that is the skill: figure out the exact two cards. It is not. Nobody can do that reliably, not even the best players in the world, and trying to is why most players either freeze or talk themselves into a bad call.</p>
+<p>The real skill is narrower and much more learnable. You do not ask "what does he have?" You ask "what hands would he play this way?" The answer is a group of hands, called a range, and once you have it the math takes over. Your equity against that group, compared to the price you are being offered, tells you what to do.</p>
+<p>This post gives you a simple method for building that range in real time. Three questions, asked in order, and a full hand walked through so you can see it work.</p>
+<!--more-->
+
+<h2>A range is a list, not a guess</h2>
+<p>Every player starts a hand with one of 169 possible starting hands. Before anyone acts, your opponent could have any of them. Then they act, and every action crosses hands off the list. A raise from early position crosses off most of the junk. A call on a scary board crosses off the hands that would have folded. By the river the list is short, and that short list is your read.</p>
+<p>Two rules keep this honest. First, the list only ever gets shorter. Once an action tells you a hand is unlikely, it does not come back later because you want it to. Second, you are estimating, not solving. A range that is roughly right beats one that is precisely wrong, and roughly right is well within reach.</p>
+
+<h2>Question 1: What did they do before the flop, and from where?</h2>
+<p>Preflop gives you the biggest cut, because most hands never get played at all. Two things matter: the action (fold, call, raise, reraise) and the position it came from.</p>
+<p>Position is a stand-in for how many players are still to act. A raise from the first seat has to get through the whole table, so it needs a real hand. A raise from the button only has the blinds left to beat, so it can be almost anything. As a starting point for a typical player:</p>
+<ul>
+  <li>Raise from early position: roughly the top 10 to 12% of hands. Pairs from 7s up, ace queen and better, ace jack suited, king queen suited.</li>
+  <li>Raise from middle position: roughly 15 to 18%. Add the smaller pairs, more suited aces, and hands like king jack and queen jack suited.</li>
+  <li>Raise from the button or cutoff: 25 to 40%. Almost any pair, any suited ace, most suited connectors, and plenty of offsuit broadway hands.</li>
+  <li>A flat call instead of a raise: usually a medium hand. Small pairs, suited connectors, weaker aces. The very strong hands tend to raise, so a call caps the top of the range.</li>
+</ul>
+<p>Adjust for the player. A tight regular who has folded for an hour raises with fewer hands than the percentages above. A loose player who is in every pot raises with more. If you do not know the player yet, use the typical numbers and update as you watch.</p>
+
+<h2>Question 2: What did the board do for that range?</h2>
+<p>The flop does not change what your opponent was dealt, but it changes which of those hands they will keep playing. Look at the range from question 1 and sort it into three piles: hands that connected hard, hands that connected a little, and hands that missed.</p>
+<p>Then watch what they do. A bet usually comes from the first pile plus some of the third pile as a bluff. A check usually comes from the second and third piles. A call after you bet comes from the first and second piles. Each action tells you which piles are still alive.</p>
+<p>The board texture matters too. A flop like king, seven, two with three different suits helps only a narrow slice of hands, so a bet there means something. A flop like ten, nine, eight with two of a suit helps a huge slice of any range, so a bet there tells you much less.</p>
+
+<h2>Question 3: What does the bet size say?</h2>
+<p>Most players at low and mid stakes bet bigger with strong hands and smaller with weak or medium ones, and they are not subtle about it. A small bet on the turn from a player who usually bets big is a sign that the top of their range is thin. A sudden big bet on a blank card often means the strong pile.</p>
+<p>Do not overuse this one. Sizing tells are player specific and good players deliberately mix them up. Use size to tilt your estimate, not to rebuild it from scratch.</p>
+
+<h2>A full hand, start to finish</h2>
+<p>You are playing a $1/$2 game. A regular in middle position raises to $8. You are on the button with ace jack suited and call. The blinds fold. Pot is $19.</p>
+<p><strong>Preflop range.</strong> Middle position raise from a normal regular: about 15%. Call it pairs from 5s up, ace ten suited and up, ace jack offsuit and up, king ten suited and up, king queen offsuit, queen ten suited, jack ten suited.</p>
+<p><strong>Flop: king, seven, two, three different suits.</strong> He bets $12. Sort his range against this board.</p>
+<ul>
+  <li>Connected hard: ace king, king queen, king jack suited, king ten suited, plus the sets: kings, sevens. Aces as an overpair.</li>
+  <li>Connected a little: the pairs below kings, from queens down to 5s. They are ahead of your ace high but nervous.</li>
+  <li>Missed: ace queen, ace jack, ace ten suited, queen ten suited, jack ten suited.</li>
+</ul>
+<p>Regulars bet this dry flop with nearly their whole range after raising preflop, so the bet removes almost nothing. His range is still wide. You have two overcards to everything but a king and a backdoor flush draw. The price is 12 into 43, about 28%, and ace jack against that whole range is doing better than that. Call. Pot is $43.</p>
+<p><strong>Turn: five, no flush draw.</strong> He bets $32, three quarters of the pot. This is where the list gets short. Most regulars do not fire a second big barrel on a dry board with a missed ace queen or a scared pair of 8s. The second bet crosses those off. What is left is mostly the strong pile: ace king, king queen, the sets, aces, and a small number of stubborn bluffs like ace queen with a backdoor that got there.</p>
+<p>Now look at your hand against that shortened list. Ace jack has three jacks and three aces as outs, and even the aces are not clean against ace king. Call it 5 outs, about 10% with one card to come. The price is 32 into 107, about 30%. You need 30 and you have 10. Fold, and it is not close.</p>
+<p>Notice what happened. You never knew his exact hand, and you did not need to. You knew the list got short and strong on the turn, and the math against that list gave you a clear answer.</p>
+
+<h2>The three mistakes that break the method</h2>
+<p><strong>Widening the range later because you want to call.</strong> If the turn bet crossed off the weak hands, they stay crossed off on the river. Talking yourself into "maybe he is bluffing" after the facts said otherwise is the most expensive habit in poker.</p>
+<p><strong>Putting them on one hand.</strong> The moment you decide "he has ace king," you stop weighing the rest of the list, and your equity estimate goes wrong. Keep the whole list in view, even the parts you do not like.</p>
+<p><strong>Using the same range for every player.</strong> The percentages above are a starting point for an unknown player. The regular who has folded for an hour and the guy who has raised six hands in a row are not holding the same 15%. Update for the person in the seat.</p>
+
+<h2>Where to practice this</h2>
+<p>Reading ranges is a skill you build by doing it a few hundred times with feedback, not by reading about it once. That is the whole reason <a href="/replay">Hand Replay</a> exists. A hand plays out, pauses at each decision, and asks you to paint your opponent's range on the 169-hand grid. It shows your equity against your read next to the equity you need, then reveals the real hand and scores how close your read was. You are graded on the read and the decision, not on whether the river was kind.</p>
+<p>When you have a specific opponent in mind, the <a href="/adversary-lab">Adversary Lab</a> turns six questions about how they play into a realistic range, so you can train against that person before you sit down with them. And the <a href="/visualizer">Equity Visualizer</a> shows how your hand's value changes as the opponent's range gets wider or tighter, which is the fastest way to build intuition for question 1.</p>
+<p>Ask the three questions, in order, on every hand you watch, even the ones you fold. Within a few sessions the list starts building itself, and "what does he have" stops being a mystery and starts being a number.</p>
+`.trim(),
+  },
 ];
 
 export const getPost = (slug: string): BlogPost | undefined =>
   POSTS.find((p) => p.slug === slug);
+
+/** Posts newest first, for the index page. */
+export const postsByDate = (): BlogPost[] =>
+  [...POSTS].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+
+/**
+ * Splits a post body into the public teaser and the gated remainder.
+ * Free posts (or members posts missing the marker) return everything as teaser.
+ */
+export function splitBody(post: BlogPost): { teaser: string; gated: string | null } {
+  if (post.access === 'free') return { teaser: post.body, gated: null };
+  const i = post.body.indexOf(TEASER_MARKER);
+  if (i === -1) return { teaser: post.body, gated: null };
+  return {
+    teaser: post.body.slice(0, i).trim(),
+    gated: post.body.slice(i + TEASER_MARKER.length).trim(),
+  };
+}
