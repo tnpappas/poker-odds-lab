@@ -2,11 +2,19 @@ import { motion } from 'framer-motion';
 import type { Card } from '@pol/poker-engine';
 
 const SUIT_GLYPH: Record<string, string> = { s: '♠', h: '♥', d: '♦', c: '♣' };
+// Four-color deck (online convention) used by the training tools.
 const SUIT_COLOR: Record<string, string> = {
   s: '#1a1a1a',
   c: '#1a7d3a',
   h: '#e63946',
   d: '#2a6fd4',
+};
+// Standard two-color deck, used where the card sits next to physical cards (homepage hero).
+const SUIT_COLOR_CLASSIC: Record<string, string> = {
+  s: '#1a1a1a',
+  c: '#1a1a1a',
+  h: '#c41f2a',
+  d: '#c41f2a',
 };
 
 export function PlayingCard({
@@ -14,11 +22,14 @@ export function PlayingCard({
   size = 'md',
   faceDown = false,
   delay = 0,
+  classic = false,
 }: {
   card?: Card;
   size?: 'sm' | 'md' | 'lg';
   faceDown?: boolean;
   delay?: number;
+  /** Two-color deck (black clubs, red diamonds) instead of the four-color training deck. */
+  classic?: boolean;
 }) {
   const dims =
     size === 'lg'
@@ -45,7 +56,7 @@ export function PlayingCard({
       animate={{ rotateY: 0, opacity: 1, y: 0 }}
       transition={{ delay, type: 'spring', stiffness: 260, damping: 20 }}
       className={`${dims} relative rounded-lg bg-white shadow-xl flex flex-col items-center justify-center font-bold select-none`}
-      style={{ color: SUIT_COLOR[suit] }}
+      style={{ color: (classic ? SUIT_COLOR_CLASSIC : SUIT_COLOR)[suit] }}
     >
       <span className="absolute top-0.5 left-1 leading-none">{rank}</span>
       <span className="text-[1.4em] leading-none">{SUIT_GLYPH[suit]}</span>

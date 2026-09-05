@@ -198,13 +198,13 @@ export function HeroHandAnalysis({ video }: { video: React.RefObject<HTMLVideoEl
             {/* Exact cards, rendered crisp, so the hand is unambiguous even where the video is soft. */}
             <div className="flex items-center gap-2 mb-2">
               <div className="flex gap-0.5">
-                <PlayingCard card={HERO[0]} size="sm" />
-                <PlayingCard card={HERO[1]} size="sm" />
+                <PlayingCard card={HERO[0]} size="sm" classic />
+                <PlayingCard card={HERO[1]} size="sm" classic />
               </div>
               <span className="h-6 w-px bg-white/20" />
               <div className="flex gap-0.5">
                 {BOARD.map((c, i) => (
-                  <PlayingCard key={c} card={c} size="sm" faceDown={i >= street.boardCount} delay={0.05 * i} />
+                  <PlayingCard key={c} card={c} size="sm" faceDown={i >= street.boardCount} delay={0.05 * i} classic />
                 ))}
               </div>
             </div>
