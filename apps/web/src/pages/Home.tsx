@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useRef } from 'react';
 import type { ComponentType } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { LOGO_WORDMARK_DATA_URI } from '../brand';
@@ -42,13 +43,15 @@ const FEATURES: Feature[] = [
 
 export function Home() {
   const reduce = useReducedMotion();
+  const heroVideo = useRef<HTMLVideoElement>(null);
 
   return (
     <div>
       {/* ---- Full-bleed casino hero: real logo + headline over the table ---- */}
       <section className="relative min-h-[88vh] flex items-center overflow-hidden">
-        {/* Looping table ambience (no cards or numbers baked in; those are rendered live below). */}
+        {/* Looping table ambience (the cards are in the video; the math panel follows its playhead). */}
         <video
+          ref={heroVideo}
           className="absolute inset-0 h-full w-full object-cover object-center sm:object-right"
           style={{ filter: 'brightness(1.18) contrast(1.04) saturate(1.06)' }}
           autoPlay
@@ -72,7 +75,7 @@ export function Home() {
         <div className="absolute inset-x-0 bottom-0 h-36" style={{ background: 'linear-gradient(180deg, transparent, #060607)' }} />
 
         {/* Live hand analysis, driven by the real engine numbers (see HeroHandAnalysis.tsx). */}
-        <HeroHandAnalysis />
+        <HeroHandAnalysis video={heroVideo} />
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-6">
           <div className="max-w-xl" style={{ textShadow: '0 2px 24px rgba(0,0,0,0.55)' }}>
