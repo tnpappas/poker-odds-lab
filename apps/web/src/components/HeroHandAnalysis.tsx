@@ -58,12 +58,13 @@ const FADE_OUT_AT = 9.25;
 // 13x13 villain range from the engine (rows/cols A..2, upper-right = suited).
 const RANGE_MATRIX = rangeToMatrix(parseRangeString(VILLAIN_RANGE));
 const LABEL = 'font-mono uppercase tracking-[0.2em] text-[10px] text-brass-400';
+// Holographic HUD: no opaque card behind the data, so the felt and cards stay visible.
+// Thin bone-white frame, faint brass glow, text carries its own shadow for legibility.
 const HUD_STYLE: React.CSSProperties = {
-  background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0) 40%), rgba(20,20,22,0.78)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 40px -22px rgba(0,0,0,0.9)',
-  backdropFilter: 'blur(3px)',
-  WebkitBackdropFilter: 'blur(3px)',
+  background: 'linear-gradient(180deg, rgba(243,240,234,0.05), rgba(243,240,234,0.015) 60%, rgba(0,0,0,0))',
+  border: '1px solid rgba(243,240,234,0.22)',
+  boxShadow: '0 0 0 1px rgba(211,172,87,0.10), 0 0 28px -6px rgba(211,172,87,0.35), inset 0 0 40px -30px rgba(243,240,234,0.35)',
+  textShadow: '0 1px 2px rgba(0,0,0,0.95), 0 0 14px rgba(0,0,0,0.85)',
 };
 const RANKS = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
 
@@ -132,7 +133,7 @@ function DecisionTree({ active }: { active: Decision }) {
               className={`num rounded-md px-2 py-0.5 text-[11px] tracking-[0.12em] border transition-all duration-500 ${
                 on
                   ? 'border-brand-400/80 bg-brand-500/25 text-ink-100 shadow-[0_0_18px_-4px_rgba(217,59,68,0.9)]'
-                  : 'border-white/10 text-ink-500'
+                  : 'border-white/20 text-ink-300/70'
               }`}
             >
               {d}
@@ -152,10 +153,10 @@ function RangeGrid() {
           <span
             key={`${r}-${c}`}
             title={`${RANKS[r]}${RANKS[c]}`}
-            className="block h-[7px] w-[7px] rounded-[1px]"
+            className="block h-[7px] w-[7px] rounded-[1px]" 
             style={{
               background:
-                w > 0 ? (r === c ? 'rgba(217,59,68,0.85)' : 'rgba(217,59,68,0.55)') : 'rgba(243,240,234,0.07)',
+                w > 0 ? (r === c ? 'rgba(232,83,91,0.95)' : 'rgba(217,59,68,0.65)') : 'rgba(243,240,234,0.10)',
             }}
           />
         )),
@@ -195,7 +196,7 @@ export function HeroHandAnalysis({ video }: { video: React.RefObject<HTMLVideoEl
               </span>
               <span className="text-ink-300 text-[11px] uppercase tracking-[0.18em]">equity</span>
             </div>
-            <div className="mt-2 h-1.5 w-40 rounded-full bg-white/10 overflow-hidden">
+            <div className="mt-2 h-1.5 w-40 rounded-full bg-white/15 overflow-hidden" style={{ boxShadow: '0 0 10px rgba(211,172,87,0.35)' }}>
               <div
                 className="h-full rounded-full transition-[width] duration-700"
                 style={{
