@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { parseRangeString, rangeToMatrix } from '@pol/poker-engine';
+import type { Card } from '@pol/poker-engine';
+import { PlayingCard } from './PlayingCard';
 
 /**
  * Homepage hero overlay: the math panel that sits on top of the looping table video.
@@ -16,8 +18,9 @@ import { parseRangeString, rangeToMatrix } from '@pol/poker-engine';
  *
  *   Hero A♠K♥ vs villain range 22+, A9s+, KTs+, QTs+, JTs, ATo+, KQo
  *   flop  Q♠ T♥ 2♣     39.6%   villain bets 4 into 6 -> hero needs 28.6% -> CALL
- *   turn  J♦           92.0%   nut straight -> RAISE
- *   river 7♣           96.1%   -> RAISE
+ *   turn  J♦           92.0%   nut straight, loses only to a paired river (sets fill up) -> RAISE
+ *   river 7♣           96.1%   no losing combos, 7.8% chops vs AK -> RAISE
+ *   Independently re-verified with scripts/hero-video/verify.py (pure-Python enumerator).
  *
  * If the hand, range, or video timing changes, re-run hero-math.ts and update
  * STREETS / the `at` timestamps below.
@@ -25,11 +28,14 @@ import { parseRangeString, rangeToMatrix } from '@pol/poker-engine';
 
 const VILLAIN_RANGE = '22+,A9s+,KTs+,QTs+,JTs,ATo+,KQo';
 const VILLAIN_LABEL = '22+ A9s+ KTs+ QTs+ JTs ATo+ KQo';
+const HERO: [Card, Card] = ['As', 'Kh'];
+const BOARD: Card[] = ['Qs', 'Th', '2c', 'Jd', '7c'];
 
 type Decision = 'FOLD' | 'CALL' | 'RAISE';
 type Street = {
   name: string;
   board: string;
+  boardCount: number; // how many board cards are out on this street
   at: number; // video time (seconds) at which this street's card has landed
   equity: number; // percent, from the engine
   decision: Decision;
@@ -42,14 +48,15 @@ export const STREETS: Street[] = [
   {
     name: 'Flop',
     board: 'Q♠ T♥ 2♣',
+    boardCount: 3,
     at: 0,
     equity: 39.6,
     decision: 'CALL',
     note: 'Gutshot plus two overcards. 39.6% beats the 28.6% the price demands.',
     potOdds: { pot: 6, bet: 4, need: 28.6 },
   },
-  { name: 'Turn', board: 'Q♠ T♥ 2♣ J♦', at: 3.5, equity: 92.0, decision: 'RAISE', note: 'Broadway. Only a chop can stop you now.' },
-  { name: 'River', board: 'Q♠ T♥ 2♣ J♦ 7♣', at: 7.35, equity: 96.1, decision: 'RAISE', note: 'Value bet. The math said so on every street.' },
+  { name: 'Turn', board: 'Q♠ T♥ 2♣ J♦', boardCount: 4, at: 3.5, equity: 92.0, decision: 'RAISE', note: 'Broadway, the nut straight. Only a paired river beats you now.' },
+  { name: 'River', board: 'Q♠ T♥ 2♣ J♦ 7♣', boardCount: 5, at: 7.35, equity: 96.1, decision: 'RAISE', note: 'Value bet. Nothing in the range beats you; AK chops.' },
 ];
 
 // The overlay fades out over the last part of the loop while the table resets.
@@ -188,7 +195,19 @@ export function HeroHandAnalysis({ video }: { video: React.RefObject<HTMLVideoEl
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className={`${LABEL} mb-1`}>{street.name} · A♠K♥ vs range</div>
-            <div className="num text-[11px] text-ink-300 mb-2">board {street.board}</div>
+            {/* Exact cards, rendered crisp, so the hand is unambiguous even where the video is soft. */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex gap-0.5">
+                <PlayingCard card={HERO[0]} size="sm" />
+                <PlayingCard card={HERO[1]} size="sm" />
+              </div>
+              <span className="h-6 w-px bg-white/20" />
+              <div className="flex gap-0.5">
+                {BOARD.map((c, i) => (
+                  <PlayingCard key={c} card={c} size="sm" faceDown={i >= street.boardCount} delay={0.05 * i} />
+                ))}
+              </div>
+            </div>
             <div className="flex items-baseline gap-2">
               <span className="num text-ink-100 text-3xl font-semibold leading-none">
                 {equity.toFixed(1)}
