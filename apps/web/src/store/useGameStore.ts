@@ -23,8 +23,8 @@ export interface Decision {
   betSize: number;
 }
 
-const FREE_REPLAY_LIMIT = 15;
-const FREE_BLITZ_LIMIT = 5;
+const FREE_REPLAY_LIMIT = 3;
+const FREE_BLITZ_LIMIT = 2;
 
 interface GameState {
   decisions: Decision[];

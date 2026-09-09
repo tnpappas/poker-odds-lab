@@ -110,7 +110,7 @@ export function Blitz() {
     setScenario(generateBlitzScenario(difficulty, focus));
   };
 
-  if (paywall) return <Paywall reason="You've used all 5 free Blitz rounds today." onClose={() => setPaywall(false)} />;
+  if (paywall) return <Paywall reason="You've used all 2 free Blitz rounds. Unlock lifetime access to keep training." onClose={() => setPaywall(false)} />;
 
   const accuracy = total ? Math.round((hits / total) * 100) : 0;
 

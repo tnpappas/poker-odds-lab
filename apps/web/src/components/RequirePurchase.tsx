@@ -7,14 +7,27 @@ import { Paywall } from './Paywall';
 import { LOGO_WORDMARK_DATA_URI } from '../brand';
 
 /**
+ * Tools that free users can try before buying.
+ * The tool's own usage limits (FREE_REPLAY_LIMIT, FREE_BLITZ_LIMIT)
+ * handle the paywall after N uses.
+ */
+const FREE_TOOLS = ['/replay', '/blitz', '/visualizer'];
+
+/**
  * Gate a tool behind purchase.
  * - Local/dev (no Clerk): no gate.
- * - Signed out: prompt sign-in.
- * - Signed in, not purchased: paywall.
+ * - Signed out: let them try free tools; gate the rest.
+ * - Signed in, not purchased: let them try free tools (with limits); gate the rest.
  * - Signed in, purchased: render the tool.
  */
 export function RequirePurchase({ children }: { children: ReactNode }) {
   if (!clerkEnabled) return <>{children}</>;
+  const path = window.location.pathname;
+  const isFreeTool = FREE_TOOLS.includes(path);
+
+  // Free tools: let anyone in. The tool's own usage limits show the paywall.
+  if (isFreeTool) return <>{children}</>;
+
   return (
     <>
       <SignedOut>
