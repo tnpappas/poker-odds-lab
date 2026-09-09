@@ -108,13 +108,17 @@ export function Home() {
             <div className="flex flex-wrap gap-3 mt-8">
               <Link to="/replay"
                 className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition shadow-[0_12px_34px_-10px_rgba(196,31,42,0.9)]">
-                <Spade size={16} /> Play a hand
+                <Spade size={16} /> Play a free hand
               </Link>
               <Link to="/visualizer"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/20 bg-black/30 backdrop-blur-sm text-ink-100 hover:border-brand-400/70 transition">
                 Explore equity
               </Link>
             </div>
+
+            <p className="mt-4 text-sm text-ink-300/70">
+              Try 3 hands free. No sign-up needed.
+            </p>
 
             <Link to="/guide"
               className="inline-block mt-5 text-sm text-ink-100/80 hover:text-ink-100 underline underline-offset-4 decoration-brand-400/50">

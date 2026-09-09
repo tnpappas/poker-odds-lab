@@ -80,6 +80,15 @@ export function App() {
                 }`}>
               How it works
             </NavLink>
+            <NavLink to="/pricing"
+              className={({ isActive }) =>
+                `px-3 py-1.5 rounded-lg text-sm font-semibold transition ${
+                  isActive
+                    ? 'text-brand-400 bg-white/[0.06]'
+                    : 'text-brand-400 hover:text-brand-300 hover:bg-white/[0.04]'
+                }`}>
+              Pricing
+            </NavLink>
           </nav>
 
           <div className="flex items-center gap-3">
