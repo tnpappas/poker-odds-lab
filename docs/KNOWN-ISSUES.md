@@ -5,8 +5,7 @@ Severity: High (affects customers or money), Medium (affects operations), Low (h
 | Date | Severity | Item | Workaround / plan |
 |---|---|---|---|
 | 2026-09-12 | Medium | No staging environment. `main` is production for both Vercel and Railway. | Every push passes lint, typecheck, tests and build first (locally via 3-Deploy.bat and in CI). Plan: Railway staging environment + Neon branch + PayPal sandbox app. |
-| 2026-09-12 | Medium | Backup restore never rehearsed; Neon Free plan retains at most 6 hours of history (checked in the Neon console 2026-09-12). | Rehearse a point-in-time restore into a branch (RUNBOOK.md, Backups). Move to the Neon Launch plan (7 to 30 day retention) before the first paying customer; 6 hours is not enough to notice and undo a bad migration overnight. |
-| 2026-09-12 | Medium | Rollback never rehearsed. | Promote a previous Vercel deployment and redeploy a previous Railway deployment once, record the time taken in RUNBOOK.md. |
+| 2026-09-12 | Medium | Application rollback (Vercel promote previous, Railway redeploy previous) never rehearsed. Database restore was rehearsed 2026-09-12 (see RUNBOOK.md). | Promote a previous Vercel deployment and redeploy a previous Railway deployment once, record the time taken in RUNBOOK.md. |
 | 2026-09-12 | Medium | Frontend lint not enforced. `eslint.config.js` ignores `apps/web`. | Run eslint on apps/web, fix the existing findings, remove the ignore. |
 | 2026-09-12 | Medium | No end-to-end browser test (signup to checkout). | Playwright test against the free flow at minimum; the paid flow needs a PayPal sandbox. |
 | 2026-09-12 | Low | `users.polar_customer_id` column still exists in the database; unused by the code. | Drop in migration 0002 after a restore rehearsal. |

@@ -11,6 +11,7 @@ All notable changes, newest first. Dates are the day the change went live on pok
 - Railway waits for CI to pass before deploying the API.
 
 ### Operations
+- Neon moved to the Launch plan; history window set to 7 days; daily snapshots kept 14 days; point-in-time restore rehearsed (preview query returned 14 users).
 - Uptime monitoring confirmed in UptimeRobot: API health endpoint and the site, 5 minute checks, email alerts.
 - Secret scan of the full git history: no real secrets ever committed.
 - One-off helper .bat files retired to `_to_delete/`; the standard set is 1-Start-App, 2-Run-Tests, 3-Deploy, 4-Pull-Latest.

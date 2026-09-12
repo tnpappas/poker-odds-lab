@@ -7,7 +7,7 @@ Every third-party account by name and owner email. Passwords live in Troy's pass
 | GitHub | tnpappas/poker-odds-lab (private) | Troy's GitHub account (tnpappas) | Owner | ON (authenticator app, recovery codes saved), confirmed 2026-09-12 |
 | Vercel | troy-pappas-projects, project poker-odds-lab-api | Troy's Vercel login (signs in via GitHub) | Owner | ON (TOTP), confirmed 2026-09-12 |
 | Railway | tnpappas's Projects, project Poker Logic Lab, service @pol/api | troynpappas@gmail.com (shown in Railway) | Owner | ON (authenticator app), confirmed 2026-09-12 |
-| Neon | org safehouse-group, project poker-logic-lab | Troy's Neon login (signs in via GitHub) | Admin | ON (authenticator app), confirmed 2026-09-12 |
+| Neon | org safehouse-group (Launch plan, card on file, billing email troynpappas@gmail.com), project poker-logic-lab | Troy's Neon login (signs in via GitHub) | Admin | ON (authenticator app), confirmed 2026-09-12 |
 | Clerk | Poker Logic Lab application | Troy's Clerk login (signs in via GitHub) | Owner | ON (authenticator app, backup codes), confirmed 2026-09-12 |
 | PayPal | Business account, Poker Logic Lab | support@pokerlogiclab.com | Owner | ON (2-step verification, authenticator app), confirmed 2026-09-12 |
 | PayPal developer | REST app "Poker Logic Lab" (live), webhook 5W508926BC789293F | same PayPal account | | |

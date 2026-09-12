@@ -47,8 +47,9 @@ If the frontend is up but the API is down, the tools still work locally but sign
 After any Railway variable change, Railway prompts "Apply changes / Deploy"; click Deploy.
 
 ## Backups
-- Neon keeps point-in-time history for the plan's retention window (Free plan: at most 6 hours as of Sept 2026; see Neon > project > Settings). Restore = Neon > Branches > "Restore" to a timestamp, which creates a branch you can point the API at by changing DATABASE_URL.
-- A restore has not been rehearsed yet (KNOWN-ISSUES.md).
+- Neon org safehouse-group is on the Launch plan (usage based) since 2026-09-12. Project poker-logic-lab history window is 7 days (Settings > History window). Daily snapshots at 00:00 UTC, kept 14 days (branch production > Backup & Restore > Edit schedule).
+- To recover: Neon > branch production > Backup & Restore. Pick the point in time, click "Preview data" and run a read-only query (for example `select count(*) from users;`) to confirm it is the state you want, then "Proceed to restore". Neon keeps the pre-restore state as a backup branch, so a wrong restore can itself be undone. Or restore from a snapshot in the list below the point-in-time picker.
+- Rehearsed 2026-09-12: preview at 20:28 UTC returned 14 users; the production restore itself was not run (nothing to fix). Time to preview: under a minute.
 
 ## Top failure scenarios
 1. "Missing PayPal plan ID" or checkout 500: a Railway variable is missing. The API now refuses to start without them, so check Railway deploy logs for "Refusing to start in production".

@@ -13,7 +13,7 @@ All five morning blockers are closed and verified live. Stage 1 sections (1 to 7
 
 Conditions (do these before spending on ads to drive paying customers):
 
-1. Backups. Neon Free plan keeps at most 6 hours of point-in-time history (checked in the Neon console today). A bad migration or accidental delete discovered the next morning is unrecoverable. Move the project to the Neon Launch plan (about $19/month, 7 day history minimum) and rehearse one restore into a branch. Effort: 30 minutes once the plan is upgraded.
+1. Backups. CLOSED the same evening: Neon org upgraded to Launch (usage based, a few dollars a month at this size), history window set to 7 days, daily snapshots kept 14 days, and a point-in-time restore rehearsed (preview query at 20:28 UTC returned 14 users; production was not overwritten).
 2. One real subscription walkthrough. The billing code is covered by 12 automated tests and the live routes answer correctly, but nobody has yet subscribed with a non-owner account on the live PayPal plans and then cancelled from the /account page. Do one $7.99 monthly subscription from a second email, confirm Pro unlocks, cancel in-app, confirm access ends after the CANCELLED webhook, then refund it in PayPal. Effort: 20 minutes.
 3. Two-factor authentication on the four accounts not checked today: GoHighLevel, the domain registrar, Meta Business, and the Google account behind troynpappas@gmail.com. Effort: 5 minutes each.
 
@@ -68,7 +68,7 @@ Failed: no staging environment. Decision for now: not worth the cost at zero rev
 
 Section 11: Reliability, backups and recovery
 Passed: 6 of 9. Timeouts (10 s) and one retry on every PayPal and GoHighLevel call; outage plan in RUNBOOK.md; retention policy written.
-Failed: Neon Free plan retention is 6 hours (Condition 1); restore never rehearsed (Condition 1); rollback never rehearsed (documented, not drilled).
+Closed the same evening: 7 day retention plus daily snapshots; restore rehearsed. Still open (Low): application rollback on Vercel and Railway documented but not drilled.
 
 Section 12: Performance and cost
 Passed: 8 of 9. COSTS.md written with every service and its plan. Bundle: main chunk 678 kB minified, 263 kB gzipped; feature pages are lazy loaded.
@@ -112,4 +112,4 @@ Dashboard changes: Railway SENTRY_DSN and Wait for CI; Vercel VITE_SENTRY_DSN; S
 
 ## OPEN QUESTIONS FOR TROY
 
-1. Neon Launch plan (Condition 1): approve the upgrade to about $19/month now, or wait for the first paying customer? Default if no answer: wait, but rehearse the restore on the Free plan anyway so the steps are known.
+1. None outstanding. Conditions 2 (live subscribe and cancel walkthrough) and 3 (2FA on the four remaining accounts) are queued.
