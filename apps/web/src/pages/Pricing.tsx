@@ -32,7 +32,7 @@ const TIERS: { plan: CheckoutPlan; label: string; price: string; period: string;
  * Public pricing page.
  *
  * Free tier: 3 replays/day, 2 blitz rounds/day, Visualizer and Calculator free.
- * Paid tiers: Monthly $7.99/mo or Annual $49/yr, billed through Polar.
+ * Paid tiers: Monthly $7.99/mo or Annual $49/yr, billed through PayPal.
  */
 export function Pricing() {
   return (
