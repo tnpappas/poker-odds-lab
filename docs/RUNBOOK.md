@@ -53,7 +53,8 @@ After any Railway variable change, Railway prompts "Apply changes / Deploy"; cli
 
 ## Top failure scenarios
 1. "Missing PayPal plan ID" or checkout 500: a Railway variable is missing. The API now refuses to start without them, so check Railway deploy logs for "Refusing to start in production".
-2. Customer paid but has no access: check `webhook_events` for the ACTIVATED event; check Sentry for a capture error; grant via /admin as a stopgap; investigate the custom_id on the PayPal subscription.
+2. Customer says they cancelled but lost access early: check `users.pro_until` for them; if null (pre Sept 12 subscription) grant via /admin until their period ends.
+2b. Customer paid but has no access: check `webhook_events` for the ACTIVATED event; check Sentry for a capture error; grant via /admin as a stopgap; investigate the custom_id on the PayPal subscription.
 3. Customer keeps being billed after cancelling: confirm the subscription status on PayPal; the CANCELLED webhook revokes access, PayPal itself stops billing.
 4. Site down: check Railway (API) and Vercel (frontend) status pages and the health URL above. If Railway shows the last deploy failed, redeploy the previous one.
 5. Clerk sign-in broken: Clerk status page; confirm VITE_CLERK_PUBLISHABLE_KEY on Vercel and CLERK_SECRET_KEY on Railway are from the same Clerk instance.

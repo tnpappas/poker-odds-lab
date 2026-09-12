@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import { storage } from '../storage/index';
-import { verifyWebhookSignature } from '../lib/paypal';
-import { grantPro, revokePro } from '../lib/entitlement';
+import { verifyWebhookSignature, verifySubscription } from '../lib/paypal';
+import { grantPro, revokePro, endSubscription, extendPro } from '../lib/entitlement';
 import { logger } from '../lib/logger';
 import { rawJson } from './raw';
 
@@ -10,16 +10,25 @@ export const paypalWebhook = Router();
 interface PayPalEvent {
   id?: string;
   event_type?: string;
-  resource?: { id?: string; custom_id?: string; status?: string };
+  resource?: {
+    id?: string;
+    custom_id?: string;
+    status?: string;
+    /** On subscription events: the next charge time, i.e. the end of the paid period. */
+    billing_info?: { next_billing_time?: string };
+    /** On PAYMENT.SALE.COMPLETED: the subscription the payment belongs to. */
+    billing_agreement_id?: string;
+  };
 }
 
 const GRANT_EVENTS = new Set(['BILLING.SUBSCRIPTION.ACTIVATED', 'BILLING.SUBSCRIPTION.RE-ACTIVATED']);
-/** SUSPENDED fires after the plan's missed-payment threshold: the subscriber has stopped paying. */
-const REVOKE_EVENTS = new Set([
-  'BILLING.SUBSCRIPTION.CANCELLED',
-  'BILLING.SUBSCRIPTION.EXPIRED',
-  'BILLING.SUBSCRIPTION.SUSPENDED',
-]);
+/**
+ * Immediate revoke: the customer has not paid for the current period.
+ * SUSPENDED fires after the plan's missed-payment threshold; EXPIRED when the
+ * subscription reaches its end. CANCELLED is handled separately: the customer
+ * keeps Pro until the period they already paid for ends.
+ */
+const REVOKE_EVENTS = new Set(['BILLING.SUBSCRIPTION.EXPIRED', 'BILLING.SUBSCRIPTION.SUSPENDED']);
 
 /**
  * PayPal subscription lifecycle. Signature verified with PayPal, deduplicated
@@ -47,11 +56,17 @@ paypalWebhook.post('/paypal/webhooks', rawJson, async (req: Request, res: Respon
 
   const userId = event.resource?.custom_id;
   const subscriptionId = event.resource?.id;
+  const paidThrough = event.resource?.billing_info?.next_billing_time;
 
   if (GRANT_EVENTS.has(type)) {
     if (userId) {
-      await grantPro(userId, subscriptionId);
-      logger.info('paypal subscription active', { userId, subscriptionId, type });
+      await grantPro(userId, subscriptionId, paidThrough);
+      logger.info('paypal subscription active', { userId, subscriptionId, type, paidThrough });
+    }
+  } else if (type === 'BILLING.SUBSCRIPTION.CANCELLED') {
+    if (userId) {
+      const outcome = await endSubscription(userId, subscriptionId);
+      logger.info('paypal subscription cancelled', { userId, subscriptionId, outcome });
     }
   } else if (REVOKE_EVENTS.has(type)) {
     if (userId) {
@@ -63,7 +78,19 @@ paypalWebhook.post('/paypal/webhooks', rawJson, async (req: Request, res: Respon
     // renewals are visible in Railway logs and Sentry breadcrumbs.
     logger.warn('paypal renewal payment failed', { userId, subscriptionId });
   } else if (type === 'PAYMENT.SALE.COMPLETED') {
-    logger.info('paypal renewal payment completed', { saleId: event.resource?.id });
+    // A renewal: read the subscription back to move the paid-through date.
+    const subId = event.resource?.billing_agreement_id;
+    if (subId) {
+      try {
+        const sub = await verifySubscription(subId);
+        if (sub.userId && sub.nextBillingTime) await extendPro(sub.userId, sub.nextBillingTime);
+        logger.info('paypal renewal payment completed', { saleId: event.resource?.id, subId, paidThrough: sub.nextBillingTime });
+      } catch (err) {
+        logger.error('paypal renewal: could not read subscription', { subId, err: String(err) });
+      }
+    } else {
+      logger.info('paypal payment completed (no subscription id)', { saleId: event.resource?.id });
+    }
   } else {
     logger.debug('paypal webhook ignored', { type });
   }

@@ -110,18 +110,23 @@ export interface SubscriptionResult {
   userId?: string;
   active: boolean;
   status: string;
+  /** ISO time of the next charge, which is also when the paid period ends. */
+  nextBillingTime?: string;
 }
 
 /** Read a subscription back from PayPal to confirm it is really active. */
 export async function verifySubscription(subscriptionId: string): Promise<SubscriptionResult> {
   const res = await paypalRequest(`/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}`, { method: 'GET' });
   if (!res.ok) throw new Error(`PayPal subscription verify error ${res.status}: ${await res.text()}`);
-  const data = (await res.json()) as { id: string; status: string; custom_id?: string };
+  const data = (await res.json()) as {
+    id: string; status: string; custom_id?: string; billing_info?: { next_billing_time?: string };
+  };
   return {
     subscriptionId: data.id,
     userId: data.custom_id,
     active: data.status === 'ACTIVE',
     status: data.status,
+    nextBillingTime: data.billing_info?.next_billing_time,
   };
 }
 

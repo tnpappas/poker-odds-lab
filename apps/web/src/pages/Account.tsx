@@ -78,7 +78,7 @@ function AccountPanel() {
     const res = await api.cancelSubscription();
     setBusy('idle');
     if (res.ok) {
-      setMessage({ ok: true, text: 'Your subscription is cancelled. You will not be charged again. Access ends at the end of the current billing period.' });
+      setMessage({ ok: true, text: 'Your subscription is cancelled. You will not be charged again. You keep access until the end of the period you have paid for.' });
       await refresh();
     } else {
       setMessage({ ok: false, text: res.error });
@@ -111,6 +111,11 @@ function AccountPanel() {
   }
 
   const isPaid = me.entitled && !me.owner;
+  const proUntil = me.proUntil ? new Date(me.proUntil) : null;
+  const proUntilText = proUntil
+    ? proUntil.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+    : null;
+  const cancelled = isPaid && !me.hasSubscription && !!proUntil;
 
   return (
     <div className="flex flex-col gap-5">
@@ -125,6 +130,11 @@ function AccountPanel() {
             <div className="num font-semibold text-lg mt-1">
               {me.owner ? 'Owner' : me.entitled ? 'Unlimited' : 'Free'}
             </div>
+            {isPaid && proUntilText && (
+              <div className="text-ink-500 text-xs mt-1">
+                {cancelled ? `Cancelled. Access ends ${proUntilText}` : `Renews ${proUntilText}`}
+              </div>
+            )}
           </div>
         </div>
         {!me.entitled && (
@@ -155,7 +165,9 @@ function AccountPanel() {
               </button>
             ) : (
               <p className="text-ink-500 text-sm">
-                No PayPal subscription is on file for this account. If you believe you are being billed, manage it on PayPal or contact support.
+                {cancelled
+                  ? `Your subscription is cancelled and will not renew. You keep full access until ${proUntilText}.`
+                  : 'No PayPal subscription is on file for this account. If you believe you are being billed, manage it on PayPal or contact support.'}
               </p>
             )}
             {portal && (

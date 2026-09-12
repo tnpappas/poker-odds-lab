@@ -11,6 +11,8 @@ export interface User {
   username: string | null;
   plan: Plan;
   paypalSubscriptionId: string | null;
+  /** ISO date the current paid period ends (null when unknown or comped). */
+  proUntil: string | null;
   createdAt: string;
 }
 
@@ -109,6 +111,7 @@ export interface Storage {
   upsertUserFromWebhook(clerkId: string, email: string, username?: string): Promise<User>;
   setPlan(userId: string, plan: Plan): Promise<void>;
   setPaypalSubscription(userId: string, subscriptionId: string | null): Promise<void>;
+  setProUntil(userId: string, proUntil: string | null): Promise<void>;
   findUserByEmail(email: string): Promise<User | null>;
   getUserById(userId: string): Promise<User | null>;
   deleteUser(userId: string): Promise<boolean>;

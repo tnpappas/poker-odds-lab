@@ -15,7 +15,7 @@ type AdversaryRow = typeof schema.adversaryProfiles.$inferSelect;
 const today = () => new Date().toISOString().slice(0, 10);
 
 function mapUser(r: UserRow): User {
-  return { id: r.id, clerkId: r.clerkId, email: r.email, username: r.username, plan: r.plan as Plan, paypalSubscriptionId: r.paypalSubscriptionId, createdAt: r.createdAt.toISOString() };
+  return { id: r.id, clerkId: r.clerkId, email: r.email, username: r.username, plan: r.plan as Plan, paypalSubscriptionId: r.paypalSubscriptionId, proUntil: r.proUntil ? r.proUntil.toISOString() : null, createdAt: r.createdAt.toISOString() };
 }
 function mapSession(r: SessionRow): Session {
   return {
@@ -61,6 +61,10 @@ export class DrizzleStorage implements Storage {
 
   async setPlan(userId: string, plan: Plan): Promise<void> {
     await this.db.update(schema.users).set({ plan }).where(eq(schema.users.id, userId));
+  }
+
+  async setProUntil(userId: string, proUntil: string | null): Promise<void> {
+    await this.db.update(schema.users).set({ proUntil: proUntil ? new Date(proUntil) : null }).where(eq(schema.users.id, userId));
   }
 
   async setPaypalSubscription(userId: string, subscriptionId: string | null): Promise<void> {

@@ -32,6 +32,11 @@ export const users = pgTable(
     plan: planEnum('plan').notNull().default('free'),
     /** Active PayPal subscription (I-...), set on activation, cleared on cancel. */
     paypalSubscriptionId: text('paypal_subscription_id'),
+    /**
+     * Paid-through date from PayPal (next billing time). After a cancel the
+     * subscription id is cleared but Pro stays on until this passes.
+     */
+    proUntil: timestamp('pro_until', { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

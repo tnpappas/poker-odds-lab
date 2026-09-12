@@ -18,6 +18,7 @@ describe('schema column names match the migrations', () => {
   it('users has the billing columns', () => {
     const names = columnNames(users);
     expect(names).toContain('paypal_subscription_id');
+    expect(names).toContain('pro_until');
     expect(names).toContain('updated_at');
     expect(names).toContain('clerk_id');
   });

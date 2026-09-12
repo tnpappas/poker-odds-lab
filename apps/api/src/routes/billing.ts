@@ -48,13 +48,16 @@ billing.post('/billing/capture', async (req, res) => {
     return res.status(403).json({ error: 'This subscription belongs to a different account.' });
   }
   if (result.active) {
-    await grantPro(user.id, subscriptionId);
+    await grantPro(user.id, subscriptionId, result.nextBillingTime);
     return res.json({ entitled: true });
   }
   res.status(202).json({ entitled: false, status: result.status });
 });
 
-/** Cancel the signed-in user's subscription. Access is revoked by the CANCELLED webhook. */
+/**
+ * Cancel the signed-in user's subscription. The CANCELLED webhook clears the
+ * subscription id; Pro stays on until the paid-through date (lib/entitlement.ts).
+ */
 billing.post('/billing/cancel', async (req, res) => {
   if (!paypalConfigured) return res.status(501).json(notConfigured);
   const user = req.user!;

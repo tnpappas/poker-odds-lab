@@ -147,6 +147,8 @@ export interface Me {
   owner?: boolean;
   /** True when a PayPal subscription is on file (can be cancelled in-app). */
   hasSubscription?: boolean;
+  /** ISO date Pro is paid through: the next charge if hasSubscription, otherwise when access ends. */
+  proUntil?: string | null;
 }
 
 /** Fetch the signed-in user's entitlement from the server. Null if unavailable. */

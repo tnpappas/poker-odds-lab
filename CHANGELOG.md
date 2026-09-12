@@ -4,6 +4,9 @@ All notable changes, newest first. Dates are the day the change went live on pok
 
 ## 2026-09-12 (evening)
 
+### Billing
+- Live walkthrough (non-owner account, real $7.99 subscription, in-app cancel, refund) found and fixed two defects: every webhook was failing with a column name mismatch (`webhook_events.received_at`), and a cancelled subscriber lost access immediately instead of at the end of the paid period. Now `users.pro_until` holds the paid-through date; cancel keeps Pro until then, and the Account page shows "Renews" or "Cancelled. Access ends" with the date. Migration 0002.
+
 ### Privacy and security
 - Meta Pixel no longer loads on page open. A one-time banner asks visitors to Accept or Decline; only Accept loads the pixel. Privacy policy updated to say so (it previously said no advertising cookies were used while the pixel loaded unconditionally).
 - Two-factor authentication turned on and verified for GitHub, Vercel, Railway, Neon, Clerk, Sentry and PayPal.

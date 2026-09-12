@@ -54,3 +54,6 @@ The API connects to Neon as a single owner role and every storage call is scoped
 - Railway and Vercel: stateless; the API is `tsx src/index.ts` behind a health check and the web app is a static Vite build. Either moves in an afternoon.
 - Sentry: DSN swap; nothing else depends on it.
 - GoHighLevel: one tag on purchase in `lib/ghl.ts`; remove the token and the call becomes a no-op.
+
+## 2026-09-12: Cancelled subscribers keep Pro until the paid period ends
+The Account page and Terms promise access until the end of the period paid for. PayPal sends CANCELLED the instant the customer cancels, so revoking on that event broke the promise (found in the live walkthrough). Now every activation and renewal stores PayPal's next billing time in `users.pro_until`; CANCELLED clears the subscription id but leaves the plan, and `/me` moves the account to free once `pro_until` has passed. SUSPENDED and EXPIRED still revoke at once because the current period was not paid. A cancelled subscriber with no `pro_until` on file (subscribed before this change) is revoked at once, as before.

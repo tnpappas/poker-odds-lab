@@ -40,13 +40,15 @@ describe('billing routes', () => {
   it('capture grants pro and stores the subscription id when PayPal says ACTIVE', async () => {
     const u = asUser(base, 'b2', 'b2@example.com');
     const meId = (await json(u.get('/api/me'))).id;
-    paypalMock.verifySubscription.mockResolvedValueOnce({ subscriptionId: 'I-ACTIVE', userId: meId, active: true, status: 'ACTIVE' });
+    const next = new Date(Date.now() + 30 * 86_400_000).toISOString();
+    paypalMock.verifySubscription.mockResolvedValueOnce({ subscriptionId: 'I-ACTIVE', userId: meId, active: true, status: 'ACTIVE', nextBillingTime: next });
     const res = await u.post('/api/billing/capture', { subscriptionId: 'I-ACTIVE' });
     expect(res.status).toBe(200);
     expect((await json(res)).entitled).toBe(true);
     const me = await json(u.get('/api/me'));
     expect(me.plan).toBe('pro');
     expect(me.hasSubscription).toBe(true);
+    expect(me.proUntil).toBe(next);
   });
 
   it('capture refuses a subscription that belongs to a different user', async () => {

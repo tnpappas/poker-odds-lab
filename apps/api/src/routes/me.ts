@@ -3,21 +3,25 @@ import { storage } from '../storage/index';
 import { isOwner } from '../lib/owners';
 import { tagGhlCustomer } from '../lib/ghl';
 import { grantSchema } from './schemas';
+import { isEntitled, expireIfDue } from '../lib/entitlement';
 
 export const me = Router();
 
 /** The client-side purchase gate reads `entitled` from here on every load. */
-me.get('/me', (req: Request, res) => {
-  const u = req.user!;
+me.get('/me', async (req: Request, res) => {
+  const u = await expireIfDue(req.user!);
   const owner = isOwner(u);
-  const plan = owner ? ('pro' as const) : u.plan;
+  const entitled = owner || isEntitled(u);
+  const plan = entitled ? (u.plan === 'lifetime' ? 'lifetime' : 'pro') : 'free';
   res.json({
     id: u.id,
     email: u.email,
     plan,
-    entitled: plan !== 'free',
+    entitled,
     owner,
     hasSubscription: !!u.paypalSubscriptionId,
+    /** Set when Pro is paid up to a date: renews on it if hasSubscription, ends on it otherwise. */
+    proUntil: u.plan === 'pro' ? u.proUntil : null,
   });
 });
 

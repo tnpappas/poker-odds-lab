@@ -14,6 +14,7 @@ All ids are UUIDs (`gen_random_uuid()`), all timestamps are `timestamptz` in UTC
 | username | text | |
 | plan | enum `plan` ('free', 'pro', 'lifetime'), default 'free' | server-side entitlement; 'lifetime' only for accounts from the one-time-purchase era |
 | paypal_subscription_id | text | active PayPal subscription (I-...); set on activation, cleared on cancel; indexed |
+| pro_until | timestamptz | paid-through date (PayPal next billing time); set on activation and every renewal. After a cancel the subscription id is cleared and Pro stays on until this passes |
 | polar_customer_id | text | unused since Sept 2026; left in place until the drop is rehearsed against a backup |
 | created_at | timestamptz, not null | |
 | updated_at | timestamptz, not null | set by the application on every update |
@@ -126,3 +127,4 @@ Numbered SQL files in `apps/api/drizzle/`. Applied by hand in the Neon SQL edito
 - (initial) tables users, sessions, hand_decisions, adversary_profiles, user_leaks, daily_usage via `drizzle-kit push`, July 2026
 - `paypal_subscription_id` column, Sept 12 2026 (ad hoc ALTER, recorded in 0001's comment)
 - `0001_billing_hardening.sql`, Sept 12 2026: plan enum, updated_at columns, indexes, webhook_events
+- `0002_paid_through.sql`, Sept 12 2026: users.pro_until
