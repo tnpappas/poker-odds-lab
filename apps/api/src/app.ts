@@ -34,7 +34,7 @@ export function createApp() {
   });
 
   app.use(helmet());
-  app.use(cors({ origin: corsOrigin, credentials: true }));
+  app.use(cors({ origin: corsOrigin, credentials: true, exposedHeaders: ['x-request-id'] }));
 
   // Webhooks are mounted BEFORE express.json(): they verify signatures against
   // the raw request body, which a global JSON parse would consume.

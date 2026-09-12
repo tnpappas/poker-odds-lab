@@ -1,62 +1,48 @@
 # Poker Logic Lab
 
-A poker **decision-training** app. The math is the engine; the skill is reading real opponents under uncertainty. See [CLAUDE.md](./CLAUDE.md) for the full product spec.
+A poker **decision-training** web app at https://www.pokerlogiclab.com. The math engine runs in the browser; the skill being trained is reading real opponents under uncertainty. Operated by TNP Digital Ventures LLC.
 
-## Status
+Start with `docs/ARCHITECTURE.md`. The original product spec in `CLAUDE.md` is historical and drifts from the code; when they disagree, the code and `docs/` win.
 
-**Engine, web client, and backend API are all built, type-checked, and verified.** The web app runs fully on `localStorage` out of the box and optionally syncs to the API. The third-party integrations that need paid accounts/keys — **Clerk** auth, **Stripe** payments, **Neon** Postgres — are wired with clearly-marked integration points and safe fallbacks: no `DATABASE_URL` → in-memory store; no `CLERK_SECRET_KEY` → dev-auth via `x-user-id`; no `STRIPE_SECRET_KEY` → payment routes return `501`. Drop in the keys to go live without code changes elsewhere.
+## Status (September 2026)
+
+Live with freemium plus subscription billing through PayPal ($7.99/mo or $49/yr). Frontend on Vercel, API on Railway, Postgres on Neon, auth by Clerk, errors to Sentry. `docs/KNOWN-ISSUES.md` lists what is still open.
 
 ## Structure
 
 ```
-packages/poker-engine/   Pure-TS math engine (deck, 7-card evaluator, Monte Carlo
-                         equity, pot odds, EV, outs, ranges, adversary modeling).
-                         23 unit tests. No dependencies.
-apps/web/                React 19 + Vite + Tailwind v4 + Zustand + Framer Motion.
-  src/lib/               Web-worker equity wrapper + opt-in API client.
-  src/features/          visualizer · replay · blitz · adversary-lab · dashboard
-  src/store/             Zustand store (localStorage-persisted, best-effort API sync).
-apps/api/                Express 5 + TypeScript + Drizzle (Neon) + Zod.
-  src/db/                Drizzle schema matching the spec (users, sessions,
-                         hand_decisions, adversary_profiles, user_leaks, daily_usage).
-  src/storage/           Storage interface + in-memory and Drizzle implementations.
-  src/routes/            sessions · decisions · leaks · adversaries · blitz · usage
-                         · stripe (stub) · clerk webhook.
-  src/middleware/        auth (Clerk/dev) · error (Zod-aware).
+packages/poker-engine/   Pure TypeScript math engine (deck, 7-card evaluator, Monte Carlo and
+                         exact equity, pot odds, EV, ranges, adversary modelling, ICM, drills).
+                         No dependencies. Unit tested.
+apps/web/                React 19 + Vite + Tailwind v4 + Zustand. Works fully on localStorage;
+                         the API is an optional entitlement and sync layer.
+apps/api/                Express 5 + Zod + Drizzle (Neon). Feature routers under src/routes,
+                         signature-verified webhooks under src/webhooks, all env reads in src/config.ts.
+docs/                    ARCHITECTURE, SCHEMA, DECISIONS, RUNBOOK, KNOWN-ISSUES, COSTS, ACCOUNTS,
+                         BUILD-STANDARD (the review checklist every milestone is graded against).
 ```
 
-## Run
+## Run it (double-click, no terminal needed)
 
-```bash
-npm install
-npm run dev        # web app at http://localhost:5173
-npm run dev:api    # API at http://localhost:3001 (in-memory unless DATABASE_URL set)
-npm test           # engine unit tests
-npm run build      # type-check + production bundle (web)
-npm run typecheck  # type-check the API
-```
+- `1-Start-App.bat` starts the web app at http://localhost:5173 and the API at http://localhost:3001 (in-memory store, dev auth).
+- `2-Run-Tests.bat` runs every gate: lint, typecheck, engine tests, API tests, web build.
+- `3-Deploy.bat` runs the gates and, only if they pass, commits and pushes to `main`. Vercel and Railway deploy automatically in about two minutes.
+- `4-Pull-Latest.bat` syncs this folder with GitHub (run first if another session pushed).
 
-To enable backend sync from the web app, copy `apps/web/.env.example` → `.env`
-(`VITE_API_URL=http://localhost:3001`). To use a real database, set `DATABASE_URL`
-in `apps/api/.env` and run `npm run db:push --workspace=apps/api`.
+Equivalent commands from the repo root: `npm run dev`, `npm run dev:api`, `npm run check`, `npm run test:api`, `npm run lint`, `npm run build`.
 
-## Features implemented
+## Environment
 
-- **Preflop Equity Visualizer** — 13×13 grid colored by equity vs random (Monte Carlo, cached). Drag the adversary VPIP slider for live equity recalculation in a web worker.
-- **Hand Replay** — pause-and-predict loop with the **range-guess mechanic** (the headline differentiator): drag to paint the hands you think the adversary holds, see your live equity *vs your own read*, then act. Scoring rewards both the +EV decision and read accuracy (how close your read was to the true range equity). The result reveals the adversary's actual hand, whether it fell inside your painted range, and a plain-English "why". Toggle the mechanic off for the basic mode.
-- **Mental Math Blitz** — 30-second binary sprint over pot odds / EV / rule-of-2-&-4 / bet-sizing, with streak multipliers and a 3-miss cap.
-- **Adversary Lab** (Pro) — answer six behavioral slider questions about a player; the engine models their range live (13×13 grid + % of hands) and surfaces exploitative adjustments with EV impact. Save adversaries and send one straight into Hand Replay to train against their exact range.
-- **EV Dashboard** — skill points, decision accuracy, avg read error, EV-by-street, and automatic leak detection (calling too wide, folding to aggression, missing value).
+Nothing is required locally. Production variables live in the hosting dashboards, never in the repo: `apps/api/.env.example` documents the Railway variables (the API refuses to start in production if a required one is missing), `apps/web/.env.example` documents the Vercel variables.
 
-## Backend API
+## Database changes
 
-`apps/api` implements every endpoint from the spec — `/api/sessions`, `/api/decisions(/summary)`, `/api/leaks(/recalculate)`, `/api/adversaries`, `/api/blitz/results`, `/api/usage`, the Clerk webhook, and Stripe stubs — all with Zod request validation. Persistence is behind a `Storage` interface with two interchangeable implementations (in-memory for zero-setup dev, Drizzle/Neon for production). Server-side leak detection mirrors the engine's dashboard logic so analytics work across devices once sync is enabled.
+Edit `apps/api/src/db/schema.ts`, write the matching SQL as the next numbered file in `apps/api/drizzle/`, apply it in the Neon SQL editor, then push the code. Details in `docs/RUNBOOK.md`; current shape in `docs/SCHEMA.md`.
 
-## The engine
+## Features
 
-`packages/poker-engine` is the heart of the app and runs entirely client-side:
-- 7-card evaluator packs each hand into one comparable integer (category + kickers) — ~2M+ evaluations/sec, so 10k Monte Carlo simulations finish in a few milliseconds.
-- `calculateEquity` (Monte Carlo, any weighted range) and `calculateExactEquity` (full enumeration).
-- `parseRangeString` supports standard notation (`AA`, `JJ+`, `A2s+`, `AQs-ATs`).
-- `vpipToRange` uses the Chen formula to approximate an opponent's range from a VPIP%.
-- 23 unit tests cover the evaluator, known equity matchups, pot odds/EV, and range parsing.
+- **Hand Replay**: pause at every street, paint the opponent's range, see equity against your own read, then act. Scored on the decision and on read accuracy.
+- **Preflop Equity Visualizer**: all 169 starting hands coloured by equity against any range, recalculated live in a web worker.
+- **Mental Math Blitz**: 30-second pot odds and EV sprints.
+- **Equity Calculator**, **Tournament Lab (ICM)**, **Adversary Lab** (model an opponent from six reads), **EV Dashboard** with leak detection and drill scheduling.
+- Marketing: landing page, Lab Notes (blog), Guide, Pricing, Legal, and `/account` for members.
