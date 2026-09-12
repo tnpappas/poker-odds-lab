@@ -136,5 +136,5 @@ export const webhookEvents = pgTable('webhook_events', {
   id: text('id').primaryKey(), // `${provider}:${eventId}`
   provider: text('provider').notNull(), // 'paypal' | 'clerk'
   eventType: text('event_type').notNull(),
-  receivedAt: createdAt(),
+  receivedAt: timestamp('received_at', { withTimezone: true }).defaultNow().notNull(),
 });
