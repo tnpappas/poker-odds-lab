@@ -15,7 +15,7 @@ type AdversaryRow = typeof schema.adversaryProfiles.$inferSelect;
 const today = () => new Date().toISOString().slice(0, 10);
 
 function mapUser(r: UserRow): User {
-  return { id: r.id, clerkId: r.clerkId, email: r.email, username: r.username, plan: r.plan as Plan, polarCustomerId: r.polarCustomerId, paypalSubscriptionId: r.paypalSubscriptionId, createdAt: r.createdAt.toISOString() };
+  return { id: r.id, clerkId: r.clerkId, email: r.email, username: r.username, plan: r.plan as Plan, paypalSubscriptionId: r.paypalSubscriptionId, createdAt: r.createdAt.toISOString() };
 }
 function mapSession(r: SessionRow): Session {
   return {
@@ -63,17 +63,8 @@ export class DrizzleStorage implements Storage {
     await this.db.update(schema.users).set({ plan }).where(eq(schema.users.id, userId));
   }
 
-  async setPolarCustomer(userId: string, polarCustomerId: string): Promise<void> {
-    await this.db.update(schema.users).set({ polarCustomerId }).where(eq(schema.users.id, userId));
-  }
-
   async setPaypalSubscription(userId: string, subscriptionId: string | null): Promise<void> {
     await this.db.update(schema.users).set({ paypalSubscriptionId: subscriptionId }).where(eq(schema.users.id, userId));
-  }
-
-  async findUserByPolarCustomer(polarCustomerId: string): Promise<User | null> {
-    const r = await this.db.select().from(schema.users).where(eq(schema.users.polarCustomerId, polarCustomerId)).limit(1);
-    return r[0] ? mapUser(r[0]) : null;
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
@@ -216,5 +207,14 @@ export class DrizzleStorage implements Storage {
       .onConflictDoUpdate({ target: [schema.dailyUsage.userId, schema.dailyUsage.date], set: next })
       .returning();
     return { date: r[0].date, replaysUsed: r[0].replaysUsed, blitzUsed: r[0].blitzUsed };
+  }
+
+  async recordWebhookEvent(provider: 'paypal' | 'clerk', eventId: string, eventType: string): Promise<boolean> {
+    const r = await this.db
+      .insert(schema.webhookEvents)
+      .values({ id: `${provider}:${eventId}`, provider, eventType })
+      .onConflictDoNothing()
+      .returning({ id: schema.webhookEvents.id });
+    return r.length > 0;
   }
 }

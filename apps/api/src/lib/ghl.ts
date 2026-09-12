@@ -9,12 +9,14 @@
  * purchase flow. No-ops when GHL_API_TOKEN is unset (same safe-fallback pattern
  * as our other optional integrations).
  */
+import { config } from '../config';
 import { logger } from './logger';
+import { fetchWithTimeout } from './http';
 
 const API_BASE = 'https://services.leadconnectorhq.com';
-const TOKEN = process.env.GHL_API_TOKEN;
-const LOCATION_ID = process.env.GHL_LOCATION_ID ?? 'uZ27QI1WPmHwzgqdmss8';
-const CUSTOMER_TAG = process.env.GHL_CUSTOMER_TAG ?? 'customer';
+const TOKEN = config.GHL_API_TOKEN;
+const LOCATION_ID = config.GHL_LOCATION_ID ?? 'uZ27QI1WPmHwzgqdmss8';
+const CUSTOMER_TAG = config.GHL_CUSTOMER_TAG;
 
 export const ghlConfigured = Boolean(TOKEN);
 
@@ -37,7 +39,7 @@ export async function tagGhlCustomer(email: string): Promise<void> {
   if (!email || email.endsWith('@placeholder.local')) return;
 
   try {
-    const upsertRes = await fetch(`${API_BASE}/contacts/upsert`, {
+    const upsertRes = await fetchWithTimeout(`${API_BASE}/contacts/upsert`, {
       method: 'POST',
       headers: ghlHeaders(),
       body: JSON.stringify({ locationId: LOCATION_ID, email }),
@@ -53,7 +55,7 @@ export async function tagGhlCustomer(email: string): Promise<void> {
       return;
     }
 
-    const tagRes = await fetch(`${API_BASE}/contacts/${contactId}/tags`, {
+    const tagRes = await fetchWithTimeout(`${API_BASE}/contacts/${contactId}/tags`, {
       method: 'POST',
       headers: ghlHeaders(),
       body: JSON.stringify({ tags: [CUSTOMER_TAG] }),

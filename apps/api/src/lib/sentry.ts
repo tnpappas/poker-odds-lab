@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/node';
+import { config } from '../config';
 import { logger } from './logger';
 
-const dsn = process.env.SENTRY_DSN;
+const dsn = config.SENTRY_DSN;
 
 export const sentryEnabled = !!dsn;
 
@@ -10,8 +11,8 @@ export const sentryEnabled = !!dsn;
 if (sentryEnabled) {
   Sentry.init({
     dsn,
-    environment: process.env.NODE_ENV ?? 'development',
-    tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? 0),
+    environment: config.NODE_ENV,
+    tracesSampleRate: config.SENTRY_TRACES_SAMPLE_RATE,
   });
   logger.info('sentry initialized');
 }

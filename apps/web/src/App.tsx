@@ -114,6 +114,9 @@ export function App() {
                   </SignInButton>
                 </SignedOut>
                 <SignedIn>
+                  <Link to="/account" className="hidden sm:inline text-xs text-ink-300 hover:text-ink-100 transition">
+                    Account
+                  </Link>
                   {plan === 'free' && pathname !== '/pricing' && (
                     <Link to="/pricing"
                       className="text-xs px-3.5 py-1.5 rounded-lg bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
@@ -143,6 +146,7 @@ export function App() {
             <Link to="/terms" className="hover:text-ink-100 transition">Terms</Link>
             <Link to="/privacy" className="hover:text-ink-100 transition">Privacy</Link>
             <Link to="/refunds" className="hover:text-ink-100 transition">Refunds</Link>
+            <Link to="/account" className="hover:text-ink-100 transition">Account</Link>
             <a href="mailto:support@pokerlogiclab.com" className="hover:text-ink-100 transition">Support</a>
           </div>
           <span className="order-3 hidden md:flex items-center gap-2 opacity-70">

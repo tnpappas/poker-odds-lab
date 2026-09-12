@@ -1,30 +1,37 @@
 import express from 'express';
+import { randomUUID } from 'node:crypto';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { config } from './config';
 import { api } from './routes/index';
-import { webhooks } from './routes/webhooks';
+import { webhooks } from './webhooks/index';
 import { errorHandler } from './middleware/error';
 import { storageBackend } from './storage/index';
 
-const isProd = process.env.NODE_ENV === 'production';
+// CORS fails closed in production: with no allowlist configured, no
+// cross-origin browser request is permitted rather than reflecting every origin.
+const corsOrigin = config.frontendOrigins.length > 0 ? config.frontendOrigins : config.isProd ? false : true;
 
-// CORS allowlist from FRONTEND_URL (comma-separated for multiple origins).
-// Fails closed in production: with no allowlist configured, no cross-origin
-// browser requests are permitted rather than reflecting every origin.
-const allowlist = (process.env.FRONTEND_URL ?? '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
-
-const corsOrigin = allowlist.length > 0 ? allowlist : isProd ? false : true;
+/** Requests per minute per IP on the application API. */
+const API_RATE_LIMIT = 120;
+/** Tighter limit for billing: nobody legitimately starts 10 checkouts a minute. */
+const BILLING_RATE_LIMIT = config.isTest ? 1000 : 10;
 
 export function createApp() {
   const app = express();
 
-  // Behind a proxy/load balancer (Railway, Render, Vercel) so rate-limit and
-  // secure-cookie logic see the real client IP.
+  // Behind Railway's proxy, so rate limiting sees the real client IP.
   app.set('trust proxy', 1);
+
+  // Request id: returned to the client and attached to every log line the
+  // request produces, so one id ties a support report to the server logs.
+  app.use((req, res, next) => {
+    const id = req.header('x-request-id') ?? randomUUID();
+    req.requestId = id;
+    res.setHeader('x-request-id', id);
+    next();
+  });
 
   app.use(helmet());
   app.use(cors({ origin: corsOrigin, credentials: true }));
@@ -39,21 +46,15 @@ export function createApp() {
     res.json({
       ok: true,
       storage: storageBackend,
-      auth: process.env.CLERK_SECRET_KEY ? 'clerk' : 'dev',
-      payments: process.env.PAYPAL_CLIENT_ID ? 'paypal' : process.env.POLAR_ACCESS_TOKEN ? 'polar' : 'disabled',
+      auth: config.CLERK_SECRET_KEY ? 'clerk' : 'dev',
+      payments: config.paypalConfigured ? 'paypal' : 'disabled',
+      errorTracking: config.SENTRY_DSN ? 'sentry' : 'disabled',
     });
   });
 
-  // Rate limit the application API (health + webhooks are intentionally exempt:
-  // webhooks are authenticated by signature and can legitimately burst).
-  const apiLimiter = rateLimit({
-    windowMs: 60_000,
-    limit: 120, // 120 requests/minute per IP
-    standardHeaders: 'draft-7',
-    legacyHeaders: false,
-    message: { error: 'Too many requests, please slow down.' },
-  });
-  app.use('/api', apiLimiter, api);
+  const limiterOptions = { standardHeaders: 'draft-7' as const, legacyHeaders: false, message: { error: 'Too many requests, please slow down.' } };
+  app.use('/api/billing', rateLimit({ windowMs: 60_000, limit: BILLING_RATE_LIMIT, ...limiterOptions }));
+  app.use('/api', rateLimit({ windowMs: 60_000, limit: API_RATE_LIMIT, ...limiterOptions }), api);
 
   app.use(errorHandler);
   return app;

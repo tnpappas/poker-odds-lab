@@ -1,26 +1,30 @@
 /**
- * PayPal REST (Orders v2) integration.
+ * PayPal integration: Subscriptions v1 (recurring billing) and webhook
+ * signature verification.
  *
- * With PayPal, the account owner is the merchant of record (unlike Polar, which
- * was a merchant-of-record service). When PAYPAL_CLIENT_ID / PAYPAL_SECRET are
- * unset, `paypalConfigured` is false and the billing routes fall back to Polar.
+ * The account owner is the merchant of record. Every call goes through
+ * fetchWithTimeout so a slow PayPal cannot hang a request. When PayPal is not
+ * configured (no PAYPAL_CLIENT_ID / PAYPAL_SECRET) the billing routes answer
+ * 501 rather than throwing.
  *
- * Flow: create a CAPTURE order tagged with our internal user id (custom_id),
- * redirect the buyer to PayPal's approval link, then capture on return and/or
- * via the PAYMENT.CAPTURE.COMPLETED webhook. Both paths grant lifetime access.
+ * Plan ids (P-...) are created in the PayPal dashboard under Subscriptions and
+ * set as PAYPAL_MONTHLY_PLAN_ID / PAYPAL_ANNUAL_PLAN_ID.
  */
+import { config } from '../config';
+import { fetchWithTimeout } from './http';
 
-const clientId = process.env.PAYPAL_CLIENT_ID;
-const secret = process.env.PAYPAL_SECRET;
-const env = (process.env.PAYPAL_ENV ?? 'live').toLowerCase();
+export type CheckoutPlan = 'monthly' | 'annual';
 
-export const paypalConfigured = !!(clientId && secret);
+export const paypalConfigured = config.paypalConfigured;
+const API_BASE = config.paypalApiBase;
 
-const API_BASE =
-  env === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
+/** Where a subscriber manages or cancels their PayPal automatic payments. */
+export const PAYPAL_AUTOPAY_URL = 'https://www.paypal.com/myaccount/autopay/';
 
-// Lifetime price in USD. Overridable via env so a price change needs no redeploy.
-const PRICE_USD = process.env.PAYPAL_LIFETIME_PRICE ?? '24.99';
+/** Map a checkout plan to its PayPal billing plan id. */
+export function paypalPlanIdFor(plan: CheckoutPlan): string | undefined {
+  return plan === 'monthly' ? config.PAYPAL_MONTHLY_PLAN_ID : config.PAYPAL_ANNUAL_PLAN_ID;
+}
 
 // --- OAuth token (cached until shortly before expiry) --------------------
 let tokenCache: { token: string; expiresAt: number } | null = null;
@@ -30,13 +34,10 @@ async function accessToken(): Promise<string> {
   const now = Date.now();
   if (tokenCache && tokenCache.expiresAt > now + 60_000) return tokenCache.token;
 
-  const auth = Buffer.from(`${clientId}:${secret}`).toString('base64');
-  const res = await fetch(`${API_BASE}/v1/oauth2/token`, {
+  const auth = Buffer.from(`${config.PAYPAL_CLIENT_ID}:${config.PAYPAL_SECRET}`).toString('base64');
+  const res = await fetchWithTimeout(`${API_BASE}/v1/oauth2/token`, {
     method: 'POST',
-    headers: {
-      Authorization: `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'grant_type=client_credentials',
   });
   if (!res.ok) throw new Error(`PayPal token error ${res.status}: ${await res.text()}`);
@@ -45,108 +46,19 @@ async function accessToken(): Promise<string> {
   return data.access_token;
 }
 
-// --- Create order --------------------------------------------------------
-export interface CreatedOrder {
-  id: string;
-  approveUrl: string;
-}
-
-/** Create a CAPTURE order for the lifetime product; custom_id ties it to our user. */
-export async function createLifetimeOrder(opts: {
-  userId: string;
-  email: string;
-  returnUrl: string;
-  cancelUrl: string;
-}): Promise<CreatedOrder> {
+async function paypalRequest(path: string, init: RequestInit & { retry?: boolean } = {}): Promise<Response> {
   const token = await accessToken();
-  const res = await fetch(`${API_BASE}/v2/checkout/orders`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          custom_id: opts.userId,
-          description: 'Poker Logic Lab - Lifetime access',
-          amount: { currency_code: 'USD', value: PRICE_USD },
-        },
-      ],
-      payment_source: {
-        paypal: {
-          experience_context: {
-            brand_name: 'Poker Logic Lab',
-            user_action: 'PAY_NOW',
-            // Show the card form first instead of PayPal's login screen. Most
-            // buyers here have no PayPal account and should not be asked for
-            // one; PayPal still offers "Log In" for those who want it.
-            landing_page: 'GUEST_CHECKOUT',
-            shipping_preference: 'NO_SHIPPING',
-            return_url: opts.returnUrl,
-            cancel_url: opts.cancelUrl,
-          },
-        },
-      },
-    }),
+  return fetchWithTimeout(`${API_BASE}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...(init.headers ?? {}),
+    },
   });
-  if (!res.ok) throw new Error(`PayPal order error ${res.status}: ${await res.text()}`);
-  const data = (await res.json()) as { id: string; links?: { rel: string; href: string }[] };
-  const approve = data.links?.find((l) => l.rel === 'payer-action' || l.rel === 'approve');
-  if (!approve) throw new Error('PayPal did not return an approval link');
-  return { id: data.id, approveUrl: approve.href };
 }
 
-// --- Capture order -------------------------------------------------------
-export interface CaptureResult {
-  orderId: string;
-  userId?: string;
-  completed: boolean;
-  /** True when PayPal reports the order was already captured by an earlier call. */
-  alreadyCaptured?: boolean;
-}
-
-/** Capture an approved order. Idempotent: an already-captured order is a success. */
-export async function captureOrder(orderId: string): Promise<CaptureResult> {
-  const token = await accessToken();
-  const res = await fetch(`${API_BASE}/v2/checkout/orders/${orderId}/capture`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-  });
-  const data = (await res.json().catch(() => ({}))) as Record<string, any>;
-
-  let alreadyCaptured = false;
-  if (!res.ok) {
-    alreadyCaptured =
-      Array.isArray(data?.details) &&
-      data.details.some((d: { issue?: string }) => d.issue === 'ORDER_ALREADY_CAPTURED');
-    if (!alreadyCaptured) {
-      throw new Error(`PayPal capture error ${res.status}: ${JSON.stringify(data)}`);
-    }
-  }
-
-  const pu = data?.purchase_units?.[0];
-  const cap = pu?.payments?.captures?.[0];
-  const userId: string | undefined = pu?.custom_id ?? cap?.custom_id;
-  const status: string | undefined = data?.status ?? cap?.status;
-  const completed = status === 'COMPLETED' || cap?.status === 'COMPLETED';
-  return { orderId, userId, completed, alreadyCaptured };
-}
-
-// --- Subscriptions (recurring billing) -----------------------------------
-
-/**
- * Map a checkout plan to its PayPal billing plan ID.
- * These are created in the PayPal dashboard (Products & Plans) and the IDs
- * are set via env vars on the server.
- */
-export function paypalPlanIdFor(plan: 'monthly' | 'annual'): string | undefined {
-  switch (plan) {
-    case 'monthly':
-      return process.env.PAYPAL_MONTHLY_PLAN_ID;
-    case 'annual':
-      return process.env.PAYPAL_ANNUAL_PLAN_ID;
-  }
-}
-
+// --- Subscriptions --------------------------------------------------------
 export interface CreatedSubscription {
   id: string;
   approveUrl: string;
@@ -154,9 +66,12 @@ export interface CreatedSubscription {
 }
 
 /**
- * Create a PayPal subscription for the given billing plan.
- * The buyer is redirected to the approval URL, returns to returnUrl, and
- * we verify the subscription is active before granting access.
+ * Create a subscription for a billing plan. The buyer is sent to approveUrl,
+ * approves on PayPal, and returns to returnUrl with subscription_id in the
+ * query string; /billing/capture then verifies it.
+ *
+ * PayPal-Request-Id makes the create idempotent per user for 72 hours: a
+ * double click cannot create two subscriptions.
  */
 export async function createSubscription(opts: {
   planId: string;
@@ -165,20 +80,14 @@ export async function createSubscription(opts: {
   returnUrl: string;
   cancelUrl: string;
 }): Promise<CreatedSubscription> {
-  const token = await accessToken();
-  const res = await fetch(`${API_BASE}/v1/billing/subscriptions`, {
+  const res = await paypalRequest('/v1/billing/subscriptions', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'PayPal-Request-Id': opts.userId,
-    },
+    retry: false,
+    headers: { 'PayPal-Request-Id': `pol-sub-${opts.userId}-${opts.planId}` },
     body: JSON.stringify({
       plan_id: opts.planId,
       custom_id: opts.userId,
-      subscriber: {
-        email_address: opts.email,
-      },
+      subscriber: { email_address: opts.email },
       application_context: {
         brand_name: 'Poker Logic Lab',
         user_action: 'SUBSCRIBE_NOW',
@@ -189,79 +98,64 @@ export async function createSubscription(opts: {
     }),
   });
   if (!res.ok) throw new Error(`PayPal subscription error ${res.status}: ${await res.text()}`);
-  const data = (await res.json()) as {
-    id: string;
-    status: string;
-    links?: { rel: string; href: string }[];
-  };
-  const approve = data.links?.find(
-    (l) => l.rel === 'approve' || l.rel === 'payer-action',
-  );
+  const data = (await res.json()) as { id: string; status: string; links?: { rel: string; href: string }[] };
+  const approve = data.links?.find((l) => l.rel === 'approve' || l.rel === 'payer-action');
   if (!approve) throw new Error('PayPal did not return an approval link');
   return { id: data.id, approveUrl: approve.href, status: data.status };
 }
 
-/**
- * Verify a subscription is active after the buyer returns from PayPal.
- * Returns the subscription status and our internal user id (from custom_id).
- */
 export interface SubscriptionResult {
   subscriptionId: string;
+  /** Our internal user id, carried on the subscription as custom_id. */
   userId?: string;
   active: boolean;
   status: string;
 }
 
+/** Read a subscription back from PayPal to confirm it is really active. */
 export async function verifySubscription(subscriptionId: string): Promise<SubscriptionResult> {
-  const token = await accessToken();
-  const res = await fetch(`${API_BASE}/v1/billing/subscriptions/${subscriptionId}`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await paypalRequest(`/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}`, { method: 'GET' });
   if (!res.ok) throw new Error(`PayPal subscription verify error ${res.status}: ${await res.text()}`);
-  const data = (await res.json()) as {
-    id: string;
-    status: string;
-    custom_id?: string;
-  };
-  const activeStatuses = ['ACTIVE', 'APPROVAL_PENDING'];
+  const data = (await res.json()) as { id: string; status: string; custom_id?: string };
   return {
     subscriptionId: data.id,
     userId: data.custom_id,
-    active: activeStatuses.includes(data.status),
+    active: data.status === 'ACTIVE',
     status: data.status,
   };
 }
 
 /**
- * Cancel a subscription so it does not renew. The user keeps access until
- * the end of the current billing period.
+ * Cancel a subscription so it never renews. PayPal then sends
+ * BILLING.SUBSCRIPTION.CANCELLED, which is what revokes access. A 422 means
+ * it was already cancelled, which counts as success.
  */
-export async function cancelSubscription(subscriptionId: string): Promise<void> {
-  const token = await accessToken();
-  const res = await fetch(`${API_BASE}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+export async function cancelSubscription(subscriptionId: string, reason = 'Cancelled from Poker Logic Lab'): Promise<void> {
+  const res = await paypalRequest(`/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}/cancel`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ reason: 'User cancelled from Poker Logic Lab' }),
+    body: JSON.stringify({ reason }),
   });
   if (!res.ok && res.status !== 422) {
-    // 422 = already cancelled, which is fine.
     throw new Error(`PayPal cancel error ${res.status}: ${await res.text()}`);
   }
 }
 
 // --- Webhook signature verification --------------------------------------
-/** Verify a PayPal webhook via the REST verify endpoint. Requires PAYPAL_WEBHOOK_ID. */
+/** Ask PayPal to confirm a webhook delivery is authentic. Requires PAYPAL_WEBHOOK_ID. */
 export async function verifyWebhookSignature(
   headers: Record<string, string | undefined>,
   rawBody: Buffer,
 ): Promise<boolean> {
-  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
-  if (!webhookId) return false;
-  const token = await accessToken();
-  const res = await fetch(`${API_BASE}/v1/notifications/verify-webhook-signature`, {
+  const webhookId = config.PAYPAL_WEBHOOK_ID;
+  if (!webhookId || !paypalConfigured) return false;
+  let event: unknown;
+  try {
+    event = JSON.parse(rawBody.toString('utf8'));
+  } catch {
+    return false;
+  }
+  const res = await paypalRequest('/v1/notifications/verify-webhook-signature', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       auth_algo: headers['paypal-auth-algo'],
       cert_url: headers['paypal-cert-url'],
@@ -269,7 +163,7 @@ export async function verifyWebhookSignature(
       transmission_sig: headers['paypal-transmission-sig'],
       transmission_time: headers['paypal-transmission-time'],
       webhook_id: webhookId,
-      webhook_event: JSON.parse(rawBody.toString('utf8')),
+      webhook_event: event,
     }),
   });
   if (!res.ok) return false;

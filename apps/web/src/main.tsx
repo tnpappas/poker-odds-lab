@@ -30,6 +30,7 @@ const Pricing = lazy(() => import('./pages/Pricing').then((m) => ({ default: m.P
 const NotFound = lazy(() => import('./pages/NotFound').then((m) => ({ default: m.NotFound })));
 const Legal = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Legal })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
+const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.Account })));
 const Blog = lazy(() => import('./pages/Blog').then((m) => ({ default: m.Blog })));
 const BlogPost = lazy(() => import('./pages/BlogPost').then((m) => ({ default: m.BlogPost })));
 const Visualizer = lazy(() => import('./features/visualizer/Visualizer').then((m) => ({ default: m.Visualizer })));
@@ -68,6 +69,8 @@ const router = createBrowserRouter([
       { path: 'refunds', element: lazyEl(<Legal doc="refunds" />) },
       // Owner-only account tools; intentionally not linked in the nav.
       { path: 'admin', element: lazyEl(<Admin />) },
+      // Membership management: plan, cancel, PayPal payment details, delete account.
+      { path: 'account', element: lazyEl(<Account />) },
       { path: 'visualizer', element: gate(<Visualizer />) },
       { path: 'replay', element: gate(<Replay />) },
       { path: 'blitz', element: gate(<Blitz />) },

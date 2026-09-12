@@ -145,6 +145,8 @@ export interface Me {
   plan: Plan;
   entitled: boolean;
   owner?: boolean;
+  /** True when a PayPal subscription is on file (can be cancelled in-app). */
+  hasSubscription?: boolean;
 }
 
 /** Fetch the signed-in user's entitlement from the server. Null if unavailable. */
@@ -179,6 +181,38 @@ async function grantAccess(
   }
 }
 
+type SimpleResult = { ok: true } | { ok: false; error: string };
+
+async function simplePost(path: string, method: 'POST' | 'DELETE' = 'POST'): Promise<SimpleResult> {
+  if (!apiEnabled) return { ok: false, error: 'API not configured' };
+  try {
+    const res = await fetch(`${API_URL}${path}`, { method, headers: await authHeaders() });
+    if (res.ok) return { ok: true };
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    return { ok: false, error: body.error ?? `Request failed (${res.status})` };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+/** Cancel the signed-in user's subscription. Access ends when PayPal confirms. */
+const cancelSubscription = () => simplePost('/api/billing/cancel');
+
+/** Delete the signed-in user's account and all data (cancels the subscription first). */
+const deleteAccount = () => simplePost('/api/account', 'DELETE');
+
+/** Where the customer manages payments on PayPal's side. */
+async function billingPortalUrl(): Promise<string | null> {
+  if (!apiEnabled) return null;
+  try {
+    const res = await fetch(`${API_URL}/api/billing/portal`, { headers: await authHeaders() });
+    if (!res.ok) return null;
+    return ((await res.json()) as { url?: string }).url ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export const api = {
   postDecision: (d: ApiDecision) => send('/api/decisions', d),
   incrementUsage: (mode: 'replay' | 'blitz') => send('/api/usage/increment', { mode }),
@@ -186,4 +220,7 @@ export const api = {
   captureCheckout,
   getMe,
   grantAccess,
+  cancelSubscription,
+  deleteAccount,
+  billingPortalUrl,
 };

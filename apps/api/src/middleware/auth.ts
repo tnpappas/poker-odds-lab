@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyToken, createClerkClient } from '@clerk/backend';
+import { config } from '../config';
 import { storage } from '../storage/index';
 import type { User } from '../storage/types';
 
@@ -8,13 +9,14 @@ declare global {
   namespace Express {
     interface Request {
       user?: User;
+      requestId?: string;
     }
   }
 }
 
-const clerkSecret = process.env.CLERK_SECRET_KEY;
+const clerkSecret = config.CLERK_SECRET_KEY;
 const clerkConfigured = !!clerkSecret;
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = config.isProd;
 
 // Fail fast on a misconfigured production deploy rather than silently trusting
 // the dev `x-user-id` header (which would let anyone impersonate any user).
