@@ -144,19 +144,18 @@ webhooks.post('/polar/webhooks', rawJson, async (req: Request, res: Response) =>
   res.status(202).send('');
 });
 
-// ---- PayPal payment events -> grant lifetime access ---------------------
-// The authoritative backup to the capture-on-return call. custom_id carries our
-// internal user id (set on the order's purchase_unit; PayPal propagates it to
-// the capture resource).
+// ---- PayPal subscription events -> grant/revoke pro --------------------
+// The authoritative backup to the verify-on-return call. custom_id carries
+// our internal user id (set on the subscription; PayPal propagates it).
 
 /**
- * Grant lifetime access, tagging the buyer in GHL on the first purchase only
- * (that tag fires the book-delivery workflow). Safe to call more than once.
+ * Grant pro access, tagging the buyer in GHL on the first purchase only.
+ * Safe to call more than once.
  */
-async function grantLifetime(userId: string): Promise<void> {
+async function grantPro(userId: string): Promise<void> {
   const user = await storage.getUserById(userId);
-  const firstPurchase = user ? user.plan !== 'lifetime' : true;
-  await storage.setPlan(userId, 'lifetime');
+  const firstPurchase = user ? user.plan === 'free' : true;
+  await storage.setPlan(userId, 'pro');
   if (firstPurchase && user) await tagGhlCustomer(user.email);
 }
 
@@ -174,37 +173,29 @@ webhooks.post('/paypal/webhooks', rawJson, async (req: Request, res: Response) =
     return res.status(400).json({ error: 'Invalid PayPal webhook body' });
   }
 
-  if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+  if (event.event_type === 'BILLING.SUBSCRIPTION.ACTIVATED') {
+    const userId: string | undefined = event.resource?.custom_id;
+    if (userId) {
+      await grantPro(userId);
+      logger.info('paypal subscription activated', { userId });
+    }
+  } else if (event.event_type === 'BILLING.SUBSCRIPTION.CANCELLED' || event.event_type === 'BILLING.SUBSCRIPTION.EXPIRED') {
+    const userId: string | undefined = event.resource?.custom_id;
+    if (userId) {
+      await storage.setPlan(userId, 'free');
+      logger.info('paypal subscription cancelled/expired', { userId });
+    }
+  } else if (event.event_type === 'PAYMENT.SALE.COMPLETED') {
+    // Recurring payment succeeded. Subscription is still active, so just log.
+    // The ACTIVATED event already granted access; this is a renewal.
+    logger.debug('paypal recurring payment completed', { id: event.resource?.id });
+  } else if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+    // Legacy one-time order (no longer used, but kept for backward compat).
     const userId: string | undefined =
       event.resource?.custom_id ?? event.resource?.purchase_units?.[0]?.custom_id;
     if (userId) {
-      await grantLifetime(userId);
-      logger.info('paypal capture completed', { userId });
-    } else {
-      logger.warn('paypal capture completed with no custom_id', { id: event.resource?.id });
-    }
-  } else if (event.event_type === 'CHECKOUT.ORDER.APPROVED') {
-    // Safety net. The buyer approved the payment but the browser may never have
-    // completed the capture (tab closed, connection dropped, session not ready).
-    // Capturing here means an approved sale is never silently lost.
-    const orderId: string | undefined = event.resource?.id;
-    const approvedUserId: string | undefined = event.resource?.purchase_units?.[0]?.custom_id;
-    if (orderId) {
-      try {
-        const result = await captureOrder(orderId);
-        const userId = result.userId ?? approvedUserId;
-        if (result.completed && userId) {
-          await grantLifetime(userId);
-          logger.info('paypal order captured by webhook', { orderId, userId });
-        } else if (result.alreadyCaptured) {
-          // The browser already captured it and granted access. Nothing to do.
-          logger.debug('paypal order already captured', { orderId });
-        } else {
-          logger.warn('paypal approved order was not captured', { orderId, userId });
-        }
-      } catch (err) {
-        logger.error('paypal webhook capture failed', { orderId, err: String(err) });
-      }
+      await grantPro(userId);
+      logger.info('paypal capture completed (legacy)', { userId });
     }
   } else {
     logger.debug('paypal webhook ignored', { type: event.event_type });

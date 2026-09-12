@@ -110,19 +110,18 @@ export type CaptureOutcome =
   | { ok: false; reason: 'unauthenticated' | 'pending' | 'error'; status: number; message?: string };
 
 /**
- * Capture a PayPal order after the buyer approves and returns to the site.
- * Grants access immediately; the PAYMENT.CAPTURE.COMPLETED webhook and the
- * CHECKOUT.ORDER.APPROVED safety net are the server-side backups.
+ * Verify a PayPal subscription after the buyer approves and returns.
+ * Grants access immediately; the BILLING.SUBSCRIPTION.ACTIVATED webhook is
+ * the server-side backup.
  */
-async function captureCheckout(orderId: string, token?: string | null): Promise<CaptureOutcome> {
+async function captureCheckout(subscriptionId: string, token?: string | null): Promise<CaptureOutcome> {
   if (!apiEnabled) return { ok: false, reason: 'error', status: 0, message: 'API not configured' };
   try {
     const res = await fetch(`${API_URL}/api/billing/capture`, {
       method: 'POST',
       headers: await authHeaders(token),
-      body: JSON.stringify({ orderId }),
+      body: JSON.stringify({ subscriptionId }),
     });
-    // 202 counts as ok on a Response, so check it first.
     if (res.status === 202) return { ok: false, reason: 'pending', status: 202 };
     if (res.ok) {
       const body = (await res.json().catch(() => ({}))) as { entitled?: boolean };

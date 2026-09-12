@@ -4,7 +4,7 @@ import { storage } from '../storage/index';
 import { requireUser } from '../middleware/auth';
 import { detectLeaks } from '../services/leakDetector';
 import { polar, productIdFor } from '../lib/polar';
-import { paypalConfigured, createLifetimeOrder, captureOrder } from '../lib/paypal';
+import { paypalConfigured, createSubscription, verifySubscription, cancelSubscription, paypalPlanIdFor } from '../lib/paypal';
 import { tagGhlCustomer } from '../lib/ghl';
 
 export const api = Router();
@@ -200,10 +200,25 @@ api.post('/billing/checkout', async (req, res) => {
   const { plan } = checkoutSchema.parse(req.body);
   const user = req.user!;
 
-  // All plans go through Polar (subscription billing).
-  // PayPal was only used for one-time lifetime orders and is now deprecated.
+  // --- PayPal Subscriptions (preferred) ---
+  if (paypalConfigured) {
+    const planId = paypalPlanIdFor(plan);
+    if (!planId) {
+      return res.status(500).json({ error: `Missing PayPal plan ID for "${plan}". Set PAYPAL_${plan.toUpperCase()}_PLAN_ID.` });
+    }
+    const sub = await createSubscription({
+      planId,
+      userId: user.id,
+      email: user.email,
+      returnUrl: `${FRONTEND_URL}/?checkout=paypal&subscription_id=${plan}`,
+      cancelUrl: `${FRONTEND_URL}/?checkout=cancel`,
+    });
+    return res.json({ url: sub.approveUrl });
+  }
+
+  // --- Polar (fallback) ---
   if (!polar) {
-    return res.status(501).json({ error: 'Payments are not configured. Set POLAR_ACCESS_TOKEN.' });
+    return res.status(501).json({ error: 'Payments are not configured. Set PAYPAL_CLIENT_ID and PAYPAL_SECRET, or POLAR_ACCESS_TOKEN.' });
   }
   const productId = productIdFor(plan);
   if (!productId) {
@@ -214,7 +229,6 @@ api.post('/billing/checkout', async (req, res) => {
     products: [productId],
     successUrl: `${FRONTEND_URL}/?checkout=success`,
     customerEmail: user.email,
-    // Ties the Polar customer to our internal user id; echoed back on webhooks.
     externalCustomerId: user.id,
     metadata: { userId: user.id, plan },
   });
@@ -222,28 +236,43 @@ api.post('/billing/checkout', async (req, res) => {
   res.json({ url: checkout.url });
 });
 
-// Capture a PayPal order after the buyer approves and returns. Grants lifetime
-// access to the authenticated user, but only if the order's custom_id matches
-// them (prevents claiming an order id that belongs to someone else). The
-// PAYMENT.CAPTURE.COMPLETED webhook is the redundant, authoritative backup.
-const captureSchema = z.object({ orderId: z.string().min(1).max(64) });
+// Verify a PayPal subscription after the buyer approves and returns.
+// The BILLING.SUBSCRIPTION.ACTIVATED webhook is the authoritative backup.
+const captureSchema = z.object({ subscriptionId: z.string().min(1).max(64) });
 api.post('/billing/capture', async (req, res) => {
   if (!paypalConfigured) {
     return res.status(501).json({ error: 'PayPal is not configured.' });
   }
-  const { orderId } = captureSchema.parse(req.body);
-  const result = await captureOrder(orderId);
+  const { subscriptionId } = captureSchema.parse(req.body);
+  const result = await verifySubscription(subscriptionId);
 
-  if (result.completed && result.userId && result.userId !== req.user!.id) {
-    return res.status(403).json({ error: 'This order belongs to a different account.' });
+  if (result.active && result.userId && result.userId !== req.user!.id) {
+    return res.status(403).json({ error: 'This subscription belongs to a different account.' });
   }
-  if (result.completed && result.userId === req.user!.id) {
+  if (result.active && result.userId === req.user!.id) {
     const firstPurchase = req.user!.plan === 'free';
     await storage.setPlan(req.user!.id, 'pro');
     if (firstPurchase) await tagGhlCustomer(req.user!.email);
     return res.json({ entitled: true });
   }
-  return res.status(202).json({ entitled: false, status: 'pending' });
+  return res.status(202).json({ entitled: false, status: result.status });
+});
+
+// Cancel the authenticated user's PayPal subscription.
+api.post('/billing/cancel', async (req, res) => {
+  if (!paypalConfigured) {
+    return res.status(501).json({ error: 'PayPal is not configured.' });
+  }
+  const subscriptionId = req.user!.polarCustomerId ?? null;
+  if (!subscriptionId) {
+    return res.status(400).json({ error: 'No subscription found for this account.' });
+  }
+  try {
+    await cancelSubscription(subscriptionId);
+    res.json({ cancelled: true });
+  } catch (err) {
+    res.status(500).json({ error: `Could not cancel subscription: ${String(err)}` });
+  }
 });
 
 // Open the Polar customer portal so the user can manage/cancel their subscription.

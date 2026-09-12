@@ -67,11 +67,17 @@ function CheckoutFlow({
     const checkout = params.get('checkout');
     if (checkout !== 'success' && checkout !== 'paypal') return;
 
-    setRet({ provider: checkout === 'paypal' ? 'paypal' : 'polar', orderId: params.get('token') });
+    // PayPal subscriptions return ba_token (billing agreement token) and/or
+    // subscription_id in the query string. The subscription id is what we need
+    // to verify. For Polar, there is no token; the webhook handles it.
+    const subId = params.get('ba_token') ?? params.get('subscription_id') ?? params.get('token');
+    setRet({ provider: checkout === 'paypal' ? 'paypal' : 'polar', orderId: subId });
     setPhase('working');
 
     params.delete('checkout');
     params.delete('token');
+    params.delete('ba_token');
+    params.delete('subscription_id');
     params.delete('PayerID');
     const qs = params.toString();
     window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''));

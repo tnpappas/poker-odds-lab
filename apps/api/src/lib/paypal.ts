@@ -131,6 +131,125 @@ export async function captureOrder(orderId: string): Promise<CaptureResult> {
   return { orderId, userId, completed, alreadyCaptured };
 }
 
+// --- Subscriptions (recurring billing) -----------------------------------
+
+/**
+ * Map a checkout plan to its PayPal billing plan ID.
+ * These are created in the PayPal dashboard (Products & Plans) and the IDs
+ * are set via env vars on the server.
+ */
+export function paypalPlanIdFor(plan: 'monthly' | 'annual'): string | undefined {
+  switch (plan) {
+    case 'monthly':
+      return process.env.PAYPAL_MONTHLY_PLAN_ID;
+    case 'annual':
+      return process.env.PAYPAL_ANNUAL_PLAN_ID;
+  }
+}
+
+export interface CreatedSubscription {
+  id: string;
+  approveUrl: string;
+  status: string;
+}
+
+/**
+ * Create a PayPal subscription for the given billing plan.
+ * The buyer is redirected to the approval URL, returns to returnUrl, and
+ * we verify the subscription is active before granting access.
+ */
+export async function createSubscription(opts: {
+  planId: string;
+  userId: string;
+  email: string;
+  returnUrl: string;
+  cancelUrl: string;
+}): Promise<CreatedSubscription> {
+  const token = await accessToken();
+  const res = await fetch(`${API_BASE}/v1/billing/subscriptions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'PayPal-Request-Id': opts.userId,
+    },
+    body: JSON.stringify({
+      plan_id: opts.planId,
+      custom_id: opts.userId,
+      subscriber: {
+        email_address: opts.email,
+      },
+      application_context: {
+        brand_name: 'Poker Logic Lab',
+        user_action: 'SUBSCRIBE_NOW',
+        shipping_preference: 'NO_SHIPPING',
+        return_url: opts.returnUrl,
+        cancel_url: opts.cancelUrl,
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`PayPal subscription error ${res.status}: ${await res.text()}`);
+  const data = (await res.json()) as {
+    id: string;
+    status: string;
+    links?: { rel: string; href: string }[];
+  };
+  const approve = data.links?.find(
+    (l) => l.rel === 'approve' || l.rel === 'payer-action',
+  );
+  if (!approve) throw new Error('PayPal did not return an approval link');
+  return { id: data.id, approveUrl: approve.href, status: data.status };
+}
+
+/**
+ * Verify a subscription is active after the buyer returns from PayPal.
+ * Returns the subscription status and our internal user id (from custom_id).
+ */
+export interface SubscriptionResult {
+  subscriptionId: string;
+  userId?: string;
+  active: boolean;
+  status: string;
+}
+
+export async function verifySubscription(subscriptionId: string): Promise<SubscriptionResult> {
+  const token = await accessToken();
+  const res = await fetch(`${API_BASE}/v1/billing/subscriptions/${subscriptionId}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`PayPal subscription verify error ${res.status}: ${await res.text()}`);
+  const data = (await res.json()) as {
+    id: string;
+    status: string;
+    custom_id?: string;
+  };
+  const activeStatuses = ['ACTIVE', 'APPROVAL_PENDING'];
+  return {
+    subscriptionId: data.id,
+    userId: data.custom_id,
+    active: activeStatuses.includes(data.status),
+    status: data.status,
+  };
+}
+
+/**
+ * Cancel a subscription so it does not renew. The user keeps access until
+ * the end of the current billing period.
+ */
+export async function cancelSubscription(subscriptionId: string): Promise<void> {
+  const token = await accessToken();
+  const res = await fetch(`${API_BASE}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason: 'User cancelled from Poker Logic Lab' }),
+  });
+  if (!res.ok && res.status !== 422) {
+    // 422 = already cancelled, which is fine.
+    throw new Error(`PayPal cancel error ${res.status}: ${await res.text()}`);
+  }
+}
+
 // --- Webhook signature verification --------------------------------------
 /** Verify a PayPal webhook via the REST verify endpoint. Requires PAYPAL_WEBHOOK_ID. */
 export async function verifyWebhookSignature(
