@@ -47,7 +47,7 @@ If the frontend is up but the API is down, the tools still work locally but sign
 After any Railway variable change, Railway prompts "Apply changes / Deploy"; click Deploy.
 
 ## Backups
-- Neon keeps point-in-time history for the plan's retention window (Free plan: 24 hours as of Sept 2026; see Neon > project > Settings). Restore = Neon > Branches > "Restore" to a timestamp, which creates a branch you can point the API at by changing DATABASE_URL.
+- Neon keeps point-in-time history for the plan's retention window (Free plan: at most 6 hours as of Sept 2026; see Neon > project > Settings). Restore = Neon > Branches > "Restore" to a timestamp, which creates a branch you can point the API at by changing DATABASE_URL.
 - A restore has not been rehearsed yet (KNOWN-ISSUES.md).
 
 ## Top failure scenarios
@@ -62,3 +62,16 @@ After any Railway variable change, Railway prompts "Apply changes / Deploy"; cli
 - `npm audit` output from the last CI run.
 - Vendor changelogs: PayPal Subscriptions API, Clerk SDK, Drizzle.
 - Rehearse one rollback or restore.
+
+## Security incident or suspected breach
+1. Rotate the affected key first (section above), then investigate. Keys: Clerk secret, PayPal secret, Neon connection string, Sentry DSN, GHL token.
+2. Sign out all sessions where the vendor offers it (Clerk dashboard for users; each vendor's account security page for Troy's own logins).
+3. Check Sentry and Railway logs for the request ids involved; check `webhook_events` for unexpected grants.
+4. If customer data was exposed, note what, when, and who; email affected users from support@pokerlogiclab.com within 72 hours with what happened and what they should do. Virginia's breach law applies to the LLC.
+5. Record the incident and the fix in DECISIONS.md.
+
+## Data retention
+- Customer rows live until the customer deletes the account (hard delete, cascades) or emails support@pokerlogiclab.com.
+- `webhook_events` rows are kept indefinitely (small, and they are the audit trail for billing disputes).
+- Sentry events expire on Sentry's free-plan schedule (90 days). Railway logs follow Railway's retention. UptimeRobot keeps its own history.
+- No files are uploaded by customers, so there is nothing else to purge.

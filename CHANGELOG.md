@@ -2,6 +2,19 @@
 
 All notable changes, newest first. Dates are the day the change went live on pokerlogiclab.com.
 
+## 2026-09-12 (evening)
+
+### Privacy and security
+- Meta Pixel no longer loads on page open. A one-time banner asks visitors to Accept or Decline; only Accept loads the pixel. Privacy policy updated to say so (it previously said no advertising cookies were used while the pixel loaded unconditionally).
+- Two-factor authentication turned on and verified for GitHub, Vercel, Railway, Neon, Clerk, Sentry and PayPal.
+- Dependency upgrades to clear high-severity advisories: drizzle-orm 0.36 to 0.45.2 (SQL identifier escaping), react-router-dom 7.1 to 7.18.3 (open redirect). CI production audit now passes.
+- Railway waits for CI to pass before deploying the API.
+
+### Operations
+- Uptime monitoring confirmed in UptimeRobot: API health endpoint and the site, 5 minute checks, email alerts.
+- Secret scan of the full git history: no real secrets ever committed.
+- One-off helper .bat files retired to `_to_delete/`; the standard set is 1-Start-App, 2-Run-Tests, 3-Deploy, 4-Pull-Latest.
+
 ## 2026-09-12
 
 ### Billing and accounts

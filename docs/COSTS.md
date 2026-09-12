@@ -6,7 +6,7 @@ Every paid or metered service, the tier in use, and where the price jumps. Revie
 |---|---|---|---|---|
 | Vercel | Frontend hosting | Hobby | $0 | Hobby is non-commercial per Vercel's fair-use terms; a paid product should move to Pro ($20/seat) once revenue starts. 100 GB bandwidth/month cap on Hobby. |
 | Railway | API hosting | Hobby | about $5 (includes $5 usage credit) | Usage billed above the credit; the API is a single small replica and has stayed inside it. |
-| Neon | Postgres | Free | $0 | Free: 0.5 GB storage, 24-hour history, compute auto-suspends. Launch plan ($19) adds 7-day history and no auto-suspend. Move when there are paying customers (restore window matters). |
+| Neon | Postgres | Free | $0 | Free: 0.5 GB storage, at most 6 hours of history, compute auto-suspends. Launch plan ($19) adds 7-day history and no auto-suspend. Move when there are paying customers (restore window matters). |
 | Clerk | Auth | Free | $0 | Free up to 10,000 monthly active users; Pro is $25/month plus per-MAU above that. |
 | PayPal | Payments | Standard | 0 fixed | Per transaction: about 3.49% + $0.49 for US consumer payments (check the current rate card). On $7.99 that is about $0.77, on $49 about $2.20. |
 | Sentry | Error tracking | Developer (free) | $0 | 5,000 errors/month; Team plan starts at $26. Tracing is off to stay inside the free quota. |

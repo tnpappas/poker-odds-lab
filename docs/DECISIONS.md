@@ -40,3 +40,17 @@ All equity math runs in the browser (web worker). Zero server compute per user a
 
 ## 2026-07: Single-user tenancy, no organizations
 Rows carry `user_id`; every query is scoped in the storage layer. Teams and invitations are a Stage 2 item.
+
+## 2026-09-12: Hard delete on account removal, no soft delete
+The privacy page promises that deleting an account removes the training data. Rows cascade-delete from `users`; there is no `deleted_at`. Recovery of an accidental deletion relies on Neon point-in-time history, which is why the Neon retention window matters (KNOWN-ISSUES.md).
+
+## 2026-09-12: Isolation in application code, no Postgres row level security
+The API connects to Neon as a single owner role and every storage call is scoped by the authenticated user id (covered by `test/isolation.test.ts`). RLS would add a second layer but needs per-request role switching that the Neon HTTP driver does not make cheap. Revisit if a second service ever shares the database.
+
+## 2026-09-12: Vendor exit notes
+- PayPal: subscriptions live in PayPal; leaving means asking every subscriber to re-subscribe with the new processor. Keep `lib/paypal.ts` as the only PayPal-aware file so a replacement is one file plus the webhook handler.
+- Clerk: users are keyed by `clerk_id`; export from the Clerk dashboard maps to `users.email`. Replacement means a new `middleware/auth.ts` and a one-time id mapping.
+- Neon: plain Postgres; `pg_dump` and restore anywhere. Only `@neondatabase/serverless` in `db/index.ts` is Neon specific.
+- Railway and Vercel: stateless; the API is `tsx src/index.ts` behind a health check and the web app is a static Vite build. Either moves in an afternoon.
+- Sentry: DSN swap; nothing else depends on it.
+- GoHighLevel: one tag on purchase in `lib/ghl.ts`; remove the token and the call becomes a no-op.

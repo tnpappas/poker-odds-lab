@@ -100,6 +100,21 @@ Every webhook delivery the API has acted on. Inserting the id before processing 
 | event_type | text | |
 | received_at | timestamptz | |
 
+## Personal data inventory
+
+What we hold about a person and why. Nothing else is collected.
+
+| Data | Table.column | Why | Source |
+|---|---|---|---|
+| Email address | users.email | account identity, support, receipts are sent by PayPal not us | Clerk sign-up |
+| Username (optional) | users.username | display | Clerk profile |
+| Clerk user id | users.clerk_id | link to the auth provider | Clerk |
+| PayPal subscription id | users.paypal_subscription_id | cancel and entitlement checks; not a payment method | PayPal |
+| Training activity | sessions, hand_decisions, user_leaks, daily_usage | the product itself: progress, mistakes, daily free-tier limits | the app |
+| Saved opponents and notes | adversary_profiles (including free-text notes) | Adversary Lab | the user |
+
+Not stored: names, addresses, card or bank details (PayPal holds them), IP addresses (Railway and Vercel access logs only, on their retention), analytics identifiers (Meta Pixel only after consent, in the visitor's browser).
+
 ## Relationships
 
 users 1..n sessions, hand_decisions, adversary_profiles, user_leaks, daily_usage. sessions 1..n hand_decisions (optional). webhook_events stands alone.
