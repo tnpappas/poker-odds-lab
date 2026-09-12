@@ -173,25 +173,37 @@ webhooks.post('/paypal/webhooks', rawJson, async (req: Request, res: Response) =
     return res.status(400).json({ error: 'Invalid PayPal webhook body' });
   }
 
-  if (event.event_type === 'BILLING.SUBSCRIPTION.ACTIVATED') {
+  const type = event.event_type;
+  if (type === 'BILLING.SUBSCRIPTION.ACTIVATED' || type === 'BILLING.SUBSCRIPTION.RE-ACTIVATED') {
+    // New subscription, or a suspended one whose payment was brought current.
     const userId: string | undefined = event.resource?.custom_id;
     const subscriptionId: string | undefined = event.resource?.id;
     if (userId) {
       await grantPro(userId);
       if (subscriptionId) await storage.setPaypalSubscription(userId, subscriptionId);
-      logger.info('paypal subscription activated', { userId });
+      logger.info('paypal subscription activated', { userId, type });
     }
-  } else if (event.event_type === 'BILLING.SUBSCRIPTION.CANCELLED' || event.event_type === 'BILLING.SUBSCRIPTION.EXPIRED') {
+  } else if (
+    type === 'BILLING.SUBSCRIPTION.CANCELLED' ||
+    type === 'BILLING.SUBSCRIPTION.EXPIRED' ||
+    type === 'BILLING.SUBSCRIPTION.SUSPENDED'
+  ) {
+    // SUSPENDED fires after the plan's missed-payment threshold (3 cycles):
+    // the subscriber is no longer paying, so access ends until RE-ACTIVATED.
     const userId: string | undefined = event.resource?.custom_id;
     if (userId) {
       await storage.setPlan(userId, 'free');
-      logger.info('paypal subscription cancelled/expired', { userId });
+      logger.info('paypal subscription ended', { userId, type });
     }
-  } else if (event.event_type === 'PAYMENT.SALE.COMPLETED') {
+  } else if (type === 'BILLING.SUBSCRIPTION.PAYMENT.FAILED') {
+    // A renewal charge failed. PayPal retries on its own; access stays until
+    // SUSPENDED. Logged so failed renewals are visible in Railway logs.
+    logger.warn('paypal renewal payment failed', { userId: event.resource?.custom_id, id: event.resource?.id });
+  } else if (type === 'PAYMENT.SALE.COMPLETED') {
     // Recurring payment succeeded. Subscription is still active, so just log.
     // The ACTIVATED event already granted access; this is a renewal.
     logger.debug('paypal recurring payment completed', { id: event.resource?.id });
-  } else if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+  } else if (type === 'PAYMENT.CAPTURE.COMPLETED') {
     // Legacy one-time order (no longer used, but kept for backward compat).
     const userId: string | undefined =
       event.resource?.custom_id ?? event.resource?.purchase_units?.[0]?.custom_id;
@@ -200,7 +212,7 @@ webhooks.post('/paypal/webhooks', rawJson, async (req: Request, res: Response) =
       logger.info('paypal capture completed (legacy)', { userId });
     }
   } else {
-    logger.debug('paypal webhook ignored', { type: event.event_type });
+    logger.debug('paypal webhook ignored', { type });
   }
 
   res.status(200).send('');
