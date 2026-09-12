@@ -1,4 +1,4 @@
-import { Card, Rank } from './types.js';
+import { Card } from './types.js';
 import { calculateEquity } from './equity.js';
 import { cellLabel, expandLabel } from './ranges.js';
 

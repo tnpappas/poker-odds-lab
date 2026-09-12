@@ -75,7 +75,7 @@ const DOCS: Record<'terms' | 'privacy' | 'refunds', Doc> = {
         'Clerk (authentication), PayPal (payments), Neon (database hosting), Vercel and Railway (app hosting), and Sentry (error monitoring). Each processes data only to provide its part of the service.',
       ] },
       { h: 'Cookies', body: [
-        'We use the cookies required for you to stay signed in (set by Clerk). We do not use advertising cookies.',
+        'We use the cookies required for you to stay signed in (set by Clerk) and to complete payment (set by PayPal). We also use the Meta (Facebook) Pixel to measure whether our ads work, but only if you accept it in the banner shown on your first visit. If you decline, no advertising tracking is loaded and the app works exactly the same. You can change your mind by clearing this site\'s data in your browser, which shows the banner again.',
       ] },
       { h: 'Data retention and deletion', body: [
         'We keep your data while your account is active. You can delete your account at any time, which removes your training data from our database. To request deletion, use the account controls or email ' + SUPPORT + '.',

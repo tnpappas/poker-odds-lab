@@ -30,3 +30,7 @@ yarn-error.log*
 .idea/
 .vercel
 .railway
+
+# local scan output
+secret-scan-report.txt
+scan-raw.txt

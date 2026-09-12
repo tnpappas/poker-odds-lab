@@ -7,6 +7,7 @@ import { api } from './lib/api';
 import { BrandMark } from './components/ui';
 import { HowToUse } from './components/HowToUse';
 import { CheckoutSuccess } from './components/CheckoutSuccess';
+import { CookieConsent } from './components/CookieConsent';
 import { Seo } from './components/Seo';
 import { Analytics } from '@vercel/analytics/react';
 import { Spade, Heart, Diamond, Club } from './components/icons';
@@ -53,6 +54,7 @@ export function App() {
       <Seo />
       <Analytics />
       <CheckoutSuccess />
+      <CookieConsent />
       <header className="sticky top-0 z-30 rail border-b backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link to="/" aria-label="Poker Logic Lab home">

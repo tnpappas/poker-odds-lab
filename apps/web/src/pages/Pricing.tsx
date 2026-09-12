@@ -234,7 +234,7 @@ function SignedInBuy({
   async function buy(buyPlan: CheckoutPlan) {
     setError(null);
     setBusy(buyPlan);
-    trackInitiateCheckout();
+    trackInitiateCheckout(buyPlan);
     const result = await api.startCheckout(buyPlan);
     if (!result.ok) {
       setBusy(null);

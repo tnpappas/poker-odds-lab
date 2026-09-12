@@ -10,6 +10,10 @@ import '@fontsource-variable/jetbrains-mono';
 import './index.css';
 import { LOGO_DATA_URI } from './brand';
 import { AuthProvider } from './lib/auth';
+import { initPixelIfConsented } from './lib/fbpixel';
+
+// Ad measurement loads only if this browser already accepted tracking.
+initPixelIfConsented();
 
 // Use the real brand mark as the browser favicon.
 {

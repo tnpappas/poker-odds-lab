@@ -29,7 +29,7 @@ export function Paywall({ reason, onClose }: { reason: string; onClose: () => vo
       return;
     }
     setBusy(plan);
-    trackInitiateCheckout();
+    trackInitiateCheckout(plan);
     const result = await api.startCheckout(plan);
     if (!result.ok) {
       setBusy(null);
