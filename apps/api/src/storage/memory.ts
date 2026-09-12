@@ -20,7 +20,7 @@ export class MemoryStorage implements Storage {
   async getOrCreateUser(clerkId: string, email: string, username?: string): Promise<User> {
     const existingId = this.byClerk.get(clerkId);
     if (existingId) return this.users.get(existingId)!;
-    const user: User = { id: randomUUID(), clerkId, email, username: username ?? null, plan: 'free', polarCustomerId: null, createdAt: now() };
+    const user: User = { id: randomUUID(), clerkId, email, username: username ?? null, plan: 'free', polarCustomerId: null, paypalSubscriptionId: null, createdAt: now() };
     this.users.set(user.id, user);
     this.byClerk.set(clerkId, user.id);
     return user;
@@ -45,6 +45,11 @@ export class MemoryStorage implements Storage {
   async setPolarCustomer(userId: string, polarCustomerId: string): Promise<void> {
     const u = this.users.get(userId);
     if (u) u.polarCustomerId = polarCustomerId;
+  }
+
+  async setPaypalSubscription(userId: string, subscriptionId: string | null): Promise<void> {
+    const u = this.users.get(userId);
+    if (u) u.paypalSubscriptionId = subscriptionId;
   }
 
   async findUserByPolarCustomer(polarCustomerId: string): Promise<User | null> {

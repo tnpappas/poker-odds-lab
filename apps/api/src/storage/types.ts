@@ -11,6 +11,7 @@ export interface User {
   username: string | null;
   plan: Plan;
   polarCustomerId: string | null;
+  paypalSubscriptionId: string | null;
   createdAt: string;
 }
 
@@ -109,6 +110,7 @@ export interface Storage {
   upsertUserFromWebhook(clerkId: string, email: string, username?: string): Promise<User>;
   setPlan(userId: string, plan: Plan): Promise<void>;
   setPolarCustomer(userId: string, polarCustomerId: string): Promise<void>;
+  setPaypalSubscription(userId: string, subscriptionId: string | null): Promise<void>;
   findUserByPolarCustomer(polarCustomerId: string): Promise<User | null>;
   findUserByEmail(email: string): Promise<User | null>;
   getUserById(userId: string): Promise<User | null>;

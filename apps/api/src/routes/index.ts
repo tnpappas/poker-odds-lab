@@ -6,6 +6,7 @@ import { detectLeaks } from '../services/leakDetector';
 import { polar, productIdFor } from '../lib/polar';
 import { paypalConfigured, createSubscription, verifySubscription, cancelSubscription, paypalPlanIdFor } from '../lib/paypal';
 import { tagGhlCustomer } from '../lib/ghl';
+import { logger } from '../lib/logger';
 
 export const api = Router();
 
@@ -252,6 +253,7 @@ api.post('/billing/capture', async (req, res) => {
   if (result.active && result.userId === req.user!.id) {
     const firstPurchase = req.user!.plan === 'free';
     await storage.setPlan(req.user!.id, 'pro');
+    await storage.setPaypalSubscription(req.user!.id, subscriptionId);
     if (firstPurchase) await tagGhlCustomer(req.user!.email);
     return res.json({ entitled: true });
   }
@@ -263,15 +265,17 @@ api.post('/billing/cancel', async (req, res) => {
   if (!paypalConfigured) {
     return res.status(501).json({ error: 'PayPal is not configured.' });
   }
-  const subscriptionId = req.user!.polarCustomerId ?? null;
+  const subscriptionId = req.user!.paypalSubscriptionId ?? null;
   if (!subscriptionId) {
     return res.status(400).json({ error: 'No subscription found for this account.' });
   }
   try {
     await cancelSubscription(subscriptionId);
+    // Access is revoked by the BILLING.SUBSCRIPTION.CANCELLED webhook.
     res.json({ cancelled: true });
   } catch (err) {
-    res.status(500).json({ error: `Could not cancel subscription: ${String(err)}` });
+    logger.error('paypal cancel failed', { userId: req.user!.id, err: String(err) });
+    res.status(500).json({ error: 'Could not cancel the subscription. Please try again or contact support.' });
   }
 });
 

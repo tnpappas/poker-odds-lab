@@ -175,8 +175,10 @@ webhooks.post('/paypal/webhooks', rawJson, async (req: Request, res: Response) =
 
   if (event.event_type === 'BILLING.SUBSCRIPTION.ACTIVATED') {
     const userId: string | undefined = event.resource?.custom_id;
+    const subscriptionId: string | undefined = event.resource?.id;
     if (userId) {
       await grantPro(userId);
+      if (subscriptionId) await storage.setPaypalSubscription(userId, subscriptionId);
       logger.info('paypal subscription activated', { userId });
     }
   } else if (event.event_type === 'BILLING.SUBSCRIPTION.CANCELLED' || event.event_type === 'BILLING.SUBSCRIPTION.EXPIRED') {

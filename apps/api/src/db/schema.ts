@@ -7,6 +7,7 @@ export const users = pgTable('users', {
   username: text('username'),
   plan: text('plan').notNull().default('free'), // 'free' | 'pro' | 'lifetime'
   polarCustomerId: text('polar_customer_id'), // set on first successful Polar checkout
+  paypalSubscriptionId: text('paypal_subscription_id'), // active PayPal subscription (I-...), set on activation
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
