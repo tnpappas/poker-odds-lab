@@ -1,3 +1,5 @@
+// Error tracking first so anything that fails during startup is reported.
+import { Sentry } from './lib/sentry';
 import { StrictMode, Suspense, lazy, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -79,10 +81,24 @@ const router = createBrowserRouter([
   },
 ]);
 
+function CrashFallback() {
+  return (
+    <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3 text-center px-6">
+      <p className="text-lg">Something went wrong on this page.</p>
+      <p className="text-ink-500 text-sm">The error has been reported. Reload to try again.</p>
+      <button type="button" className="underline text-sm" onClick={() => window.location.reload()}>
+        Reload
+      </button>
+    </div>
+  );
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <Sentry.ErrorBoundary fallback={<CrashFallback />}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </Sentry.ErrorBoundary>
   </StrictMode>,
 );
