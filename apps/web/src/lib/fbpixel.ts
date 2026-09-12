@@ -12,8 +12,8 @@ declare global {
   }
 }
 
-/** One-time launch price. Keep in sync with the Paywall tier + server. */
-export const PRICE_USD = 24.99;
+/** Monthly price. Keep in sync with the Paywall tier + server. */
+export const PRICE_USD = 7.99;
 
 /** Fired when the user starts checkout (clicks the Lifetime tier). */
 export function trackInitiateCheckout(): void {

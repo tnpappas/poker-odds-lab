@@ -20,7 +20,7 @@ export function Blog() {
         Short, practical breakdowns of the math and reads that actually move your win rate. No jargon, no fluff.
       </p>
       <p className="text-gold-400 mt-3 text-sm font-medium">
-        New Lab Notes are dealt regularly to lifetime members.{' '}
+        New Lab Notes are dealt regularly to members.{' '}
         <Link to="/pricing" className="underline underline-offset-2 hover:text-ink-100">
           See what is included
         </Link>
@@ -36,7 +36,7 @@ export function Blog() {
               {p.access === 'free' ? (
                 <span className="px-2 py-0.5 rounded-full border border-felt-700 text-ink-300">Free</span>
               ) : (
-                <span className="px-2 py-0.5 rounded-full border border-gold-500/50 text-gold-400">Lifetime members</span>
+                <span className="px-2 py-0.5 rounded-full border border-gold-500/50 text-gold-400">Members</span>
               )}
               <span aria-hidden>·</span>
               <span>{p.readingTime}</span>

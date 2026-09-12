@@ -178,7 +178,7 @@ export function Home() {
       {/* ---- Included with purchase: the complete book ---- */}
       <div className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
         <div className="inlay mb-8" />
-        <Eyebrow>Included with lifetime access</Eyebrow>
+        <Eyebrow>Unlimited access</Eyebrow>
         <div className="felt-card rounded-2xl p-6 sm:p-8 mt-2 flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
           <img
             src={BOOK_COVER_DATA_URI}
@@ -190,13 +190,13 @@ export function Home() {
               Every tool, plus the complete book.
             </h2>
             <p className="text-ink-300 mt-3 text-[15px] leading-relaxed max-w-xl">
-              One purchase unlocks every trainer in the lab and the full guide,
-              <span className="text-ink-100"> Playing Online Texas Hold’em</span>. All 19 chapters,
-              yours to download and keep. $24.99 once. Less than one month of a solver subscription. Yours forever.
+              One payment of $49/year (or $7.99/month) unlocks every trainer in the lab and the full guide,
+              <span className="text-ink-100"> Playing Online Texas Hold\u2019em</span>. All 19 chapters,
+              yours to download and keep. New Lab Notes every week. Cancel anytime.
             </p>
             <Link to="/pricing"
               className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
-              <Spade size={16} /> Get lifetime access
+              <Spade size={16} /> Get unlimited access
             </Link>
           </div>
         </div>

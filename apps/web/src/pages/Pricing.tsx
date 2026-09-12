@@ -4,7 +4,7 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton } from '@clerk/clerk-re
 import { motion } from 'framer-motion';
 import { clerkEnabled } from '../lib/auth';
 import { useGameStore } from '../store/useGameStore';
-import { api } from '../lib/api';
+import { api, type CheckoutPlan } from '../lib/api';
 import { trackInitiateCheckout } from '../lib/fbpixel';
 import { Eyebrow } from '../components/ui';
 import { Spade } from '../components/icons';
@@ -18,73 +18,114 @@ const INCLUDED = [
   'Tournament Lab: push/fold and ICM for the spots that decide tournaments',
   'Adversary Lab: model a real opponent from six reads and train against them',
   'EV Dashboard with automatic leak detection',
-  'The complete book, Playing Online Texas Hold’em, all 19 chapters, yours to download and keep',
+  'The complete book, Playing Online Texas Hold\u2019em, all 19 chapters, yours to download and keep',
+  'New Lab Notes delivered every week',
+  'Weekly leak reports by email',
+];
+
+const TIERS: { plan: CheckoutPlan; label: string; price: string; period: string; note: string; highlight?: boolean }[] = [
+  { plan: 'monthly', label: 'Monthly', price: '$7.99', period: '/mo', note: 'Cancel anytime', highlight: true },
+  { plan: 'annual', label: 'Annual', price: '$49', period: '/yr', note: 'Save 49% \u2014 about $4.08/mo' },
 ];
 
 /**
  * Public pricing page.
  *
- * This is the only place a logged-out visitor is asked to buy, so it has to
- * carry the whole pitch: price, what is included, how payment works, and the
- * refund promise. Purchases are tied to an account (entitlement lives on the
- * user record and PayPal orders carry the user id), so the button creates the
- * account first, then returns here with ?buy=1 and starts checkout
- * automatically. The visitor sees one continuous flow, not a dead end.
+ * Free tier: 3 replays/day, 2 blitz rounds/day, Visualizer and Calculator free.
+ * Paid tiers: Monthly $7.99/mo or Annual $49/yr, billed through Polar.
  */
 export function Pricing() {
   return (
     <div className="max-w-3xl mx-auto px-5 sm:px-6 pt-6 pb-28">
       <div className="text-center">
-        <Eyebrow>Lifetime access</Eyebrow>
+        <Eyebrow>Pricing</Eyebrow>
         <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight mt-3">
-          Pay once. Keep the whole lab.
+          Train every day. Pay less than one solver month.
         </h1>
         <p className="text-ink-300 mt-4 text-[15px] leading-relaxed max-w-xl mx-auto">
-          Every trainer in the lab and the complete book, for a single payment. No subscription,
-          no renewal, nothing to cancel.
+          Try 3 hands free every day, no sign-up needed. When you want more, pick a plan.
+          Cancel anytime.
         </p>
       </div>
 
+      {/* Free tier summary */}
+      <div className="felt-card rounded-2xl p-5 mt-7 text-center">
+        <div className="flex items-baseline justify-center gap-2">
+          <span className="num font-display text-3xl font-semibold text-ink-100">Free</span>
+          <span className="text-ink-500 text-sm">3 hands / day</span>
+        </div>
+        <p className="text-ink-300 text-sm mt-2">
+          Replay, Blitz, Visualizer, and Calculator. No sign-up needed.
+        </p>
+        <Link to="/replay" className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl border border-white/20 bg-black/30 text-ink-100 hover:border-brand-400/70 transition text-sm font-medium">
+          <Spade size={14} /> Play a free hand
+        </Link>
+      </div>
+
+      {/* Paid tiers */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="felt-card rounded-2xl p-6 sm:p-9 mt-9"
+        className="felt-card rounded-2xl p-6 sm:p-8 mt-4"
       >
-        <div className="flex flex-col sm:flex-row items-center gap-7">
+        <div className="flex flex-col sm:flex-row items-center gap-6">
           <img
             src={BOOK_COVER_DATA_URI}
-            alt="Playing Online Texas Hold’em book cover"
-            className="w-28 sm:w-32 rounded-lg shadow-2xl shrink-0 ring-1 ring-white/10"
+            alt="Playing Online Texas Hold\u2019em book cover"
+            className="w-24 sm:w-28 rounded-lg shadow-2xl shrink-0 ring-1 ring-white/10"
           />
           <div className="flex-1 text-center sm:text-left">
-            <div className="flex items-baseline justify-center sm:justify-start gap-2">
-              <span className="num font-display text-5xl font-semibold text-brass-300">$24.99</span>
-              <span className="text-ink-500 text-sm">once</span>
-            </div>
-            <p className="text-ink-300 mt-3 text-sm leading-relaxed">
-              Less than one month of a solver subscription. Yours forever.
+            <h2 className="font-display text-xl font-semibold tracking-tight">
+              Unlimited access
+            </h2>
+            <p className="text-ink-300 mt-2 text-sm leading-relaxed">
+              Every tool, unlimited hands, the complete book, and new Lab Notes every week.
             </p>
           </div>
         </div>
 
-        <ul className="mt-8 space-y-2.5">
+        <div className="grid sm:grid-cols-2 gap-4 mt-7">
+          {TIERS.map((t) => (
+            <div
+              key={t.plan}
+              className={`rounded-xl p-5 border text-center transition ${
+                t.highlight
+                  ? 'border-brand-400/60 bg-brand-500/[0.07]'
+                  : 'border-felt-700 bg-felt-900/50'
+              }`}
+            >
+              <div className="text-xs text-ink-500 uppercase tracking-wide">{t.label}</div>
+              <div className="flex items-baseline justify-center gap-1 mt-2">
+                <span className="num font-display text-4xl font-semibold text-brass-300">{t.price}</span>
+                <span className="text-ink-500 text-sm">{t.period}</span>
+              </div>
+              <p className="text-xs text-ink-400 mt-2">{t.note}</p>
+              <div className="mt-5">
+                <BuyButton plan={t.plan} label={t.highlight ? `Go ${t.label}` : `Go ${t.label}`} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <ul className="mt-7 space-y-2.5">
           {INCLUDED.map((item) => (
-            <li key={item} className="flex gap-3 text-[15px] text-ink-200 leading-relaxed">
+            <li key={item} className="flex gap-3 text-[14px] text-ink-200 leading-relaxed">
               <Spade size={13} className="mt-1.5 shrink-0 text-brand-400" />
               <span>{item}</span>
             </li>
           ))}
         </ul>
 
-        <div className="mt-9">
+        <div className="mt-7 border-t border-felt-700/50 pt-5">
           <BuyBlock />
         </div>
 
         <p className="text-xs text-ink-500 mt-5 text-center leading-relaxed">
-          Pay by debit or credit card, or with PayPal. A PayPal account is not required.
-        </p>
-        <p className="text-xs text-ink-500 mt-2 text-center leading-relaxed">
-          Covered by our <Link to="/refunds" className="text-brand-400 hover:text-brand-300">14-day money-back guarantee</Link>.
+          Covered by our{' '}
+          <Link to="/refunds" className="text-brand-400 hover:text-brand-300">
+            14-day money-back guarantee
+          </Link>
+          . Cancel anytime from your account or by emailing support.
         </p>
       </motion.div>
 
@@ -105,13 +146,40 @@ export function Pricing() {
 }
 
 const BTN =
-  'w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition disabled:opacity-60';
+  'w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition disabled:opacity-60';
 
-function BuyBlock() {
-  // Local/dev with no Clerk key: nothing is gated, so just send them in.
+function BuyButton({ plan, label }: { plan: CheckoutPlan; label: string }) {
   if (!clerkEnabled) {
     return (
       <Link to="/replay" className={BTN}>
+        <Spade size={14} /> Open the lab
+      </Link>
+    );
+  }
+  return (
+    <>
+      <SignedOut>
+        <SignUpButton
+          mode="modal"
+          forceRedirectUrl={`/pricing?buy=${plan}`}
+          signInForceRedirectUrl={`/pricing?buy=${plan}`}
+        >
+          <button className={BTN}>
+            <Spade size={14} /> {label}
+          </button>
+        </SignUpButton>
+      </SignedOut>
+      <SignedIn>
+        <SignedInBuy plan={plan} label={label} />
+      </SignedIn>
+    </>
+  );
+}
+
+function BuyBlock() {
+  if (!clerkEnabled) {
+    return (
+      <Link to="/replay" className={`${BTN} max-w-xs mx-auto`}>
         <Spade size={16} /> Open the lab
       </Link>
     );
@@ -119,69 +187,90 @@ function BuyBlock() {
   return (
     <>
       <SignedOut>
-        <SignUpButton mode="modal" forceRedirectUrl="/pricing?buy=1" signInForceRedirectUrl="/pricing?buy=1">
-          <button className={BTN}>
-            <Spade size={16} /> Get lifetime access
-          </button>
-        </SignUpButton>
-        <p className="text-xs text-ink-500 mt-3 text-center">
-          We create your account first so your purchase is saved to it, then take you straight to payment.
-        </p>
-        <p className="text-sm text-ink-500 mt-4 text-center">
-          Already bought it?{' '}
-          <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing?buy=1">
-            <button className="text-brand-400 hover:text-brand-300 font-medium">Sign in</button>
-          </SignInButton>
-        </p>
+        <div className="text-center">
+          <SignUpButton
+            mode="modal"
+            forceRedirectUrl="/pricing?buy=monthly"
+            signInForceRedirectUrl="/pricing?buy=monthly"
+          >
+            <button className={`${BTN} max-w-xs mx-auto`}>
+              <Spade size={16} /> Start unlimited
+            </button>
+          </SignUpButton>
+          <p className="text-xs text-ink-500 mt-3 text-center">
+            Create your account, then choose a plan.
+          </p>
+          <p className="text-sm text-ink-500 mt-3 text-center">
+            Already a member?{' '}
+            <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing?buy=monthly">
+              <button className="text-brand-400 hover:text-brand-300 font-medium">Sign in</button>
+            </SignInButton>
+          </p>
+        </div>
       </SignedOut>
       <SignedIn>
-        <SignedInBuy />
+        <SignedInBuy plan="monthly" label="Start unlimited" showAlreadyPro />
       </SignedIn>
     </>
   );
 }
 
-function SignedInBuy() {
-  const plan = useGameStore((s) => s.plan);
+function SignedInBuy({
+  plan,
+  label,
+  showAlreadyPro,
+}: {
+  plan: CheckoutPlan;
+  label: string;
+  showAlreadyPro?: boolean;
+}) {
+  const currentPlan = useGameStore((s) => s.plan);
   const planLoaded = useGameStore((s) => s.planLoaded);
   const [params, setParams] = useSearchParams();
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<CheckoutPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
   const started = useRef(false);
 
-  async function buy() {
+  async function buy(buyPlan: CheckoutPlan) {
     setError(null);
-    setBusy(true);
+    setBusy(buyPlan);
     trackInitiateCheckout();
-    const result = await api.startCheckout('lifetime');
-    // On success the browser is redirected to PayPal, so we only land here on failure.
+    const result = await api.startCheckout(buyPlan);
     if (!result.ok) {
-      setBusy(false);
-      setError(result.error ?? 'Could not start checkout. Please try again, or email support@pokerlogiclab.com.');
+      setBusy(null);
+      setError(
+        result.error ??
+          'Could not start checkout. Please try again, or email support@pokerlogiclab.com.'
+      );
     }
   }
 
-  // Arriving back from sign-up with ?buy=1: continue straight into checkout so
-  // creating the account feels like one step of buying, not a detour.
+  // Arriving from sign-up with ?buy=<plan>: auto-start checkout.
   useEffect(() => {
     if (started.current) return;
-    if (params.get('buy') !== '1') return;
-    if (!planLoaded || plan !== 'free') return;
+    const buyPlan = params.get('buy');
+    if (!buyPlan || (buyPlan !== 'monthly' && buyPlan !== 'annual')) return;
+    if (!planLoaded || currentPlan !== 'free') return;
     started.current = true;
     setParams({}, { replace: true });
-    void buy();
+    void buy(buyPlan as CheckoutPlan);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [planLoaded, plan, params]);
+  }, [planLoaded, currentPlan, params]);
 
   if (!planLoaded) {
-    return <div className="num text-ink-500 text-sm text-center animate-pulse py-3">Checking your access…</div>;
+    return (
+      <div className="num text-ink-500 text-sm text-center animate-pulse py-3">
+        Checking your access\u2026
+      </div>
+    );
   }
 
-  if (plan !== 'free') {
+  if (currentPlan !== 'free') {
+    if (!showAlreadyPro) return null;
     return (
       <div className="text-center">
-        <p className="text-chip-green text-sm font-medium mb-4">You already have lifetime access.</p>
-        <Link to="/replay" className={BTN}>
+        <p className="text-chip-green text-sm font-medium mb-4">You already have unlimited access.</p>
+        <Link to="/replay" className={`${BTN} max-w-xs mx-auto`}>
           <Spade size={16} /> Open the lab
         </Link>
       </div>
@@ -189,15 +278,15 @@ function SignedInBuy() {
   }
 
   return (
-    <>
-      <button onClick={buy} disabled={busy} className={BTN}>
-        <Spade size={16} /> {busy ? 'Opening secure checkout…' : 'Get lifetime access for $24.99'}
+    <div className="text-center">
+      <button onClick={() => buy(plan)} disabled={busy !== null} className={`${BTN} max-w-xs mx-auto`}>
+        <Spade size={14} /> {busy ? 'Opening secure checkout\u2026' : label}
       </button>
       {error && (
         <p className="text-sm text-oxblood-400 mt-3 text-center" role="alert">
           {error}
         </p>
       )}
-    </>
+    </div>
   );
 }

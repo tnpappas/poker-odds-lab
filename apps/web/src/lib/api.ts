@@ -70,7 +70,7 @@ export interface ApiDecision {
   betSize: number;
 }
 
-export type CheckoutPlan = 'lifetime' | 'monthly' | 'annual';
+export type CheckoutPlan = 'monthly' | 'annual';
 
 /**
  * Start a real hosted checkout and redirect the browser to it.
@@ -138,7 +138,7 @@ async function captureCheckout(orderId: string, token?: string | null): Promise<
   }
 }
 
-export type Plan = 'free' | 'pro' | 'lifetime';
+export type Plan = 'free' | 'pro';
 
 export interface Me {
   id?: string;
@@ -163,7 +163,7 @@ async function getMe(token?: string | null): Promise<Me | null> {
 /** Owner-only: grant (or revoke) access for an account by email address. */
 async function grantAccess(
   email: string,
-  plan: Plan = 'lifetime',
+  plan: Plan = 'pro',
 ): Promise<{ ok: true; email: string; plan: Plan } | { ok: false; error: string }> {
   if (!apiEnabled) return { ok: false, error: 'API not configured' };
   try {

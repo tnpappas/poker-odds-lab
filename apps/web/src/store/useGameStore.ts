@@ -29,7 +29,7 @@ const FREE_BLITZ_LIMIT = 2;
 interface GameState {
   decisions: Decision[];
   skillPoints: number;
-  plan: 'free' | 'pro' | 'lifetime';
+  plan: 'free' | 'pro';
   planLoaded: boolean; // true once entitlement has been checked against the server
   usage: { date: string; replays: number; blitz: number };
   adversaries: SavedAdversary[];
@@ -39,7 +39,7 @@ interface GameState {
   logDecision: (d: Omit<Decision, 'id' | 'ts'>) => void;
   incrementUsage: (mode: 'replay' | 'blitz') => void;
   remaining: (mode: 'replay' | 'blitz') => number;
-  setPlan: (plan: 'free' | 'pro' | 'lifetime') => void;
+  setPlan: (plan: 'free' | 'pro') => void;
   addAdversary: (v: Omit<SavedAdversary, 'id'>) => string;
   updateAdversary: (id: string, patch: Partial<SavedAdversary>) => void;
   deleteAdversary: (id: string) => void;

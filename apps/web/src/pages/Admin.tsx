@@ -101,10 +101,10 @@ export function Admin() {
 
       <div className="flex flex-col sm:flex-row gap-2 mt-4">
         <button
-          onClick={() => submit('lifetime')}
+          onClick={() => submit('pro')}
           disabled={busy || !email.trim()}
           className="flex-1 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition disabled:opacity-50">
-          {busy ? 'Working…' : 'Grant lifetime access'}
+          {busy ? 'Working\u2026' : 'Grant unlimited access'}
         </button>
         <button
           onClick={() => submit('free')}

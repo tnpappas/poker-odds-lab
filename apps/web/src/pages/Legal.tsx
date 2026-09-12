@@ -28,10 +28,11 @@ const DOCS: Record<'terms' | 'privacy' | 'refunds', Doc> = {
       { h: 'Your account', body: [
         'Sign-in and accounts are handled by our identity provider, Clerk. You are responsible for activity under your account and for keeping your login secure. Tell us at ' + SUPPORT + ' if you suspect unauthorized use.',
       ] },
-      { h: 'Lifetime access and billing', body: [
-        'Poker Logic Lab is offered as a one-time Lifetime purchase of $24.99 (USD). It is a single charge, not a subscription, and it unlocks the tools available in the app.',
-        'Payments are processed by our payment provider, PayPal. We do not receive or store your full card details.',
-        'Lifetime access covers the app as it exists and evolves. We may add, change, or retire individual features over time.',
+      { h: 'Subscriptions and billing', body: [
+        'Poker Logic Lab is offered as a monthly subscription at $7.99/month (USD) or an annual subscription at $49/year (USD). Subscriptions renew automatically until cancelled.',
+        'A free tier is available with daily limits: 3 Hand Replay hands and 2 Mental Math Blitz rounds per day, plus the Equity Visualizer and Equity Calculator.',
+        'Payments are processed by our payment provider, Polar. We do not receive or store your full card details.',
+        'You can cancel your subscription at any time from your account or by emailing ' + SUPPORT + '. Cancellation takes effect at the end of your billing period.',
       ] },
       { h: 'Refunds', body: [
         'We offer a 14-day money-back guarantee. See our Refund Policy for details.',
@@ -65,13 +66,13 @@ const DOCS: Record<'terms' | 'privacy' | 'refunds', Doc> = {
       { h: 'What we collect', body: [
         'Account info: your email address (and name, if you provide it), managed through our identity provider, Clerk.',
         'Training data: the practice decisions you make, scores, and usage counts, so the app can track your progress and detect your leaks.',
-        'Payment info: handled by our payment provider, PayPal. We receive confirmation of your purchase and a customer reference, but not your full card details.',
+        'Payment info: handled by our payment provider, Polar. We receive confirmation of your subscription and a customer reference, but not your full card details.',
       ] },
       { h: 'How we use it', body: [
         'To run the app, save your progress, detect your recurring mistakes, personalize drills, and unlock your purchase. We do not sell your personal data.',
       ] },
       { h: 'Service providers we use', body: [
-        'Clerk (authentication), PayPal (payments), Neon (database hosting), Vercel and Railway (app hosting), and Sentry (error monitoring). Each processes data only to provide its part of the service.',
+        'Clerk (authentication), Polar (payments), Neon (database hosting), Vercel and Railway (app hosting), and Sentry (error monitoring). Each processes data only to provide its part of the service.',
       ] },
       { h: 'Cookies', body: [
         'We use the cookies required for you to stay signed in (set by Clerk). We do not use advertising cookies.',
@@ -90,13 +91,13 @@ const DOCS: Record<'terms' | 'privacy' | 'refunds', Doc> = {
     intro: 'We want you to be happy with Poker Logic Lab. If it is not for you, we make refunds simple.',
     sections: [
       { h: '14-day money-back guarantee', body: [
-        'Your one-time Lifetime purchase is backed by a 14-day money-back guarantee. If you are not satisfied within 14 days of your purchase, we will refund you in full.',
+        'Your subscription is backed by a 14-day money-back guarantee. If you are not satisfied within 14 days of your first payment, we will refund you in full.',
       ] },
       { h: 'How to request a refund', body: [
-        'Email ' + SUPPORT + ' from the address on your account within 14 days of purchase and ask for a refund. No lengthy forms.',
+        'Email ' + SUPPORT + ' from the address on your account within 14 days of your first payment and ask for a refund. No lengthy forms.',
       ] },
       { h: 'Processing', body: [
-        'Approved refunds are issued to your original payment method through PayPal. It can take a few business days for the refund to appear, depending on your bank.',
+        'Approved refunds are issued to your original payment method through Polar. It can take a few business days for the refund to appear, depending on your bank.',
       ] },
       { h: 'After a refund', body: [
         'When a refund is issued, your paid access ends and your account returns to the free state.',

@@ -47,14 +47,14 @@ function EntitlementGate({ children }: { children: ReactNode }) {
   if (!planLoaded) {
     return (
       <Centered>
-        <span className="num text-ink-500 text-sm animate-pulse">Checking access…</span>
+        <span className="num text-ink-500 text-sm animate-pulse">Checking access\u2026</span>
       </Centered>
     );
   }
   if (plan === 'free') {
     return (
       <Paywall
-        reason="Every tool is part of lifetime access. Unlock once, keep it forever."
+        reason="This tool is part of unlimited access. Go unlimited for $7.99/mo."
         onClose={() => window.history.back()}
       />
     );
@@ -66,19 +66,19 @@ function SignInWall() {
   return (
     <Centered>
       <img src={LOGO_WORDMARK_DATA_URI} alt="Poker Logic Lab" className="h-12 mb-7" />
-      <h2 className="font-display text-2xl font-semibold mb-2">This tool is part of lifetime access</h2>
+      <h2 className="font-display text-2xl font-semibold mb-2">This tool is part of unlimited access</h2>
       <p className="text-ink-300 text-sm mb-7 max-w-sm text-center">
-        One payment of $24.99 unlocks every tool in the lab, plus the complete book,
-        Playing Online Texas Hold&rsquo;em, all 19 chapters, yours to keep.
+        Unlimited access starts at $7.99/mo. It unlocks every tool in the lab, the complete book,
+        and new Lab Notes every week.
       </p>
       <Link
         to="/pricing"
         className="px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition"
       >
-        See what is included
+        See pricing
       </Link>
       <p className="mt-5 text-sm text-ink-500">
-        Already bought it?{' '}
+        Already a member?{' '}
         <SignInButton mode="modal" signUpForceRedirectUrl="/pricing">
           <button className="text-brand-400 hover:text-brand-300 font-medium">Sign in</button>
         </SignInButton>

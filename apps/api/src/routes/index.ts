@@ -64,7 +64,7 @@ const OWNER_EMAILS = (process.env.OWNER_EMAILS ?? '')
 api.get('/me', (req, res) => {
   const u = req.user!;
   const isOwner = OWNER_EMAILS.includes(u.email.toLowerCase());
-  const plan = isOwner ? 'lifetime' : u.plan;
+  const plan = isOwner ? 'pro' as const : u.plan;
   res.json({ id: u.id, email: u.email, plan, entitled: plan !== 'free', owner: isOwner });
 });
 
@@ -73,7 +73,7 @@ api.get('/me', (req, res) => {
 // for comping a customer or fixing a payment that failed to grant access.
 const grantSchema = z.object({
   email: z.string().email(),
-  plan: z.enum(['free', 'pro', 'lifetime']).default('lifetime'),
+  plan: z.enum(['free', 'pro']).default('pro'),
 });
 
 api.post('/admin/grant', async (req, res) => {
@@ -191,7 +191,7 @@ api.delete('/account', async (req, res) => {
 // FRONTEND_URL may be a comma-separated allowlist (for CORS); the first entry
 // is the primary origin used for checkout success/return redirects.
 const FRONTEND_URL = (process.env.FRONTEND_URL ?? 'http://localhost:5173').split(',')[0].trim();
-const checkoutSchema = z.object({ plan: z.enum(['lifetime', 'monthly', 'annual']) });
+const checkoutSchema = z.object({ plan: z.enum(['monthly', 'annual']) });
 
 // Create a hosted checkout and return its URL for the browser to open.
 // Prefers PayPal when configured (merchant of record = the account owner);
@@ -200,23 +200,10 @@ api.post('/billing/checkout', async (req, res) => {
   const { plan } = checkoutSchema.parse(req.body);
   const user = req.user!;
 
-  // --- PayPal (preferred when configured) ---
-  if (paypalConfigured) {
-    if (plan !== 'lifetime') {
-      return res.status(400).json({ error: 'Only the lifetime plan is available via PayPal.' });
-    }
-    const order = await createLifetimeOrder({
-      userId: user.id,
-      email: user.email,
-      returnUrl: `${FRONTEND_URL}/?checkout=paypal`,
-      cancelUrl: `${FRONTEND_URL}/?checkout=cancel`,
-    });
-    return res.json({ url: order.approveUrl });
-  }
-
-  // --- Polar (fallback) ---
+  // All plans go through Polar (subscription billing).
+  // PayPal was only used for one-time lifetime orders and is now deprecated.
   if (!polar) {
-    return res.status(501).json({ error: 'Payments are not configured.' });
+    return res.status(501).json({ error: 'Payments are not configured. Set POLAR_ACCESS_TOKEN.' });
   }
   const productId = productIdFor(plan);
   if (!productId) {
@@ -251,9 +238,8 @@ api.post('/billing/capture', async (req, res) => {
     return res.status(403).json({ error: 'This order belongs to a different account.' });
   }
   if (result.completed && result.userId === req.user!.id) {
-    const firstPurchase = req.user!.plan !== 'lifetime';
-    await storage.setPlan(req.user!.id, 'lifetime');
-    // First purchase -> tag the buyer in GHL, which fires the book-delivery email.
+    const firstPurchase = req.user!.plan === 'free';
+    await storage.setPlan(req.user!.id, 'pro');
     if (firstPurchase) await tagGhlCustomer(req.user!.email);
     return res.json({ entitled: true });
   }

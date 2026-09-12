@@ -177,7 +177,7 @@ function Success({ onClose }: { onClose: () => void }) {
       <div className="eyebrow mb-2">Payment complete</div>
       <h2 className="font-display text-3xl font-semibold tracking-tight">You&rsquo;re in.</h2>
       <p className="text-ink-300 mt-3 text-[15px] leading-relaxed">
-        Lifetime access is unlocked. Every tool in the lab is yours now, forever, and your
+        Unlimited access is unlocked. Every tool in the lab is yours, and your
         complete guide is ready below. Time to stop losing to better math.
       </p>
       <div className="flex flex-col gap-2 mt-7">

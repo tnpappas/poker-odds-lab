@@ -52,7 +52,7 @@ export function BlogPost() {
         {post.access === 'free' ? (
           <span className="px-2 py-0.5 rounded-full border border-felt-700 text-ink-300">Free</span>
         ) : (
-          <span className="px-2 py-0.5 rounded-full border border-gold-500/50 text-gold-400">Lifetime members</span>
+          <span className="px-2 py-0.5 rounded-full border border-gold-500/50 text-gold-400">Members</span>
         )}
         <span aria-hidden>·</span>
         <span>{post.readingTime}</span>
@@ -110,15 +110,15 @@ function MemberWall() {
       {/* Fade hinting there is more below */}
       <div aria-hidden className="pointer-events-none absolute -top-16 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-felt-950" />
       <div className="rounded-2xl bg-gradient-to-b from-felt-800 to-felt-950 border border-gold-500/40 p-8 text-center">
-        <div className="text-gold-400 text-xs uppercase tracking-widest mb-2">Lifetime members only</div>
+        <div className="text-gold-400 text-xs uppercase tracking-widest mb-2">Members only</div>
         <h2 className="font-display text-2xl font-semibold tracking-tight">The rest of this Lab Note is dealt to members</h2>
         <p className="text-ink-300 text-sm mt-3 max-w-md mx-auto leading-relaxed">
-          One payment unlocks every Lab Note, every tool in the lab, and the complete book,
-          Playing Online Texas Hold&rsquo;em. New Lab Notes are dealt regularly.
+          Unlimited access unlocks every Lab Note, every tool in the lab, and the complete book,
+          Playing Online Texas Hold&rsquo;em. New Lab Notes every week.
         </p>
         <Link to="/pricing"
           className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-400 transition">
-          <Spade size={16} /> Continue reading with lifetime access
+          <Spade size={16} /> Continue reading with unlimited access
         </Link>
         <p className="mt-5 text-sm text-ink-500">
           Already a member?{' '}
