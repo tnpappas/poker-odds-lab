@@ -226,6 +226,79 @@ export const POSTS: BlogPost[] = [
 <p>Ask the three questions, in order, on every hand you watch, even the ones you fold. Within a few sessions the list starts building itself, and "what does he have" stops being a mystery and starts being a number.</p>
 `.trim(),
   },
+  {
+    slug: 'expected-value-in-poker',
+    title: 'Expected Value in Poker: The Number Behind Every Decision | Poker Logic Lab',
+    heading: 'Expected Value: The One Number Behind Every Poker Decision',
+    description:
+      'You made the right call and lost. Expected value explains why that is fine. What EV is, how to work it out in your head, and the spot where it finds money pot odds cannot see.',
+    date: '2026-09-13',
+    readingTime: '7 min read',
+    access: 'members',
+    body: `
+<p>You made the right call and lost the pot. It happens constantly, and it is the single biggest reason players quietly abandon good decisions. If the correct play can lose, how are you supposed to know it was correct?</p>
+<p>Expected value is the answer. It is one number that tells you what a decision is worth on average, separate from what happened to you this time. Pot odds tell you whether a call clears the bar. Expected value tells you by how much, and which of your options is best, which is a different and far more useful question.</p>
+<p>If you have not read <a href="/blog/how-to-calculate-pot-odds-fast">How to Calculate Pot Odds Fast</a> and <a href="/blog/implied-odds-explained">Implied Odds Explained</a>, start with those. This post ties both of them together.</p>
+<!--more-->
+
+<h2>What expected value actually is</h2>
+<p>Picture the exact same poker spot happening a thousand times: same cards, same board, same opponent, same bet. You would win some of them and lose the rest. Add up every dollar won and lost across all thousand, divide by a thousand, and you have the expected value of that decision. It is the average result per attempt.</p>
+<p>There is nothing mystical about it. EV does not predict this hand and it never claimed to. It tells you what this decision is worth if you keep making it, and since you will face the same shapes of spot thousands of times over a year of play, the average is the thing that actually shows up in your bankroll.</p>
+<p>That is also why a correct call can lose. One trial is not the average. A call that wins 40% of the time loses 60% of the time, and you will feel every one of those sixty. The number does not care, and neither should you.</p>
+
+<h2>The formula in plain words</h2>
+<p>What you stand to gain, weighted by how often you gain it, minus what you stand to lose, weighted by how often you lose it. That is the whole thing.</p>
+<p>Two rules make it work at the table, and both of them trip people up.</p>
+<p><strong>Rule one: you only win money that is not yours.</strong> When the pot comes your way, the profit is what your opponents put in. The chips you contributed were yours already, so they do not count as winnings.</p>
+<p><strong>Rule two: folding is always worth exactly zero.</strong> The money you have already put in the pot is gone either way, so folding neither wins nor loses anything from here. That makes zero the baseline every other option has to beat. It is a small mental shift with a big payoff: you stop thinking "I am already in for $60, I have to see it through" and start asking "does this next decision beat doing nothing?"</p>
+
+<h2>A worked example</h2>
+<p>You are on the turn with a flush draw. The pot is $80 and your opponent bets $40. Nine cards complete your flush with one card to come, which is a shade under 20%. Call it 20% for the arithmetic.</p>
+<p>Before you act, the pot holds $120: the original $80 plus his $40. You have to put in $40.</p>
+<ul>
+  <li>When you hit (20% of the time) you win that $120.</li>
+  <li>When you miss (80% of the time) you lose the $40 you called.</li>
+</ul>
+<p>So the average result is 0.20 times $120, minus 0.80 times $40. That is $24 minus $32, which is negative $8.</p>
+<p>Calling costs you $8 every time you do it. Not this time necessarily, this time you might scoop $120. But make that call a hundred times and you are down about $800. Folding, which is worth zero, is the better decision, and now you know by exactly how much.</p>
+
+<h2>Why this is the same test as pot odds</h2>
+<p>Run the pot odds on that spot and you get $40 into a $160 total pot, which is 25%. You had 20%, so pot odds said fold. EV said fold too, and it was never going to say anything else.</p>
+<p>The two methods are the same test wearing different clothes. Pot odds find the equity where EV crosses zero. Plug 25% into the EV calculation and watch it happen: 0.25 times $120 is $30, and 0.75 times $40 is also $30. They cancel exactly. That is what a breakeven call looks like.</p>
+<p>So if pot odds already answer the question, why bother with EV? Because pot odds only ever answer one question, about one option.</p>
+
+<h2>Where EV goes further</h2>
+<p>Pot odds compare calling to folding. That is it. They have nothing to say about your third option, which in the hand above is the one that actually makes money.</p>
+<p>Same spot: $80 pot, he bets $40, you have the flush draw. This time you raise to $120. Two things can happen.</p>
+<p><strong>He folds.</strong> You win the $120 sitting in the middle without seeing a river. Your raise comes back to you untouched.</p>
+<p><strong>He calls.</strong> He adds $80 to match your $120, and the pot swells to $320. Of that, $200 is money other people put in. You win it 20% of the time and lose your $120 the other 80%. That branch is worth 0.20 times $200 minus 0.80 times $120, which is $40 minus $96, or negative $56.</p>
+<p>Now weight the two branches. Say this opponent folds 40% of the time to a turn raise. The raise is worth 0.40 times $120, plus 0.60 times negative $56. That is $48 minus $33.60, or about positive $14.</p>
+<p>Line the three options up and the hand answers itself:</p>
+<ul>
+  <li>Fold: $0.</li>
+  <li>Call: negative $8.</li>
+  <li>Raise: positive $14.</li>
+</ul>
+<p>The play that makes money is the one pot odds could not see, and it makes money for a reason pot odds do not measure: you win two different ways. Sometimes the flush arrives, and sometimes he folds and the flush never has to. That second way of winning is called fold equity, and it is worth real money.</p>
+<p>Here is the number worth carrying to the table. Work out how often he has to fold for that raise to break even and it comes to about 32%. Just under a third of the time. That is a far easier bar to clear than making your flush, and you will misjudge spots for years if the only question you ever ask is whether your draw gets there.</p>
+
+<h2>Results are not the scoreboard</h2>
+<p>The hardest part of all this is not the arithmetic. It is holding your nerve when a positive EV decision loses four times in a row, which it absolutely will.</p>
+<p>Give yourself one rule: judge the decision with the information you had when you made it, never with the card that came afterward. A raise that was worth $14 was worth $14 whether he folded, called and lost, or called and rivered a boat. The result told you what happened. It did not tell you whether you were right.</p>
+<p>This is also why a session, a night, or a week tells you almost nothing about how you are playing. The averages need volume before they surface. What you can do is count decisions instead of dollars: how many times did you take the highest EV line available? That number moves in weeks, not months, and it is the one you actually control.</p>
+
+<h2>Where to practice this</h2>
+<p>EV is quick once you have done it fifty times and slow the first ten, so the point is reps with feedback.</p>
+<ul>
+  <li>The <a href="/dashboard">EV Dashboard</a> tracks the EV of the decisions you make in training and flags the leaks, so you can see whether you are actually taking the best line or just the comfortable one.</li>
+  <li><a href="/blitz">Mental Math Blitz</a> drills the pot odds and equity inputs in 30-second rounds until the numbers arrive without effort. EV is easy when the two pieces feeding it are instant.</li>
+  <li>The <a href="/calculator">Equity Calculator</a> gives you the true equity against a real range, so the percentage going into your EV is a fact rather than a guess.</li>
+  <li><a href="/replay">Hand Replay</a> puts you in live spots with the pot, the stacks, and the price in front of you, and scores the decision rather than the outcome.</li>
+  <li>New to the math? The free <a href="/guide">How It Works guide</a> builds pot odds, equity, and EV from zero.</li>
+</ul>
+<p>Pot odds get you to a yes or no. Expected value ranks every option you have and puts a dollar figure on each one. Once you start thinking in those terms, the bad beat stops being evidence and goes back to being what it always was: one trial out of a thousand.</p>
+`.trim(),
+  },
 ];
 
 export const getPost = (slug: string): BlogPost | undefined =>
