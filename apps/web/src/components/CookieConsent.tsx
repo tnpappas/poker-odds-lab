@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { consentChoice, setConsent } from '../lib/fbpixel';
 
 /**
- * One-time tracking consent banner. Ad measurement (Meta Pixel) only loads
+ * One-time tracking consent banner. Ad measurement (Meta Pixel) and usage
+ * analytics (Microsoft Clarity) only load
  * after "Accept"; "Decline" keeps the site fully usable with no ad tracking.
  * The choice is remembered per browser.
  */
@@ -24,8 +25,8 @@ export function CookieConsent() {
     >
       <div className="pointer-events-auto max-w-3xl mx-auto rounded-xl border border-felt-800/80 bg-ink-950/95 backdrop-blur-md shadow-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 text-xs text-ink-300">
         <p className="flex-1">
-          We use a Meta ad pixel to measure whether our ads work. It loads only if you accept. Essential
-          sign-in and payment cookies are always on.{' '}
+          We use a Meta ad pixel to measure whether our ads work and Microsoft Clarity to see how the app
+          gets used. Both load only if you accept. Essential sign-in and payment cookies are always on.{' '}
           <Link to="/privacy" className="underline hover:text-ink-100">Privacy policy</Link>
         </p>
         <div className="flex items-center gap-2 shrink-0">
