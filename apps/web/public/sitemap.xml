@@ -36,6 +36,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://pokerlogiclab.com/blog/bluffing-math-how-often-a-bluff-needs-to-work</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://pokerlogiclab.com/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

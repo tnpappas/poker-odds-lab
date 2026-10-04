@@ -299,6 +299,86 @@ export const POSTS: BlogPost[] = [
 <p>Pot odds get you to a yes or no. Expected value ranks every option you have and puts a dollar figure on each one. Once you start thinking in those terms, the bad beat stops being evidence and goes back to being what it always was: one trial out of a thousand.</p>
 `.trim(),
   },
+  {
+    slug: 'bluffing-math-how-often-a-bluff-needs-to-work',
+    title: 'Bluffing Math: How Often a Bluff Needs to Work | Poker Logic Lab',
+    heading: 'Bluffing Math: How Often Does a Bluff Need to Work?',
+    description:
+      'Every bluff has a break-even number. Learn the one formula, the bet-size anchors worth memorizing, why a draw makes your bluffs far cheaper, and the spots where bluffing quietly loses money.',
+    date: '2026-10-04',
+    readingTime: '7 min read',
+    access: 'members',
+    body: `
+<p>Most players treat bluffing as a feel thing. Some nights they feel brave and fire, other nights they give up, and the results swing wildly either way. Then they decide bluffing is a matter of nerve, or of reading souls across the table.</p>
+<p>It is neither. Every bluff has a price, the same way every call does, and you can work it out in a few seconds. Once you know the number, the question stops being "do I feel lucky?" and becomes "will this player fold more often than the bet requires?" That is a question you can actually answer.</p>
+<p>This post builds on <a href="/blog/how-to-calculate-pot-odds-fast">How to Calculate Pot Odds Fast</a> and <a href="/blog/expected-value-in-poker">Expected Value in Poker</a>. If the idea of a break-even point is new to you, start there.</p>
+<!--more-->
+
+<h2>The one formula</h2>
+<p>A pure bluff is a bet with a hand that loses whenever it gets called. It only makes money one way: your opponent folds and you take the pot. So the only number that matters is how often they need to fold for the bet to break even.</p>
+<p>Take your bet and divide it by the pot plus your bet. That is the share of the time your opponent has to fold for the bluff to be worth zero. Any more folds than that and the bluff makes money. Any fewer and it loses.</p>
+<p>An example. You are on the river with a missed draw and nothing else. The pot is $60. You bet $40.</p>
+<ul>
+  <li>Your bet divided by the pot plus your bet: 40 / (60 + 40) = 40%.</li>
+  <li>Your opponent has to fold at least 40% of the time.</li>
+</ul>
+<p>Check it with expected value. If he folds half the time, you win $60 half the time and lose $40 the other half: $30 minus $20, so the bluff is worth plus $10 every time you make it. If he only folds 30% of the time, it is $18 minus $28, so minus $10. At exactly 40%, it is $24 minus $24, which is zero. The formula is just the point where those two sides balance.</p>
+
+<h2>The anchors worth memorizing</h2>
+<p>Like pot odds, the number only depends on the bet size relative to the pot, so a handful of anchors covers almost every spot:</p>
+<ul>
+  <li>Bet a quarter of the pot: they need to fold 20% of the time.</li>
+  <li>Bet half the pot: 33%.</li>
+  <li>Bet two-thirds of the pot: 40%.</li>
+  <li>Bet three-quarters of the pot: about 43%.</li>
+  <li>Bet the full pot: 50%.</li>
+  <li>Bet twice the pot: about 67%.</li>
+</ul>
+<p>The pattern runs the opposite way to what most players feel. A big bet looks scary and powerful, so it seems like it should work more often. Maybe it does. But it also has to work more often, because you are risking more to win the same pot. A small bluff that gets through a third of the time can be a better play than a big one that gets through 45% of the time.</p>
+
+<h2>Why this is not the same number as pot odds</h2>
+<p>Put the two tables side by side and something looks off. Facing a half-pot bet, the caller needs 25% equity. But the bettor needs 33% folds. Why are they different?</p>
+<p>Because the two players are risking different amounts against different rewards. The bettor puts in $50 to win the $100 already in the pot, so they risk 50 to win 100: 50 out of 150, which is 33%. The caller puts in $50 to win the $150 that is now there (the pot plus the bet), so they risk 50 to win 150: 50 out of 200, which is 25%. The bet itself is part of the caller's reward, which makes calling cheaper than bluffing at every size.</p>
+<p>Keep the two numbers separate in your head. Pot odds are the caller's price. Fold frequency is the bettor's price.</p>
+
+<h2>A draw makes your bluffs much cheaper</h2>
+<p>A pure bluff has to win entirely through folds. A semi-bluff, a bet with a hand that is behind now but can improve, gets a second way to win: sometimes they call and you hit anyway. That second way changes the math more than most players realize.</p>
+<p>An example. On the turn the pot is $80 and your opponent checks to you. You have a flush draw: 9 outs with one card to come, which is about 20% (9 of the 46 unseen cards, or 19.6%). You bet $60.</p>
+<ul>
+  <li>As a pure bluff, a $60 bet into $80 needs folds 60 / 140 of the time, about 43%.</li>
+  <li>With the draw, when he calls the pot becomes $200. You hit 20% of the time and win the $140 he and the pot put in, and you miss 80% of the time and lose your $60. That branch is worth $28 minus $48, so minus $20.</li>
+  <li>When he folds you win the $80 outright.</li>
+</ul>
+<p>Now find the break-even fold rate. Folds need to make up for that minus $20 when he calls, and each fold is worth $80. That works out to 20%. At 20% folds, 0.20 times $80 is $16, and 0.80 times minus $20 is minus $16. They cancel.</p>
+<p>So the same $60 bet needs folds 43% of the time with nothing, and only 20% of the time with a flush draw. To keep the example simple it assumes no more betting on the river, and real hands are messier. The lesson holds anyway: if you are going to bluff, bluff with hands that can still win when called.</p>
+
+<h2>Picking the right hands to bluff with</h2>
+<p>The formula tells you how often a bluff needs to work. These three questions tell you which hands should be doing the bluffing.</p>
+<p><strong>Does my hand win at showdown sometimes?</strong> If it does, it is a poor bluff. A weak pair that wins when you both check is worth something already, so betting it turns it into a hand that only gets called by better. The best pure bluffs are hands with no chance of winning if you check: missed draws, total air. Their check is worth nothing, so the bluff has the lowest bar to beat.</p>
+<p><strong>Does my hand have any equity if called?</strong> Earlier in the hand, a draw beats air every time, for the reason shown above. Your bluffs on the flop and turn should mostly be hands that can improve.</p>
+<p><strong>Does my hand block what they would call with?</strong> If the river puts a third spade on the board and you hold the ace of spades with no pair, your opponent cannot have the best flush. You hold the card that makes their strongest calling hand. That does not guarantee a fold, but it shifts their range toward hands that can fold, which is exactly what a bluff needs.</p>
+
+<h2>Spots where bluffs quietly lose money</h2>
+<p><strong>More than one opponent.</strong> Every player has to fold for a bluff to work. Say you bet two-thirds of the pot and need 40% folds. Against one player who folds 60% of the time, that is an easy profit. Against two players who each fold 60% of the time and decide independently, both fold only 36% of the time, and the same bluff now loses. Against three, it is about 22%. Bluff heads-up, almost never multiway.</p>
+<p><strong>Players who do not fold.</strong> The formula only works if you plug in a real fold rate. The player who calls every river to "keep you honest" does not fold 40% of the time, no matter how scary your story is. Against that player, stop bluffing and bet your good hands bigger. That is where the money is with them.</p>
+<p><strong>Stories that do not make sense.</strong> Your bluff is only believable if the hand you are representing fits how you played. If you called the flop and the turn and then bet big on a river that changed nothing, the strong hands you claim to have would usually have raised earlier. A thoughtful opponent builds your range the same way you build theirs in <a href="/blog/how-to-put-an-opponent-on-a-range">How to Put an Opponent on a Range</a>, and bluffs that skip that logic get called.</p>
+
+<h2>The other side of the table</h2>
+<p>Flip the formula around and you get a defensive number. If a bettor needs you to fold 33% of the time against a half-pot bet, then the bettor's bluffs automatically make money if you fold more than that. To stop that, you would need to keep playing with about two-thirds of your range. Theory calls this the minimum defense frequency, and it is simply the pot divided by the pot plus the bet.</p>
+<p>Use it carefully. It is the right baseline against aggressive players who bluff often. But most players at low and mid stakes bluff far less than the math allows, especially on the river. Against them, folding more than the theory number is not a leak. It is just correct, because their bets are mostly real. Defend to the theory against players who bluff, and fold freely against players who do not.</p>
+
+<h2>Where to practice this</h2>
+<p>The formula takes a minute to learn and a few hundred hands to trust. Practice with feedback is what turns it into a reflex.</p>
+<ul>
+  <li><a href="/blitz">Mental Math Blitz</a> drills the bet-size fractions in 30-second rounds, so the break-even numbers arrive without effort.</li>
+  <li>The <a href="/adversary-lab">Adversary Lab</a> models a specific opponent from how they play, so you can see how often that player is likely to fold before you decide to bluff them.</li>
+  <li><a href="/replay">Hand Replay</a> puts you in real decision spots and scores the decision, not the result, which is the only fair way to judge a bluff.</li>
+  <li>The <a href="/calculator">Equity Calculator</a> shows how much equity your semi-bluff actually has against a real range, so the "second way to win" is a number instead of a hope.</li>
+  <li>The <a href="/dashboard">EV Dashboard</a> tracks the EV of your training decisions so you can see whether your aggression is making money or just making noise.</li>
+</ul>
+<p>Bluffing is not about nerve. It is a price, the same as calling. Know the number, pick hands that can win more than one way, and bluff the players who actually fold.</p>
+`.trim(),
+  },
 ];
 
 export const getPost = (slug: string): BlogPost | undefined =>
