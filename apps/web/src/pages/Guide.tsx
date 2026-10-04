@@ -80,7 +80,7 @@ export function Guide() {
       <div className="felt-card rounded-2xl p-8 text-center">
         <h3 className="font-display text-2xl font-semibold tracking-tight">Ready to train?</h3>
         <p className="text-ink-300 mt-2 text-sm max-w-md mx-auto leading-relaxed">
-          Unlock every tool once and keep it forever. Start with a single hand and let the app teach you as you go.
+          Start free, upgrade to unlimited when you are ready. Start with a single hand and let the app teach you as you go.
         </p>
         <div className="flex flex-wrap gap-3 justify-center mt-6">
           <Link to="/replay"
