@@ -9,7 +9,7 @@ vi.mock('../src/lib/paypal', () => ({
   createSubscription: vi.fn(),
   ...paypalMock,
 }));
-vi.mock('../src/lib/ghl', () => ({ ghlConfigured: false, tagGhlCustomer: vi.fn(async () => undefined) }));
+vi.mock('../src/lib/ghl', () => ({ ghlConfigured: false, tagGhlCustomer: vi.fn(async () => undefined), tagGhlContact: vi.fn(async () => undefined) }));
 
 import { startServer, asUser, json } from './helpers';
 

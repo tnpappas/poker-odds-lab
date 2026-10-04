@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, type Plan } from '../lib/api';
+import { api, type Plan, type AdminChallenge } from '../lib/api';
 
 /**
  * Owner-only account tools, reachable at /admin (not linked in the nav).
@@ -79,6 +79,7 @@ export function Admin() {
   }
 
   return (
+    <>
     <Shell>
       <h1 className="font-display text-2xl font-semibold mb-1">Account tools</h1>
       <p className="text-ink-300 text-sm mb-6">
@@ -118,6 +119,55 @@ export function Admin() {
         <p className={`text-sm mt-4 ${result.ok ? 'text-brass-200' : 'text-red-400'}`}>{result.text}</p>
       )}
     </Shell>
+    <ChallengePanel />
+    </>
+  );
+}
+
+/** Live Read Challenge: answers for every day (for making the posts) and the full leaderboard with emails (for prizes). */
+function ChallengePanel() {
+  const [data, setData] = useState<AdminChallenge | null | 'loading'>('loading');
+  useEffect(() => {
+    api.adminChallenge().then(setData);
+  }, []);
+  if (data === 'loading') return null;
+  if (!data) return <p className="max-w-3xl mx-auto px-4 text-sm text-ink-500">Challenge data unavailable.</p>;
+  return (
+    <div className="max-w-3xl mx-auto px-4 pb-16">
+      <div className="felt-card rounded-2xl p-8">
+        <h2 className="font-display text-2xl font-semibold mb-1">Live Read Challenge</h2>
+        <p className="text-ink-300 text-sm mb-4">Owner view. Emails are never shown on the public page. Grant prizes with the form above, using the email in this table.</p>
+        <table className="w-full text-sm mb-8">
+          <thead className="text-xs text-ink-500 text-left"><tr><th className="py-2">Day</th><th>Hand</th><th>Status</th><th>Answer</th><th className="text-right">Equity / needed</th><th className="text-right">Entries</th></tr></thead>
+          <tbody>
+            {data.spots.map((s) => (
+              <tr key={s.day} className="border-t border-felt-800/60">
+                <td className="py-2 num">{s.day}</td><td>{s.title}</td><td className="text-ink-500">{s.status}</td>
+                <td className="font-semibold">{s.correct.toUpperCase()}</td>
+                <td className="num text-right">{s.equityPct}% / {s.requiredPct}%</td><td className="num text-right">{s.entries}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <h3 className="font-semibold mb-2">Leaderboard ({data.leaderboard.length} entrants)</h3>
+        <table className="w-full text-sm">
+          <thead className="text-xs text-ink-500 text-left"><tr><th className="py-2">#</th><th>Name</th><th>Email</th><th className="text-right">Pts</th><th className="text-right">Days</th><th className="text-right">Error</th></tr></thead>
+          <tbody>
+            {data.leaderboard.map((r, i) => (
+              <tr key={r.email} className="border-t border-felt-800/60">
+                <td className="py-2 num">{i + 1}</td><td>{r.handle}</td><td className="text-ink-300 break-all">
+                  {r.email}
+                  {r.sharedIpWith.length > 0 && (
+                    <span className="block text-xs text-oxblood-400">Same IP as {r.sharedIpWith.join(', ')}. Check before awarding.</span>
+                  )}
+                </td>
+                <td className="num text-right">{r.points}</td><td className="num text-right">{r.answered}</td><td className="num text-right">{r.totalError}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 

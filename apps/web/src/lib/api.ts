@@ -215,7 +215,113 @@ async function billingPortalUrl(): Promise<string | null> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Live Read Challenge (public: no account needed)
+// ---------------------------------------------------------------------------
+
+export type ChallengeAction = 'call' | 'fold';
+
+export interface ChallengeDay {
+  day: number;
+  status: 'upcoming' | 'open' | 'revealed';
+  opensAt: string;
+  closesAt: string;
+  spot?: {
+    title: string;
+    hook: string;
+    profile: string;
+    action: string;
+    hero: [string, string];
+    board: string[];
+    pot: number;
+    bet: number;
+    points: number;
+  };
+  reveal?: {
+    correct: ChallengeAction;
+    equityPct: number;
+    requiredPct: number;
+    rangeText: string;
+    range: string;
+    lesson: string;
+    entries: number;
+    callPct: number | null;
+    correctPct: number | null;
+  };
+}
+
+export interface ChallengeState {
+  id: string;
+  name: string;
+  startsAt: string;
+  endsAt: string;
+  finished: boolean;
+  entrants: number;
+  days: ChallengeDay[];
+  leaderboard: { handle: string; points: number; correct: number; answered: number; totalError: number }[];
+}
+
+export interface ChallengeAnswerInput {
+  email: string;
+  handle: string;
+  day: number;
+  action: ChallengeAction;
+  equityGuess: number;
+}
+
+async function getChallenge(): Promise<ChallengeState | null> {
+  if (!apiEnabled) return null;
+  try {
+    const res = await fetch(`${API_URL}/api/challenge`);
+    if (!res.ok) return null;
+    return (await res.json()) as ChallengeState;
+  } catch {
+    return null;
+  }
+}
+
+async function publicPost(path: string, body: unknown): Promise<SimpleResult> {
+  if (!apiEnabled) return { ok: false, error: 'The challenge is not available right now.' };
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) return { ok: true };
+    const data = (await res.json().catch(() => ({}))) as { error?: string; issues?: { message?: string }[] };
+    const issue = data.issues?.[0]?.message;
+    return { ok: false, error: data.error === 'Validation failed' && issue ? issue : data.error ?? `Request failed (${res.status})` };
+  } catch {
+    return { ok: false, error: 'Network error. Try again.' };
+  }
+}
+
+const challengeAnswer = (input: ChallengeAnswerInput) => publicPost('/api/challenge/answer', input);
+const challengeSignup = (email: string) => publicPost('/api/challenge/signup', { email });
+
+export interface AdminChallenge {
+  spots: { day: number; title: string; status: ChallengeDay['status']; entries: number; correct: ChallengeAction; equityPct: number; requiredPct: number }[];
+  leaderboard: { handle: string; email: string; points: number; correct: number; answered: number; totalError: number; firstAnswerAt: string; sharedIpWith: string[] }[];
+}
+
+/** Owner only: every spot with its answer and the full leaderboard with emails. */
+async function adminChallenge(): Promise<AdminChallenge | null> {
+  if (!apiEnabled) return null;
+  try {
+    const res = await fetch(`${API_URL}/api/admin/challenge`, { headers: await authHeaders() });
+    if (!res.ok) return null;
+    return (await res.json()) as AdminChallenge;
+  } catch {
+    return null;
+  }
+}
+
 export const api = {
+  getChallenge,
+  challengeAnswer,
+  challengeSignup,
+  adminChallenge,
   postDecision: (d: ApiDecision) => send('/api/decisions', d),
   incrementUsage: (mode: 'replay' | 'blitz') => send('/api/usage/increment', { mode }),
   startCheckout,

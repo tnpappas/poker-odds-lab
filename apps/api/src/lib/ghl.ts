@@ -35,8 +35,13 @@ function ghlHeaders() {
  * dedicated endpoint so the tag-added workflow trigger fires reliably.
  */
 export async function tagGhlCustomer(email: string): Promise<void> {
-  if (!ghlConfigured) return;
-  if (!email || email.endsWith('@placeholder.local')) return;
+  await tagGhlContact(email, CUSTOMER_TAG);
+}
+
+/** Upsert a contact by email and add one tag. Best-effort, never throws. Resolves true when the tag was added. */
+export async function tagGhlContact(email: string, tag: string): Promise<boolean> {
+  if (!ghlConfigured) return false;
+  if (!email || email.endsWith('@placeholder.local')) return false;
 
   try {
     const upsertRes = await fetchWithTimeout(`${API_BASE}/contacts/upsert`, {
@@ -46,26 +51,28 @@ export async function tagGhlCustomer(email: string): Promise<void> {
     });
     if (!upsertRes.ok) {
       logger.warn('ghl contact upsert failed', { status: upsertRes.status });
-      return;
+      return false;
     }
     const data = (await upsertRes.json()) as { contact?: { id?: string } };
     const contactId = data.contact?.id;
     if (!contactId) {
       logger.warn('ghl upsert returned no contact id');
-      return;
+      return false;
     }
 
     const tagRes = await fetchWithTimeout(`${API_BASE}/contacts/${contactId}/tags`, {
       method: 'POST',
       headers: ghlHeaders(),
-      body: JSON.stringify({ tags: [CUSTOMER_TAG] }),
+      body: JSON.stringify({ tags: [tag] }),
     });
     if (!tagRes.ok) {
       logger.warn('ghl add-tag failed', { status: tagRes.status, contactId });
-      return;
+      return false;
     }
-    logger.info('ghl customer tagged', { contactId });
+    logger.info('ghl contact tagged', { contactId, tag });
+    return true;
   } catch (err) {
     logger.warn('ghl tag error', { err: String(err) });
+    return false;
   }
 }

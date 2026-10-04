@@ -145,11 +145,14 @@ export function App() {
             <Link to="/pricing" className="hover:text-ink-100 transition">Pricing</Link>
             <Link to="/guide" className="hover:text-ink-100 transition">How it works</Link>
             <Link to="/blog" className="hover:text-ink-100 transition">Lab Notes</Link>
+            <Link to="/challenge" className="hover:text-ink-100 transition">Challenge</Link>
             <Link to="/terms" className="hover:text-ink-100 transition">Terms</Link>
             <Link to="/privacy" className="hover:text-ink-100 transition">Privacy</Link>
             <Link to="/refunds" className="hover:text-ink-100 transition">Refunds</Link>
             <Link to="/account" className="hover:text-ink-100 transition">Account</Link>
             <a href="mailto:support@pokerlogiclab.com" className="hover:text-ink-100 transition">Support</a>
+            <a href="https://www.instagram.com/pokerlogiclab/" target="_blank" rel="noopener noreferrer" className="hover:text-ink-100 transition">Instagram</a>
+            <a href="https://www.facebook.com/PokerLogicLab" target="_blank" rel="noopener noreferrer" className="hover:text-ink-100 transition">Facebook</a>
           </div>
           <span className="order-3 hidden md:flex items-center gap-2 opacity-70">
             <Spade size={12} /><Heart size={12} className="text-oxblood-400" /><Diamond size={12} className="text-brass-400" /><Club size={12} className="text-chip-green" />

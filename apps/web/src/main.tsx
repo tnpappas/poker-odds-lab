@@ -37,6 +37,8 @@ const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin
 const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.Account })));
 const Blog = lazy(() => import('./pages/Blog').then((m) => ({ default: m.Blog })));
 const BlogPost = lazy(() => import('./pages/BlogPost').then((m) => ({ default: m.BlogPost })));
+const Challenge = lazy(() => import('./pages/Challenge').then((m) => ({ default: m.Challenge })));
+const ChallengeRules = lazy(() => import('./pages/ChallengeRules').then((m) => ({ default: m.ChallengeRules })));
 const Visualizer = lazy(() => import('./features/visualizer/Visualizer').then((m) => ({ default: m.Visualizer })));
 const Replay = lazy(() => import('./features/replay/Replay').then((m) => ({ default: m.Replay })));
 const Blitz = lazy(() => import('./features/blitz/Blitz').then((m) => ({ default: m.Blitz })));
@@ -68,6 +70,8 @@ const router = createBrowserRouter([
       { path: 'pricing', element: lazyEl(<Pricing />) },
       { path: 'blog', element: lazyEl(<Blog />) },
       { path: 'blog/:slug', element: lazyEl(<BlogPost />) },
+      { path: 'challenge', element: lazyEl(<Challenge />) },
+      { path: 'challenge/rules', element: lazyEl(<ChallengeRules />) },
       { path: 'terms', element: lazyEl(<Legal doc="terms" />) },
       { path: 'privacy', element: lazyEl(<Legal doc="privacy" />) },
       { path: 'refunds', element: lazyEl(<Legal doc="refunds" />) },

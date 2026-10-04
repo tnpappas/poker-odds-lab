@@ -51,6 +51,14 @@ const META: Record<string, { title: string; desc: string }> = {
     title: 'EV Dashboard | Poker Logic Lab',
     desc: 'Track your decision quality over time and get your poker leaks diagnosed automatically.',
   },
+  '/challenge': {
+    title: 'The 7-Day Live Read Challenge | Poker Logic Lab',
+    desc: '7 days, 7 river decisions, 1 leaderboard. Read the player, make the call or the fold, and win a year of Poker Logic Lab. Free to enter.',
+  },
+  '/challenge/rules': {
+    title: 'Live Read Challenge Official Rules | Poker Logic Lab',
+    desc: 'Official rules for the 7-Day Live Read Challenge: eligibility, scoring, tie-breakers and prizes.',
+  },
   '/terms': { title: 'Terms of Service | Poker Logic Lab', desc: 'The terms for using Poker Logic Lab.' },
   '/privacy': { title: 'Privacy Policy | Poker Logic Lab', desc: 'What Poker Logic Lab collects, why, and your choices.' },
   '/refunds': { title: 'Refund Policy | Poker Logic Lab', desc: 'Our simple 14-day money-back guarantee.' },

@@ -106,6 +106,21 @@ export interface AdversaryInput {
   notes?: string | null;
 }
 
+/** One entrant's answer for one day of the Live Read Challenge. */
+export interface ChallengeAnswer {
+  id: string;
+  challengeId: string;
+  day: number;
+  email: string;
+  handle: string;
+  action: 'call' | 'fold';
+  equityGuess: number;
+  ipHash: string | null;
+  createdAt: string;
+}
+
+export type ChallengeAnswerInput = Omit<ChallengeAnswer, 'id' | 'createdAt'>;
+
 export interface Storage {
   getOrCreateUser(clerkId: string, email: string, username?: string): Promise<User>;
   upsertUserFromWebhook(clerkId: string, email: string, username?: string): Promise<User>;
@@ -140,6 +155,10 @@ export interface Storage {
    * seen and false on a redelivery, so handlers can skip duplicates.
    */
   recordWebhookEvent(provider: 'paypal' | 'clerk', eventId: string, eventType: string): Promise<boolean>;
+
+  /** Save a challenge answer. Returns false when this email already answered this day. */
+  addChallengeAnswer(input: ChallengeAnswerInput): Promise<boolean>;
+  listChallengeAnswers(challengeId: string): Promise<ChallengeAnswer[]>;
 }
 
 export const STREETS: Street[] = ['preflop', 'flop', 'turn', 'river'];

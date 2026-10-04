@@ -143,3 +143,27 @@ export const webhookEvents = pgTable('webhook_events', {
   eventType: text('event_type').notNull(),
   receivedAt: timestamp('received_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+/**
+ * Live Read Challenge answers (migration 0003). Entrants need no account, so
+ * rows are keyed by email, one per entrant per day.
+ */
+export const challengeAnswers = pgTable(
+  'challenge_answers',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    challengeId: text('challenge_id').notNull(),
+    day: integer('day').notNull(),
+    email: text('email').notNull(),
+    handle: text('handle').notNull(),
+    action: text('action').notNull(), // 'call' | 'fold'
+    equityGuess: integer('equity_guess').notNull(),
+    /** Salted hash of the entrant's IP, to spot one person entering with several emails. Never the raw IP. */
+    ipHash: text('ip_hash'),
+    createdAt: createdAt(),
+  },
+  (t) => ({
+    onePerDay: unique('challenge_answers_one_per_day').on(t.challengeId, t.day, t.email),
+    challengeIdx: index('challenge_answers_challenge_idx').on(t.challengeId),
+  }),
+);

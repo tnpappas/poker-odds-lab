@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getTableColumns } from 'drizzle-orm';
-import { users, webhookEvents, sessions } from '../src/db/schema';
+import { users, webhookEvents, sessions, challengeAnswers } from '../src/db/schema';
 
 /**
  * The in-memory store used by the other tests never touches Postgres, so a
@@ -24,5 +24,10 @@ describe('schema column names match the migrations', () => {
   });
   it('sessions has updated_at', () => {
     expect(columnNames(sessions)).toContain('updated_at');
+  });
+  it('challenge_answers matches migration 0003', () => {
+    expect(columnNames(challengeAnswers)).toEqual([
+      'id', 'challenge_id', 'day', 'email', 'handle', 'action', 'equity_guess', 'ip_hash', 'created_at',
+    ]);
   });
 });

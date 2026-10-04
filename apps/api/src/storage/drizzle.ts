@@ -4,6 +4,7 @@ import * as schema from '../db/schema';
 import {
   Storage, User, Session, Decision, Adversary, Leak, Usage, Plan, SessionMode,
   DecisionInput, DecisionSummary, AdversaryInput, summarize, Street, DecisionType, Action,
+  ChallengeAnswer, ChallengeAnswerInput,
 } from './types';
 
 type DB = NeonHttpDatabase<typeof schema>;
@@ -220,5 +221,25 @@ export class DrizzleStorage implements Storage {
       .onConflictDoNothing()
       .returning({ id: schema.webhookEvents.id });
     return r.length > 0;
+  }
+
+  async addChallengeAnswer(input: ChallengeAnswerInput): Promise<boolean> {
+    const r = await this.db
+      .insert(schema.challengeAnswers)
+      .values(input)
+      .onConflictDoNothing()
+      .returning({ id: schema.challengeAnswers.id });
+    return r.length > 0;
+  }
+
+  async listChallengeAnswers(challengeId: string): Promise<ChallengeAnswer[]> {
+    const rows = await this.db
+      .select()
+      .from(schema.challengeAnswers)
+      .where(eq(schema.challengeAnswers.challengeId, challengeId));
+    return rows.map((r) => ({
+      id: r.id, challengeId: r.challengeId, day: r.day, email: r.email, handle: r.handle,
+      action: r.action as 'call' | 'fold', equityGuess: r.equityGuess, ipHash: r.ipHash, createdAt: r.createdAt.toISOString(),
+    }));
   }
 }

@@ -54,3 +54,28 @@ export const grantSchema = z.object({
 
 export const checkoutSchema = z.object({ plan: z.enum(['monthly', 'annual']) });
 export const captureSchema = z.object({ subscriptionId: z.string().min(1).max(64) });
+
+const email = z.string().trim().toLowerCase().email().max(254);
+
+/**
+ * One inbox, one entrant: Gmail ignores dots and anything after "+", so
+ * j.o.e+1@gmail.com and joe@gmail.com are the same person and the same entry.
+ */
+export function normalizeEntrantEmail(address: string): string {
+  const [local, domain] = address.split('@');
+  if (domain !== 'gmail.com' && domain !== 'googlemail.com') return address;
+  return `${local.split('+')[0].replace(/\./g, '')}@gmail.com`;
+}
+const entrantEmail = email.transform(normalizeEntrantEmail);
+
+export const challengeSignupSchema = z.object({ email });
+
+export const challengeAnswerSchema = z.object({
+  email: entrantEmail,
+  /** Public leaderboard name, e.g. an Instagram handle. */
+  handle: z.string().trim().min(2).max(30).regex(/^[A-Za-z0-9_.@ -]+$/, 'Use letters, numbers, spaces, @ . _ or -'),
+  day: z.number().int().min(1).max(7),
+  action: z.enum(['call', 'fold']),
+  /** Your guess at your equity against his range, in percent. */
+  equityGuess: z.number().int().min(0).max(100),
+});

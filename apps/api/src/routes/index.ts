@@ -13,6 +13,7 @@ import { blitz } from './blitz';
 import { usage } from './usage';
 import { account } from './account';
 import { billing } from './billing';
+import { challengeAdmin } from './challenge';
 
 export const api = Router();
 
@@ -25,3 +26,4 @@ api.use(blitz);
 api.use(usage);
 api.use(account);
 api.use(billing);
+api.use(challengeAdmin);

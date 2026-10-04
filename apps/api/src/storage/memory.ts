@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import {
   Storage, User, Session, Decision, Adversary, Leak, Usage, Plan, SessionMode,
-  DecisionInput, DecisionSummary, AdversaryInput, summarize,
+  DecisionInput, DecisionSummary, AdversaryInput, summarize, ChallengeAnswer, ChallengeAnswerInput,
 } from './types';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -17,6 +17,7 @@ export class MemoryStorage implements Storage {
   private leaks = new Map<string, Leak[]>(); // userId -> leaks
   private usage = new Map<string, Usage>(); // `${userId}:${date}` -> usage
   private webhookEvents = new Set<string>();
+  private challengeAnswers: ChallengeAnswer[] = [];
 
   async getOrCreateUser(clerkId: string, email: string, username?: string): Promise<User> {
     const existingId = this.byClerk.get(clerkId);
@@ -177,5 +178,18 @@ export class MemoryStorage implements Storage {
     if (this.webhookEvents.has(key)) return false;
     this.webhookEvents.add(key);
     return true;
+  }
+
+  async addChallengeAnswer(input: ChallengeAnswerInput): Promise<boolean> {
+    const dup = this.challengeAnswers.some(
+      (a) => a.challengeId === input.challengeId && a.day === input.day && a.email === input.email,
+    );
+    if (dup) return false;
+    this.challengeAnswers.push({ ...input, id: randomUUID(), createdAt: now() });
+    return true;
+  }
+
+  async listChallengeAnswers(challengeId: string): Promise<ChallengeAnswer[]> {
+    return this.challengeAnswers.filter((a) => a.challengeId === challengeId);
   }
 }
