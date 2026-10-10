@@ -15,6 +15,9 @@ All notable changes, newest first. Dates are the day the change went live on pok
 ### Pricing page
 - Names the payment method: checkout through PayPal, with PayPal balance, bank, or a debit or credit card.
 
+### Security
+- proxy-addr 2.0.7 to 2.0.8 to clear a new critical advisory (IP spoofing through a trusted subnet). It failed the CI audit on the first push of the day, which held back the API deploy.
+
 ### Fixes
 - Text that showed a raw `\u2019` or `\u2026` code instead of an apostrophe or ellipsis (homepage book paragraph, pricing page, paywall, access check).
 
