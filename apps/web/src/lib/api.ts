@@ -281,7 +281,7 @@ async function getChallenge(): Promise<ChallengeState | null> {
 }
 
 async function publicPost(path: string, body: unknown): Promise<SimpleResult> {
-  if (!apiEnabled) return { ok: false, error: 'The challenge is not available right now.' };
+  if (!apiEnabled) return { ok: false, error: 'This is not available right now.' };
   try {
     const res = await fetch(`${API_URL}${path}`, {
       method: 'POST',
@@ -299,6 +299,9 @@ async function publicPost(path: string, body: unknown): Promise<SimpleResult> {
 
 const challengeAnswer = (input: ChallengeAnswerInput) => publicPost('/api/challenge/answer', input);
 const challengeSignup = (email: string) => publicPost('/api/challenge/signup', { email });
+
+/** Free chapters email capture (public: no account needed). `source` is the page the form is on. */
+const freeChapters = (email: string, source: string) => publicPost('/api/leads/free-chapters', { email, source });
 
 export interface AdminChallenge {
   spots: { day: number; title: string; status: ChallengeDay['status']; entries: number; correct: ChallengeAction; equityPct: number; requiredPct: number }[];
@@ -321,6 +324,7 @@ export const api = {
   getChallenge,
   challengeAnswer,
   challengeSignup,
+  freeChapters,
   adminChallenge,
   postDecision: (d: ApiDecision) => send('/api/decisions', d),
   incrementUsage: (mode: 'replay' | 'blitz') => send('/api/usage/increment', { mode }),

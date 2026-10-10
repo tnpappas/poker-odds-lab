@@ -58,7 +58,14 @@ export function Challenge() {
   };
 
   if (state === 'loading') {
-    return <Shell><p className="num text-ink-500 text-sm animate-pulse">Dealing the cards…</p></Shell>;
+    // The static parts render at once (and into the prerendered page); the live hand loads under them.
+    return (
+      <Shell>
+        <Hero />
+        <p className="num text-ink-500 text-sm animate-pulse mt-8">Dealing the cards…</p>
+        <Prizes />
+      </Shell>
+    );
   }
   if (!state) {
     return (

@@ -18,7 +18,7 @@ Poker Logic Lab is a poker decision-training web app. Last updated: September 12
 
 ## How a request flows
 
-1. The browser loads the SPA from Vercel. The app works fully on localStorage with no backend; the API is an optional sync and entitlement layer.
+1. The browser loads the SPA from Vercel. Public pages (home, guide, pricing, Lab Notes, challenge, legal) are prerendered to static HTML during the build by `apps/web/scripts/prerender.mjs`, so crawlers get real content; the React app then replaces that HTML in the browser. Any URL without a prerendered file is rewritten to the empty shell `app.html` (see `vercel.json`). The app works fully on localStorage with no backend; the API is an optional sync and entitlement layer.
 2. When Clerk is configured the frontend attaches the Clerk session JWT as a bearer token on every API call (`apps/web/src/lib/api.ts`).
 3. The API (`apps/api/src/app.ts`) assigns a request id, applies helmet and CORS (allowlist from `FRONTEND_URL`), mounts the signature-verified webhook receivers before the JSON parser, then rate limits and mounts the application routes.
 4. `middleware/auth.ts` verifies the JWT with `@clerk/backend`, upserts the user into our `users` table and attaches it as `req.user`. Every application route requires this.

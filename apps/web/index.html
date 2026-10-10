@@ -44,6 +44,9 @@
     <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Meta Pixel is loaded after consent; see src/lib/fbpixel.ts -->
+
+    <!-- Public pages are prerendered. Entrance animations start hidden, so show them when JavaScript is off. -->
+    <noscript><style>[style*="opacity:0"]{opacity:1!important;transform:none!important}</style></noscript>
   </head>
   <body>
     <div id="root"></div>

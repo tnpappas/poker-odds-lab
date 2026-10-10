@@ -47,7 +47,7 @@ function EntitlementGate({ children }: { children: ReactNode }) {
   if (!planLoaded) {
     return (
       <Centered>
-        <span className="num text-ink-500 text-sm animate-pulse">Checking access\u2026</span>
+        <span className="num text-ink-500 text-sm animate-pulse">Checking access…</span>
       </Centered>
     );
   }

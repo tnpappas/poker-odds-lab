@@ -87,6 +87,11 @@ export function initPixelIfConsented(): void {
   }
 }
 
+/** Fired when a visitor gives their email for the free chapters. */
+export function trackLead(): void {
+  window.fbq?.('track', 'Lead');
+}
+
 /** Fired when the user starts checkout for a plan. */
 export function trackInitiateCheckout(plan: PricedPlan = 'monthly'): void {
   window.fbq?.('track', 'InitiateCheckout', { value: PRICE_USD[plan], currency: 'USD' });

@@ -7,7 +7,7 @@ import { trackInitiateCheckout } from '../lib/fbpixel';
 
 const TIERS: { name: string; price: string; note: string; plan: CheckoutPlan; highlight?: boolean }[] = [
   { name: 'Monthly', price: '$7.99/mo', note: 'cancel anytime', plan: 'monthly', highlight: true },
-  { name: 'Annual', price: '$49/yr', note: 'save 49% \u2014 about $4.08/mo', plan: 'annual' },
+  { name: 'Annual', price: '$49/yr', note: 'save 49%, about $4.08/mo', plan: 'annual' },
 ];
 
 export function Paywall({ reason, onClose }: { reason: string; onClose: () => void }) {
@@ -45,7 +45,7 @@ export function Paywall({ reason, onClose }: { reason: string; onClose: () => vo
     >
       <div className="rounded-3xl bg-gradient-to-b from-felt-800 to-felt-950 border border-gold-500/40 p-8 text-center shadow-2xl">
         <div className="text-gold-400 text-sm uppercase tracking-widest mb-2">Unlock everything</div>
-        <h2 className="text-2xl font-bold mb-1">You&apos;re in the zone \u2014 keep going.</h2>
+        <h2 className="text-2xl font-bold mb-1">You&apos;re in the zone. Keep going.</h2>
         <p className="text-ink-300 text-sm mb-6">{reason}</p>
 
         <div className="space-y-3 mb-6">

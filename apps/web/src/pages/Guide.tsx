@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Eyebrow } from '../components/ui';
 import { Spade } from '../components/icons';
 import { CONCEPTS, TOOL_HELP } from '../components/toolHelp';
+import { FreeChapters } from '../components/FreeChapters';
 
 export function Guide() {
   const reduce = useReducedMotion();
@@ -74,6 +75,10 @@ export function Guide() {
           </div>
         ))}
       </div>
+
+      {/* Free chapters */}
+      <div className="inlay my-10" />
+      <FreeChapters source="guide" />
 
       {/* CTA */}
       <div className="inlay my-10" />

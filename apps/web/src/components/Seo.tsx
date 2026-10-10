@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getPost } from '../content/posts';
 
-const SITE = 'https://pokerlogiclab.com';
+export const SITE = 'https://pokerlogiclab.com';
 
 const DEFAULT = {
   title: 'Poker Logic Lab · Train your poker decisions',
@@ -64,6 +64,19 @@ const META: Record<string, { title: string; desc: string }> = {
   '/refunds': { title: 'Refund Policy | Poker Logic Lab', desc: 'Our simple 14-day money-back guarantee.' },
 };
 
+/** Title and description for a path. Shared by the live app and the build-time prerender. */
+export function metaFor(pathname: string): { title: string; desc: string } {
+  // Individual blog posts: pull title/description from the post itself.
+  if (pathname.startsWith('/blog/')) {
+    const post = getPost(pathname.slice('/blog/'.length));
+    if (post) return { title: post.title, desc: post.description };
+  }
+  return META[pathname] ?? DEFAULT;
+}
+
+/** Every path that has its own title and description. */
+export const META_PATHS = Object.keys(META);
+
 function upsertMeta(selector: string, create: () => HTMLElement, content: string) {
   let el = document.head.querySelector<HTMLElement>(selector);
   if (!el) {
@@ -77,12 +90,7 @@ function upsertMeta(selector: string, create: () => HTMLElement, content: string
 export function Seo() {
   const { pathname } = useLocation();
   useEffect(() => {
-    let m = META[pathname] ?? DEFAULT;
-    // Individual blog posts: pull title/description from the post itself.
-    if (pathname.startsWith('/blog/')) {
-      const post = getPost(pathname.slice('/blog/'.length));
-      if (post) m = { title: post.title, desc: post.description };
-    }
+    const m = metaFor(pathname);
     const url = SITE + pathname;
 
     document.title = m.title;

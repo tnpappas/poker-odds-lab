@@ -8,6 +8,7 @@ import { Spade, Heart, Diamond, Club } from '../components/icons';
 import { BOOK_COVER_DATA_URI } from '../components/GuideDownload';
 import { POSTS } from '../content/posts';
 import { HeroHandAnalysis } from '../components/HeroHandAnalysis';
+import { FreeChapters } from '../components/FreeChapters';
 
 type SuitProps = { size?: number; className?: string };
 
@@ -175,6 +176,13 @@ export function Home() {
         </section>
       </div>
 
+      {/* ---- Free chapters: the email capture on the main path ---- */}
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
+        <div className="inlay mb-8" />
+        <Eyebrow>Free download</Eyebrow>
+        <FreeChapters source="home" className="mt-2" />
+      </div>
+
       {/* ---- Included with purchase: the complete book ---- */}
       <div className="max-w-6xl mx-auto px-5 sm:px-6 pb-24">
         <div className="inlay mb-8" />
@@ -191,7 +199,7 @@ export function Home() {
             </h2>
             <p className="text-ink-300 mt-3 text-[15px] leading-relaxed max-w-xl">
               One payment of $49/year (or $7.99/month) unlocks every trainer in the lab and the full guide,
-              <span className="text-ink-100"> Playing Online Texas Hold\u2019em</span>. All 19 chapters,
+              <span className="text-ink-100"> Playing Online Texas Hold’em</span>. All 19 chapters,
               yours to download and keep. New Lab Notes every week. Cancel anytime.
             </p>
             <Link to="/pricing"

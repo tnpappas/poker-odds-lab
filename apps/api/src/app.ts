@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import { config } from './config';
 import { api } from './routes/index';
 import { challenge } from './routes/challenge';
+import { leads } from './routes/leads';
 import { webhooks } from './webhooks/index';
 import { errorHandler } from './middleware/error';
 import { storageBackend } from './storage/index';
@@ -18,6 +19,8 @@ const corsOrigin = config.frontendOrigins.length > 0 ? config.frontendOrigins : 
 const API_RATE_LIMIT = 120;
 /** Public challenge writes: an entrant makes one answer a day. */
 const CHALLENGE_WRITE_LIMIT = config.isTest ? 1000 : 10;
+/** Public lead capture: one signup per visitor. */
+const LEADS_WRITE_LIMIT = config.isTest ? 1000 : 10;
 /** Tighter limit for billing: nobody legitimately starts 10 checkouts a minute. */
 const BILLING_RATE_LIMIT = config.isTest ? 1000 : 10;
 
@@ -60,7 +63,8 @@ export function createApp() {
   // Public Live Read Challenge: no account needed, so it sits before the
   // authenticated router. Writes get their own tight limit.
   app.post('/api/challenge/*splat', rateLimit({ windowMs: 60_000, limit: CHALLENGE_WRITE_LIMIT, ...limiterOptions }));
-  app.use('/api', rateLimit({ windowMs: 60_000, limit: API_RATE_LIMIT, ...limiterOptions }), challenge, api);
+  app.post('/api/leads/*splat', rateLimit({ windowMs: 60_000, limit: LEADS_WRITE_LIMIT, ...limiterOptions }));
+  app.use('/api', rateLimit({ windowMs: 60_000, limit: API_RATE_LIMIT, ...limiterOptions }), challenge, leads, api);
 
   app.use(errorHandler);
   return app;

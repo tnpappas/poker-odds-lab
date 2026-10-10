@@ -70,6 +70,12 @@ const entrantEmail = email.transform(normalizeEntrantEmail);
 
 export const challengeSignupSchema = z.object({ email });
 
+/** `source` is the page the form was on (home, pricing, guide). */
+export const freeChaptersSchema = z.object({
+  email,
+  source: z.string().trim().max(40).regex(/^[a-z0-9-]*$/).default(''),
+});
+
 export const challengeAnswerSchema = z.object({
   email: entrantEmail,
   /** Public leaderboard name, e.g. an Instagram handle. */

@@ -2,6 +2,22 @@
 
 All notable changes, newest first. Dates are the day the change went live on pokerlogiclab.com.
 
+## 2026-10-10
+
+### Search visibility
+- Public pages are now prerendered to static HTML at build time (`apps/web/scripts/prerender.mjs`): home, guide, pricing, Lab Notes and every post, challenge, rules and the legal pages. Before this, a crawler that does not run JavaScript received an empty page with the same title on every URL. Each page now ships its own title, description and canonical link. The tool pages (sign-in gated) get their own titles too. Every other URL falls back to the empty app shell, `app.html`.
+- The build fails if any public page renders without real content or if two pages share a title.
+- `/pricing` added to the sitemap.
+
+### Email capture
+- Free chapters signup (Pot Odds and Outs, Playing the Flop) on the homepage, pricing page and guide. Public route `POST /api/leads/free-chapters` tags the contact `free-chapters` in GoHighLevel; the PDF download is handed over on the page as soon as the address is saved. Fires a Meta `Lead` event for visitors who accepted tracking.
+
+### Pricing page
+- Names the payment method: checkout through PayPal, with PayPal balance, bank, or a debit or credit card.
+
+### Fixes
+- Text that showed a raw `\u2019` or `\u2026` code instead of an apostrophe or ellipsis (homepage book paragraph, pricing page, paywall, access check).
+
 ## 2026-09-12 (evening)
 
 ### Billing

@@ -9,6 +9,7 @@ import { trackInitiateCheckout } from '../lib/fbpixel';
 import { Eyebrow } from '../components/ui';
 import { Spade } from '../components/icons';
 import { BOOK_COVER_DATA_URI } from '../components/GuideDownload';
+import { FreeChapters } from '../components/FreeChapters';
 
 const INCLUDED = [
   'Hand Replay, the core loop: pause at every street, read the range, make the call',
@@ -25,7 +26,7 @@ const INCLUDED = [
 
 const TIERS: { plan: CheckoutPlan; label: string; price: string; period: string; note: string; highlight?: boolean }[] = [
   { plan: 'monthly', label: 'Monthly', price: '$7.99', period: '/mo', note: 'Cancel anytime', highlight: true },
-  { plan: 'annual', label: 'Annual', price: '$49', period: '/yr', note: 'Save 49% \u2014 about $4.08/mo' },
+  { plan: 'annual', label: 'Annual', price: '$49', period: '/yr', note: 'Save 49%, about $4.08/mo' },
 ];
 
 /**
@@ -43,8 +44,8 @@ export function Pricing() {
           Train every day. Pay less than one solver month.
         </h1>
         <p className="text-ink-300 mt-4 text-[15px] leading-relaxed max-w-xl mx-auto">
-          Try 3 hands free every day, no sign-up needed. When you want more, pick a plan.
-          Cancel anytime.
+          Try 3 hands free every day, no sign-up needed. When you want more, pick a plan and
+          check out with PayPal. Cancel anytime.
         </p>
       </div>
 
@@ -71,7 +72,7 @@ export function Pricing() {
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <img
             src={BOOK_COVER_DATA_URI}
-            alt="Playing Online Texas Hold\u2019em book cover"
+            alt="Playing Online Texas Hold’em book cover"
             className="w-24 sm:w-28 rounded-lg shadow-2xl shrink-0 ring-1 ring-white/10"
           />
           <div className="flex-1 text-center sm:text-left">
@@ -107,6 +108,11 @@ export function Pricing() {
           ))}
         </div>
 
+        <p className="text-xs text-ink-400 mt-4 text-center leading-relaxed">
+          Secure checkout through PayPal. Pay with your PayPal balance, your bank, or a debit or credit card.
+          We never see your full card details.
+        </p>
+
         <ul className="mt-7 space-y-2.5">
           {INCLUDED.map((item) => (
             <li key={item} className="flex gap-3 text-[14px] text-ink-200 leading-relaxed">
@@ -128,6 +134,9 @@ export function Pricing() {
           . Cancel anytime from your account or by emailing support.
         </p>
       </motion.div>
+
+      {/* Not ready to pay: leave with the free chapters instead of leaving with nothing. */}
+      <FreeChapters source="pricing" className="mt-4" />
 
       <p className="text-xs text-ink-500 mt-8 text-center leading-relaxed max-w-lg mx-auto">
         Poker Logic Lab is decision-training software. Every hand is simulated, so there is no money
@@ -198,7 +207,7 @@ function BuyBlock() {
             </button>
           </SignUpButton>
           <p className="text-xs text-ink-500 mt-3 text-center">
-            Create your account, then choose a plan.
+            Create your account, then check out securely with PayPal.
           </p>
           <p className="text-sm text-ink-500 mt-3 text-center">
             Already a member?{' '}
@@ -260,7 +269,7 @@ function SignedInBuy({
   if (!planLoaded) {
     return (
       <div className="num text-ink-500 text-sm text-center animate-pulse py-3">
-        Checking your access\u2026
+        Checking your access…
       </div>
     );
   }
