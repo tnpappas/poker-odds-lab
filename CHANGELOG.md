@@ -18,6 +18,10 @@ All notable changes, newest first. Dates are the day the change went live on pok
 ### Security
 - proxy-addr 2.0.7 to 2.0.8 to clear a new critical advisory (IP spoofing through a trusted subnet). It failed the CI audit on the first push of the day, which held back the API deploy.
 
+### Operations
+- Railway only redeployed the API when a file under `apps/api` changed, so dependency and poker engine updates never reached production. Watch paths now live in `railway.json` and include the lockfile, root `package.json`, `packages/` and `railway.json` itself.
+- `/api/health` reports the running commit, so a deploy can be confirmed from outside.
+
 ### Fixes
 - Text that showed a raw `\u2019` or `\u2026` code instead of an apostrophe or ellipsis (homepage book paragraph, pricing page, paywall, access check).
 

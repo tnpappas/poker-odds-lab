@@ -55,6 +55,8 @@ export function createApp() {
       auth: config.CLERK_SECRET_KEY ? 'clerk' : 'dev',
       payments: config.paypalConfigured ? 'paypal' : 'disabled',
       errorTracking: config.SENTRY_DSN ? 'sentry' : 'disabled',
+      // Which commit is running, so a deploy can be confirmed from outside (set by Railway).
+      commit: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 8) ?? 'unknown',
     });
   });
 
