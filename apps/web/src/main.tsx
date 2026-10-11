@@ -12,7 +12,8 @@ import { LOGO_DATA_URI } from './brand';
 import { AuthProvider } from './lib/auth';
 import { initPixelIfConsented } from './lib/fbpixel';
 
-// Ad measurement loads only if this browser already accepted tracking.
+// Tracking loads by default outside the EU/EEA/UK (the banner is an opt-out),
+// and only after Accept inside those regions. An opt-out blocks it everywhere.
 initPixelIfConsented();
 
 // Use the real brand mark as the browser favicon.

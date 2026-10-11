@@ -1,8 +1,9 @@
-// Microsoft Clarity (session recordings + heatmaps), loaded only after consent.
+// Microsoft Clarity (session recordings + heatmaps).
 //
-// Same rule as the Meta Pixel: nothing from Clarity is loaded until the visitor
-// accepts tracking in the cookie banner. Called from lib/fbpixel.ts, which owns
-// the stored consent choice. No-ops safely if it never loads.
+// Same rule as the Meta Pixel (see shouldLoadTracking in lib/fbpixel.ts, which
+// owns the stored consent choice): on by default outside the EU/EEA/UK, off
+// there until the visitor accepts, and off everywhere after an opt-out.
+// No-ops safely if it never loads.
 //
 // Project ID: yha4qfsr0s (Poker Logic Lab)
 
@@ -27,4 +28,16 @@ export function loadClarity(): void {
   s.async = true;
   s.src = `https://www.clarity.ms/tag/${CLARITY_PROJECT_ID}`;
   document.head.appendChild(s);
+}
+
+/** Opt out: tell Clarity to drop its cookies and stop recording. */
+export function stopClarity(): void {
+  if (typeof window === 'undefined') return;
+  const c = (window as unknown as { clarity?: (...args: unknown[]) => void }).clarity;
+  try {
+    c?.('consent', false);
+    c?.('stop');
+  } catch {
+    // Never let an opt-out throw.
+  }
 }
