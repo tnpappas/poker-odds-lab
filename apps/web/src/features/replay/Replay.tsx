@@ -86,7 +86,9 @@ export function Replay() {
     incrementUsage('replay');
     const { activeAdversaryId: avId, adversaries: vs } = useGameStore.getState();
     const av = vs.find((v) => v.id === avId);
-    const h = await generateHand(av ? { adversary: { name: av.name, vpip: av.vpip } } : {});
+    const h = await generateHand(av ? {
+      adversary: { name: av.name, vpip: av.vpip, pfr: av.pfr, cbetFlop: av.cbetFlop, cbetTurn: av.cbetTurn, foldTo3bet: av.foldTo3bet, af: av.af, wtsd: av.wtsd },
+    } : {});
     setHand(h);
     setPhase('decide');
   }, [remaining, incrementUsage, resetRead]);
@@ -186,7 +188,7 @@ export function Replay() {
       </div>
       {activeAdversary && (
         <div className="mb-3 flex items-center justify-between rounded-xl bg-gold-500/10 border border-gold-500/40 px-4 py-2 text-sm">
-          <span>Training vs <span className="text-gold-400 font-semibold">{activeAdversary.name}</span> · VPIP {Math.round(activeAdversary.vpip * 100)}%</span>
+          <span>Training vs <span className="text-gold-400 font-semibold">{activeAdversary.name}</span> · VPIP {Math.round(activeAdversary.vpip * 100)}% · PFR {Math.round(activeAdversary.pfr * 100)}% · AF {activeAdversary.af.toFixed(1)}</span>
           <button onClick={() => setActiveAdversary(null)} className="text-ink-500 hover:text-ink-300">Use random adversaries</button>
         </div>
       )}
@@ -225,7 +227,7 @@ export function Replay() {
               </button>
             </div>
             <p className="text-ink-300 text-sm mb-4">
-              Adversary bets <span className="text-ink-100 font-semibold">${node.betSize}</span> on the {node.street}.
+              He {hand.preflopRaised ? 'raised' : 'called'} before the flop. Now he bets <span className="text-ink-100 font-semibold">${node.betSize}</span> on the {node.street}.
             </p>
 
             {readMode && showReadHint && (

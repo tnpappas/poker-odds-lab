@@ -7,8 +7,10 @@ import {
   calculateExactEquity,
   matrixToRange,
   rangeToMatrix,
-  vpipToRange,
   narrowRange,
+  adversaryStyle,
+  preflopStartRange,
+  type AdversaryStyle,
   type Card,
   type HandRange,
   type AdversaryProfile,
@@ -38,6 +40,8 @@ export interface GeneratedHand {
   adversaryCards: [Card, Card];
   board: Card[]; // full 5 cards
   adversaryName: string;
+  preflopRaised: boolean; // true if he raised preflop, false if he just called
+  style: AdversaryStyle; // how readily he keeps betting weak hands
   nodes: DecisionNode[];
 }
 
@@ -91,12 +95,17 @@ function explain(node: Omit<DecisionNode, 'explanation'>): string {
 
 /** Generate a complete hand with engine-computed decision nodes. */
 export async function generateHand(
-  opts: { profileIndex?: number; adversary?: { name: string; vpip: number } } = {},
+  opts: { profileIndex?: number; adversary?: AdversaryProfile & { name: string } } = {},
 ): Promise<GeneratedHand> {
   const profile: AdversaryProfile & { name: string } = opts.adversary
-    ? { name: opts.adversary.name, vpip: opts.adversary.vpip, pfr: 0 }
-    : PROFILES[opts.profileIndex ?? Math.floor(Math.random() * PROFILES.length)];
-  const adversaryRange = matrixToRange(vpipToRange(profile.vpip, 'CO'));
+    ?? PROFILES[opts.profileIndex ?? Math.floor(Math.random() * PROFILES.length)];
+  // Raised or called preflop (PFR vs VPIP) decides his starting hands; his
+  // aggression and c-bet set how readily he keeps betting weak hands. His
+  // showdown rate is not used here yet: it only matters when you raise, and
+  // raise scoring needs a multi-street model first.
+  const start = preflopStartRange(profile);
+  const adversaryRange = matrixToRange(start.matrix);
+  const style = adversaryStyle(profile);
 
   // Deal hero, adversary (from range), and a full board with no conflicts.
   const deck = shuffle(makeDeck());
@@ -139,7 +148,7 @@ export async function generateHand(
     const betSize = Math.round(pot * (0.5 + Math.random() * 0.25));
     const potAfterBet = pot + betSize; // what hero can win
 
-    liveRange = narrowRange(liveRange, boardSlice, { style: 'balanced' });
+    liveRange = narrowRange(liveRange, boardSlice, { style });
     const rangeSurvival = (liveRange.reduce((t, c) => t + c.weight, 0)) / startCombos;
     const adversaryRangeMatrix = rangeToMatrix(liveRange);
 
@@ -171,5 +180,5 @@ export async function generateHand(
     pot = potAfterBet + betSize; // assume hero called -> pot for next street
   }
 
-  return { heroCards, adversaryCards, board, adversaryName: profile.name, nodes };
+  return { heroCards, adversaryCards, board, adversaryName: profile.name, preflopRaised: start.raised, style, nodes };
 }

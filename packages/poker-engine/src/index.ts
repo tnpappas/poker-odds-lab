@@ -9,3 +9,4 @@ export * from './preflop.js';
 export * from './icm.js';
 export * from './narrowing.js';
 export * from './drills.js';
+export * from './opponentModel.js';
