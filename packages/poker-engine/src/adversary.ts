@@ -68,6 +68,34 @@ export function calculateExploitativeAdjustments(
     });
   }
 
+  // Preflop raise rate vs hands played. A big gap means he limps or calls with
+  // most of his hands, so the hands he does raise are the strong part.
+  const pfr = Math.min(adversary.pfr, adversary.vpip);
+  const passiveGap = adversary.vpip - pfr;
+  if (adversary.vpip >= 0.15 && passiveGap > 0.15) {
+    out.push({
+      adjustment: 'Respect his preflop raises, attack his limps',
+      evGain: Math.round(passiveGap * 20 * 10) / 10,
+      reason: `Plays ${Math.round(adversary.vpip * 100)}% of hands but raises only ${Math.round(pfr * 100)}%. Most of his hands just call, so when he does raise he usually has it. Fold marginal hands to his raises, and raise his limps for value.`,
+    });
+  }
+
+  // Went to showdown. Typical winning players sit around 25-30%.
+  const wtsd = adversary.wtsd ?? 0.28;
+  if (wtsd > 0.33) {
+    out.push({
+      adjustment: 'Stop bluffing, value bet thinner',
+      evGain: Math.round((wtsd - 0.28) * 40 * 10) / 10,
+      reason: `Goes to showdown ${Math.round(wtsd * 100)}% of the time, well above the usual 25 to 30%. He calls your bluffs, so bet your medium-strength hands for value instead.`,
+    });
+  } else if (wtsd < 0.22) {
+    out.push({
+      adjustment: 'Keep betting the turn and river as a bluff',
+      evGain: Math.round((0.28 - wtsd) * 40 * 10) / 10,
+      reason: `Goes to showdown only ${Math.round(wtsd * 100)}% of the time, below the usual 25 to 30%. He gives up on later streets, so a second or third bet wins the pot often.`,
+    });
+  }
+
   if ((adversary.af ?? 2.5) < 1.5) {
     out.push({
       adjustment: 'Fold to his aggression',

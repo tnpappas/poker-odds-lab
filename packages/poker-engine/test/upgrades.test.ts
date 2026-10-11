@@ -16,6 +16,8 @@ import {
   buildDrillQueue,
   isDue,
   type HandRange,
+  calculateExploitativeAdjustments,
+  type Card,
 } from '../src/index.js';
 
 describe('ICM', () => {
@@ -144,5 +146,31 @@ describe('drill scheduler', () => {
     ];
     const q = buildDrillQueue(cards, now);
     expect(q[0].leak).toBe('folding_to_aggression');
+  });
+});
+
+describe('calculateExploitativeAdjustments: preflop raise and showdown sliders', () => {
+  const hero: [Card, Card] = ['As', 'Ks'];
+  const base = { vpip: 0.24, pfr: 0.18, cbetFlop: 0.6, foldTo3bet: 0.55, af: 2.5, wtsd: 0.28 };
+  const names = (p: typeof base) => calculateExploitativeAdjustments(hero, p).map((a) => a.adjustment);
+
+  it('the default profile stays balanced', () => {
+    expect(names(base)).toEqual([]);
+  });
+
+  it('a big gap between hands played and hands raised flags strong raises', () => {
+    expect(names({ ...base, vpip: 0.4, pfr: 0.08 })).toContain('Respect his preflop raises, attack his limps');
+    expect(names({ ...base, vpip: 0.3, pfr: 0.2 })).not.toContain('Respect his preflop raises, attack his limps');
+  });
+
+  it('a high showdown rate says stop bluffing; a low one says keep barreling', () => {
+    expect(names({ ...base, wtsd: 0.4 })).toContain('Stop bluffing, value bet thinner');
+    expect(names({ ...base, wtsd: 0.2 })).toContain('Keep betting the turn and river as a bluff');
+    expect(names({ ...base, wtsd: 0.3 })).toEqual([]);
+  });
+
+  it('moving each slider changes the advice', () => {
+    expect(names({ ...base, pfr: 0.04 })).not.toEqual(names(base));
+    expect(names({ ...base, wtsd: 0.45 })).not.toEqual(names(base));
   });
 });

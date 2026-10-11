@@ -201,11 +201,11 @@ export const TOOL_HELP: ToolHelp[] = [
     screen: [
       { label: 'Name box', meaning: 'Give the player a name so you can find them later.' },
       { label: 'How many hands does he play?', meaning: 'Known as VPIP: the share of hands where they put money in before the flop. This slider builds the Modeled range grid.' },
-      { label: 'How often does he raise preflop?', meaning: 'Known as PFR: the share of hands they raise before the flop. It can never be higher than the first slider.' },
+      { label: 'How often does he raise preflop?', meaning: 'Known as PFR: the share of hands they raise before the flop. It can never be higher than the first slider. A big gap between this and the first slider means their raises are strong.' },
       { label: 'Does he c-bet the flop?', meaning: 'How often they bet the flop after raising before the flop (continuation bet).' },
       { label: 'Does he fold to 3-bets?', meaning: 'How often they fold when someone re-raises their raise.' },
       { label: 'How aggressive overall?', meaning: 'Known as aggression factor: bets and raises divided by calls. 1 is passive, 3 or more is aggressive.' },
-      { label: 'Does he go to showdown a lot?', meaning: 'How often they see the hand through to the end and show cards.' },
+      { label: 'Does he go to showdown a lot?', meaning: 'Known as WTSD: how often they see the hand through to the end and show cards. High means they call down a lot, low means they give up easily.' },
       { label: 'Modeled range', meaning: 'The hands this player likely plays. Bright cells are in, faded cells are out.' },
       { label: 'Exploitative adjustments', meaning: 'Specific ways to beat this player, based on the sliders.' },
     ],
@@ -219,7 +219,7 @@ export const TOOL_HELP: ToolHelp[] = [
     ],
     numbers: [
       { label: 'X% of hands', meaning: 'How much of all starting hands this player’s range covers.' },
-      { label: 'When adjustments appear', meaning: 'Fold to 3-bets above 65%, c-bet above 75%, plays more than 40% of hands, or aggression below 1.5. Anything else shows "fairly balanced".' },
+      { label: 'When adjustments appear', meaning: 'Fold to 3-bets above 65%, c-bet above 75%, plays more than 40% of hands, hands played minus hands raised is more than 15 points (when playing at least 15%), showdown above 33% or below 22%, or aggression below 1.5. Anything else shows "fairly balanced".' },
       { label: '+X EV', meaning: 'A rough score for how big each edge is, useful for comparing adjustments with each other. It is a teaching estimate, not a measured win rate.' },
       { label: 'VPIP · PFR · AF', meaning: 'The short stat line under each saved player: hands played, preflop raise rate, and aggression.' },
     ],
