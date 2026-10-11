@@ -122,6 +122,11 @@ export function setConsent(choice: ConsentChoice): void {
     }
     stopClarity();
     stopGoogleAnalytics();
+    // Those calls are not enough on their own: tested live, Clarity restarts and
+    // the Meta Pixel fires a PageView on the next in-app page change. Tags that
+    // are already loaded can only be reliably removed by reloading, after which
+    // the stored "declined" choice keeps all three from loading at all.
+    if (loaded && typeof window !== 'undefined') window.location.reload();
   }
 }
 
