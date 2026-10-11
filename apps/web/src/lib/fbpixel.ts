@@ -1,5 +1,6 @@
 // Typed wrapper around the Meta Pixel (fbq), loaded only after consent.
-// Consent also gates Microsoft Clarity (see lib/clarity.ts).
+// Consent also gates Microsoft Clarity (see lib/clarity.ts) and Google
+// Analytics (see lib/ga.ts).
 //
 // Nothing from Meta is loaded until the visitor accepts tracking in the
 // cookie banner (see components/CookieConsent.tsx). The choice is kept in
@@ -9,6 +10,7 @@
 // Dataset / Pixel ID: 1383191933689906 (Poker Logic Lab)
 
 import { loadClarity } from './clarity';
+import { loadGoogleAnalytics } from './ga';
 
 declare global {
   interface Window {
@@ -76,6 +78,7 @@ export function setConsent(choice: ConsentChoice): void {
   if (choice === 'granted') {
     loadPixel();
     loadClarity();
+    loadGoogleAnalytics();
   }
 }
 
@@ -84,6 +87,7 @@ export function initPixelIfConsented(): void {
   if (readChoice() === 'granted') {
     loadPixel();
     loadClarity();
+    loadGoogleAnalytics();
   }
 }
 
