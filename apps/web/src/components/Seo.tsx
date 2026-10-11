@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getPost } from '../content/posts';
 
-export const SITE = 'https://pokerlogiclab.com';
+export const SITE = 'https://www.pokerlogiclab.com';
 
 const DEFAULT = {
   title: 'Poker Logic Lab · Train your poker decisions',
