@@ -231,3 +231,14 @@ input[type='range']::-moz-range-thumb {
   text-underline-offset: 2px;
 }
 .article a:hover { color: var(--color-brand-300); }
+
+/* Phones and tablets: keep form text at 16px so iOS does not zoom the page when
+   a field is focused. This replaces the old maximum-scale=1 viewport lock, which
+   also blocked pinch to zoom (WCAG 1.4.4). */
+@media (pointer: coarse) {
+  input:not([type='range']):not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
