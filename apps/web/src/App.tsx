@@ -151,6 +151,7 @@ export function App() {
             <a href="mailto:support@pokerlogiclab.com" className="hover:text-ink-100 transition">Support</a>
             <a href="https://www.instagram.com/pokerlogiclab/" target="_blank" rel="noopener noreferrer" className="hover:text-ink-100 transition">Instagram</a>
             <a href="https://www.facebook.com/PokerLogicLab" target="_blank" rel="noopener noreferrer" className="hover:text-ink-100 transition">Facebook</a>
+            <a href="https://www.youtube.com/@PokerLogicLabHQ" target="_blank" rel="noopener noreferrer" className="hover:text-ink-100 transition">YouTube</a>
           </div>
           <span className="order-3 hidden md:flex items-center gap-2 opacity-70">
             <Spade size={12} /><Heart size={12} className="text-oxblood-400" /><Diamond size={12} className="text-brass-400" /><Club size={12} className="text-chip-green" />

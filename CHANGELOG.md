@@ -2,6 +2,11 @@
 
 All notable changes, newest first. Dates are the day the change went live on pokerlogiclab.com.
 
+## 2026-10-11
+
+### Footer
+- YouTube link added next to Instagram and Facebook, pointing to the channel's new handle https://www.youtube.com/@PokerLogicLabHQ (the old @PokerLogicLab-1 handle is released about Oct 25, 2026).
+
 ## 2026-10-10
 
 ### Search visibility
