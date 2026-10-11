@@ -12,6 +12,7 @@ import {
 import { HandGrid, equityColor } from '../../components/HandGrid';
 import { CardRow } from '../../components/PlayingCard';
 import { computePreflopTable, useLiveEquity } from '../../lib/useEquityWorker';
+import { HowToUse } from '../../components/HowToUse';
 
 const CACHE_KEY = 'pol-preflop-table-v1';
 
@@ -67,6 +68,7 @@ export function Visualizer() {
       <header className="text-center my-6">
         <h1 className="text-2xl font-bold">Preflop Equity Visualizer</h1>
         <p className="text-ink-300 text-sm">Every starting hand, colored by its raw equity vs a random hand.</p>
+        <div className="mt-3 flex justify-center"><HowToUse path="/visualizer" /></div>
       </header>
 
       <div className="grid md:grid-cols-[1.3fr_1fr] gap-6">

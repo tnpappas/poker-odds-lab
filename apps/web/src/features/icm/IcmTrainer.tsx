@@ -12,6 +12,7 @@ import {
 } from '@pol/poker-engine';
 import { CardRow } from '../../components/PlayingCard';
 import { useGameStore } from '../../store/useGameStore';
+import { HowToUse } from '../../components/HowToUse';
 
 type Tab = 'push' | 'icm';
 
@@ -22,6 +23,7 @@ export function IcmTrainer() {
       <header className="text-center my-6">
         <h1 className="text-2xl font-bold">Tournament Lab</h1>
         <p className="text-ink-300 text-sm">Learn the math that actually decides tournaments — push/fold and ICM — without a $130/mo solver.</p>
+        <div className="mt-3 flex justify-center"><HowToUse path="/icm" /></div>
       </header>
 
       <div className="flex gap-2 justify-center mb-6">

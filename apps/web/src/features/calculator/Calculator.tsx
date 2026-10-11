@@ -14,6 +14,7 @@ import {
 import { HandGrid, equityColor } from '../../components/HandGrid';
 import { CardSlots } from '../../components/CardPicker';
 import { useLiveEquity } from '../../lib/useEquityWorker';
+import { HowToUse } from '../../components/HowToUse';
 
 const PRESETS: { label: string; range: string }[] = [
   { label: 'Any two', range: '22+,A2+,K2+,Q2+,J2+,T2+,92+,82+,72+,62+,52+,42+,32+' },
@@ -80,6 +81,7 @@ export function Calculator() {
       <header className="text-center my-6">
         <h1 className="text-2xl font-bold">Equity Calculator</h1>
         <p className="text-ink-300 text-sm">Your hand vs a range on any board — the fast answer, plus whether the price is right.</p>
+        <div className="mt-3 flex justify-center"><HowToUse path="/calculator" /></div>
       </header>
 
       <div className="grid md:grid-cols-[1fr_1fr] gap-6">

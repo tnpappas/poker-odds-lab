@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { LEAK_META, buildDrillQueue, type LeakType } from '@pol/poker-engine';
 import { useGameStore, type Decision, type Street } from '../../store/useGameStore';
 import { GuideDownloadCard } from '../../components/GuideDownload';
+import { HowToUse } from '../../components/HowToUse';
 
 interface Leak {
   type: string;
@@ -86,7 +87,10 @@ export function Dashboard() {
     return (
       <div className="max-w-3xl mx-auto px-5 sm:px-6 py-14">
         <GuideDownloadCard />
-        <div className="eyebrow mb-3">Start here</div>
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="eyebrow">Start here</div>
+          <HowToUse path="/dashboard" />
+        </div>
         <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">Welcome to the lab</h1>
         <p className="text-ink-300 mt-4 max-w-xl leading-relaxed">
           This dashboard fills in as you play. It tracks how good your decisions are and finds your leaks automatically.
@@ -108,7 +112,7 @@ export function Dashboard() {
       </div>
       <header className="my-6 flex items-end justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Your EV report, last 7 days</h1>
-        <Link to="/guide" className="text-xs text-ink-500 hover:text-ink-300 shrink-0">New here? Read the guide</Link>
+        <HowToUse path="/dashboard" className="shrink-0" />
       </header>
 
       <div className={`grid ${readError != null ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'} gap-3 mb-6`}>

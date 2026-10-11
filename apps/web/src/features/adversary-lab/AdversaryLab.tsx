@@ -11,6 +11,7 @@ import {
 import { HandGrid } from '../../components/HandGrid';
 import { Paywall } from '../../components/Paywall';
 import { useGameStore, type SavedAdversary } from '../../store/useGameStore';
+import { HowToUse } from '../../components/HowToUse';
 
 type Draft = Omit<SavedAdversary, 'id'>;
 
@@ -81,7 +82,10 @@ export function AdversaryLab() {
   return (
     <div className="max-w-5xl mx-auto px-4 pb-16">
       <header className="my-6">
-        <h1 className="text-2xl font-bold">Adversary Lab</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold">Adversary Lab</h1>
+          <HowToUse path="/adversary-lab" />
+        </div>
         <p className="text-ink-300 text-sm">Answer six questions about a player. We'll model their range and show you how to beat them.</p>
       </header>
 

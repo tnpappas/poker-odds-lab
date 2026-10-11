@@ -5,6 +5,7 @@ import { useGameStore } from '../../store/useGameStore';
 import { generateBlitzScenario, type BlitzScenario, type BlitzFocus } from './scenarios';
 import type { LeakType } from '@pol/poker-engine';
 import { Paywall } from '../../components/Paywall';
+import { HowToUse } from '../../components/HowToUse';
 
 type Phase = 'idle' | 'playing' | 'over';
 const GAME_SECONDS = 30;
@@ -119,6 +120,7 @@ export function Blitz() {
       <header className="text-center my-6">
         <h1 className="text-2xl font-bold">Mental Math Blitz</h1>
         <p className="text-ink-300 text-sm">30 seconds. Tap fast. Miss 3 in a row and it's over.</p>
+        <div className="mt-3 flex justify-center"><HowToUse path="/blitz" /></div>
       </header>
 
       {drillLeak && (

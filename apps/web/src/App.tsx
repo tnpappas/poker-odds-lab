@@ -5,7 +5,6 @@ import { useGameStore } from './store/useGameStore';
 import { clerkEnabled } from './lib/auth';
 import { api } from './lib/api';
 import { BrandMark } from './components/ui';
-import { HowToUse } from './components/HowToUse';
 import { CheckoutSuccess } from './components/CheckoutSuccess';
 import { CookieConsent } from './components/CookieConsent';
 import { Seo } from './components/Seo';
@@ -94,7 +93,6 @@ export function App() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <HowToUse />
             <span className="hidden xs:flex items-center gap-1.5 text-xs text-ink-500">
               <span className="eyebrow !tracking-[0.15em] !text-[0.6rem]">SP</span>
               <span className={`num font-semibold text-sm ${skillPoints >= 0 ? 'text-chip-green' : 'text-chip-red'}`}>

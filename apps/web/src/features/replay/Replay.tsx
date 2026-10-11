@@ -18,6 +18,7 @@ import { useLiveEquity } from '../../lib/useEquityWorker';
 import { generateHand, judge, type GeneratedHand, type DecisionNode } from './handGenerator';
 import { Paywall } from '../../components/Paywall';
 import type { Action } from '../../store/useGameStore';
+import { HowToUse } from '../../components/HowToUse';
 
 type Phase = 'loading' | 'decide' | 'result' | 'done';
 
@@ -179,6 +180,10 @@ export function Replay() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 pb-16">
+      <div className="flex flex-wrap items-center justify-between gap-3 my-4">
+        <h1 className="text-2xl font-bold">Hand Replay</h1>
+        <HowToUse path="/replay" />
+      </div>
       {activeAdversary && (
         <div className="mb-3 flex items-center justify-between rounded-xl bg-gold-500/10 border border-gold-500/40 px-4 py-2 text-sm">
           <span>Training vs <span className="text-gold-400 font-semibold">{activeAdversary.name}</span> · VPIP {Math.round(activeAdversary.vpip * 100)}%</span>
