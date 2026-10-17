@@ -379,6 +379,94 @@ export const POSTS: BlogPost[] = [
 <p>Bluffing is not about nerve. It is a price, the same as calling. Know the number, pick hands that can win more than one way, and bluff the players who actually fold.</p>
 `.trim(),
   },
+  {
+    slug: 'icm-explained-why-tournament-chips-are-not-money',
+    title: 'ICM Explained: Why Tournament Chips Are Not Money | Poker Logic Lab',
+    heading: 'ICM Explained: Why Tournament Chips Are Not Money',
+    description:
+      'In a tournament, the chips you win are worth less than the chips you lose. How ICM turns stacks into prize money, why a 50% call can need 73% on the bubble, and who feels the pressure most.',
+    date: '2026-10-17',
+    readingTime: '7 min read',
+    access: 'members',
+    body: `
+<p>In a cash game, a chip is a dollar. Win 3,000 chips and you are 3,000 richer. Lose them and you are 3,000 poorer. Every calculation in the other Lab Notes posts rests on that symmetry.</p>
+<p>Tournaments break it. You cannot cash out your chips, and prize money is paid by finishing position, not by stack size. That one rule change means the chips you might win are worth less than the chips you might lose, sometimes far less. A call that is clear profit in a cash game can be a disaster on a tournament bubble.</p>
+<p>The tool that measures this is called ICM, the Independent Chip Model. This post explains what it does, walks a bubble hand through it, and shows why it makes good players fold hands like ace king.</p>
+<!--more-->
+
+<h2>Chips are not prize money</h2>
+<p>Picture the end of a small tournament. Four players are left and three get paid: $500 for first, $300 for second, $200 for third. That is $1,000 in prizes, and there are 10,000 chips in play.</p>
+<ul>
+  <li>Player A: 4,000 chips.</li>
+  <li>You: 3,000 chips.</li>
+  <li>Player C: 2,000 chips.</li>
+  <li>Player D: 1,000 chips.</li>
+</ul>
+<p>If chips were money, you would own 30% of the chips and so 30% of the prize pool, $300. But that is not how the money is paid. Even if you won every chip on the table, you would collect $500, not $1,000. Meanwhile the player with 1,000 chips has not won anything yet but has a real shot at sneaking into third while the bigger stacks fight. The payout structure caps what the top of the table can win and props up the bottom.</p>
+
+<h2>What ICM does</h2>
+<p>ICM converts a set of stacks into a fair dollar value for each player. It starts from one simple assumption: your chance of finishing first equals your share of the chips. With 3,000 of 10,000, you win the tournament 30% of the time.</p>
+<p>Then it repeats that idea for every other place. If someone else wins, your chance of finishing second is your share of the chips that are left once their stack is removed, and so on down the payout list. Weight every possible finishing order by how likely it is, add up the prize money, and you get each player's expected payout. That number is their ICM equity.</p>
+<p>You will never do the full calculation at the table. It gets long quickly. What matters is the pattern it produces. For the table above:</p>
+<ul>
+  <li>Player A, 4,000 chips: $336 (chip share would say $400).</li>
+  <li>You, 3,000 chips: $295 (chip share would say $300).</li>
+  <li>Player C, 2,000 chips: $236 (chip share would say $200).</li>
+  <li>Player D, 1,000 chips: $133 (chip share would say $100).</li>
+</ul>
+<p>Big stacks are worth less than their chips. Short stacks are worth more. Each chip you add to your stack buys a little less prize money than the one before it, and each chip you lose costs a little more. That is the whole reason tournament math is different.</p>
+
+<h2>The bubble hand</h2>
+<p>Player A moves all in. You are next to act, and calling puts your whole stack at risk. Player A covers you, so this is a 3,000 chip flip for your tournament life. Leave the blinds out to keep the numbers clean.</p>
+<p><strong>The cash game view.</strong> You risk 3,000 to win 3,000. The price is 50%. Any hand that beats Player A's range more than half the time is a call.</p>
+<p><strong>The ICM view.</strong> Look at what each result is worth in dollars instead of chips.</p>
+<ul>
+  <li>Fold: you keep 3,000 chips, worth about $295.</li>
+  <li>Call and win: you have 6,000 chips and Player A drops to 1,000. Your stack is now worth about $405, a gain of roughly $110.</li>
+  <li>Call and lose: you finish fourth with nothing. You lose the full $295.</li>
+</ul>
+<p>So the call risks $295 to win $110. The break-even point is your current value divided by your value if you win: 295 / 405, about 73%. On this bubble you need to win 73% of the time to call, not 50%.</p>
+<p>That ratio has a name. What you stand to lose divided by what you stand to win, measured in dollars rather than chips, is the bubble factor. Here it is about 2.7: every dollar of upside costs you 2.7 dollars of downside. A bubble factor of 1 is a cash game. Anything above it means you need more than pot odds to continue.</p>
+
+<h2>What 73% actually means</h2>
+<p>Suppose Player A is a maniac who shoves any two cards. Against a completely random hand, here is roughly how often common holdings win:</p>
+<ul>
+  <li>Pocket aces: 85%.</li>
+  <li>Kings: 82%.</li>
+  <li>Queens: 80%.</li>
+  <li>Jacks: 77%.</li>
+  <li>Tens: 75%.</li>
+  <li>Nines: 72%.</li>
+  <li>Ace king suited: 67%.</li>
+  <li>Ace king offsuit: 65%.</li>
+</ul>
+<p>In a cash game every one of those is an easy call against a random shove, along with a big chunk of the rest of the deck. On this bubble the line falls between tens and nines. Ace king, a hand most players would never fold, is a fold against the widest range there is. Against a player who only shoves strong hands, the list gets shorter still.</p>
+<p>This feels wrong the first few times. It is not cowardice, it is arithmetic. Folding keeps the $295 you already have. Calling with ace king offsuit wins $110 about 65% of the time and loses $295 the other 35%. That is roughly $72 minus $103, a loss of about $31 every time you make the call.</p>
+
+<h2>Who feels the pressure most</h2>
+<p>Run the same shove from Player A at each of the other three stacks and the required win rate changes with the stack:</p>
+<ul>
+  <li>Player D, the short stack: about 61%.</li>
+  <li>Player C, 2,000 chips: about 70%.</li>
+  <li>You, 3,000 chips: about 73%.</li>
+</ul>
+<p><strong>Medium stacks suffer most.</strong> You are comfortably placed to cash if you sit tight, so you have the most to lose by busting before the short stack does.</p>
+<p><strong>Short stacks have less to protect.</strong> Player D cannot fold into the money forever because the blinds will eat the stack. Their bubble factor is the lowest at the table, so they can call much wider than you can.</p>
+<p><strong>Big stacks get to push.</strong> Player A can shove wide precisely because everyone else has to call so tight. Losing a flip costs A chips but does not end A's tournament. On the bubble, the chip leader's edge comes from everyone else's bubble factor, not from the cards.</p>
+
+<h2>Where ICM stops mattering</h2>
+<p>ICM is strongest when the prize jumps are large compared to what is left: the money bubble, pay jumps at a final table, and satellites where every seat pays the same. Early in a big tournament, with hundreds of players and the money far away, chip values sit close to chip counts, and the normal math from <a href="/blog/how-to-calculate-pot-odds-fast">How to Calculate Pot Odds Fast</a> and <a href="/blog/expected-value-in-poker">Expected Value in Poker</a> does most of the work.</p>
+<p>The model also has known blind spots. It ignores skill, so a strong player's chips are worth a little more than it says. It ignores position and the blinds coming around, so a short stack about to be forced all in is worth a little less. Treat ICM as the baseline correction, not the final word.</p>
+
+<h2>Where to practice this</h2>
+<ul>
+  <li>The <a href="/icm">Tournament Lab</a> shows each stack's dollar equity under ICM and your bubble factor against each opponent, then drills shove and fold decisions until the adjustment is automatic.</li>
+  <li>The <a href="/calculator">Equity Calculator</a> tells you how often your hand wins against a real shoving range, which is the other half of every bubble decision.</li>
+  <li><a href="/blitz">Mental Math Blitz</a> keeps the break-even fractions fast, so turning "risk 295 to win 110" into a percentage takes seconds.</li>
+</ul>
+<p>In a cash game, the question is whether a call wins chips. In a tournament, the question is whether it wins money. Most of the time those agree. On the bubble they can point in opposite directions, and the player who knows the difference keeps getting paid.</p>
+`.trim(),
+  },
 ];
 
 export const getPost = (slug: string): BlogPost | undefined =>
