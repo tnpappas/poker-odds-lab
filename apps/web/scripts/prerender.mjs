@@ -5,8 +5,10 @@
 //
 //   dist/index.html            home, prerendered
 //   dist/<path>/index.html     every other public page, prerendered
-//   dist/app.html              the empty app shell (vercel.json sends every
-//                              other URL here, e.g. /account or a 404)
+//   dist/app.html              the empty app shell (vercel.json sends the
+//                              app-only routes /account and /admin here)
+//   dist/404.html              the shell, noindex; Vercel serves it with a
+//                              404 status for every unknown URL
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -55,6 +57,19 @@ async function writePage(path, html) {
 
 // The untouched shell is the fallback for every URL that is not prerendered.
 await writeFile(join(dist, 'app.html'), shell);
+
+// dist/404.html: Vercel serves this with a real 404 status for any URL that is
+// not a static file or one of the app-only routes rewritten in vercel.json
+// (TRO-31). It boots the same app, which renders the NotFound page. It is
+// marked noindex and has no canonical so search engines drop unknown URLs.
+const notFound = shell
+  .replace(/<title>[^<]*<\/title>/, '<title>Page not found · Poker Logic Lab</title>')
+  .replace(/\s*<link rel="canonical"[^>]*>/, '')
+  .replace('</head>', '    <meta name="robots" content="noindex" />\n  </head>');
+if (notFound.includes('rel="canonical"') || !notFound.includes('noindex')) {
+  throw new Error('prerender: could not build 404.html from the shell');
+}
+await writeFile(join(dist, '404.html'), notFound);
 
 const titles = new Map();
 for (const path of CONTENT_PATHS) {
