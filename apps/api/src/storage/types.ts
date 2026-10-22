@@ -121,6 +121,26 @@ export interface ChallengeAnswer {
 
 export type ChallengeAnswerInput = Omit<ChallengeAnswer, 'id' | 'createdAt'>;
 
+/** 'year' = 1st place, 'month' = 2nd to 5th, 'chapters' = answered all seven days (no access, an email). */
+export type ChallengePrizeKind = 'year' | 'month' | 'chapters';
+
+export interface ChallengePrize {
+  challengeId: string;
+  /** Normalized entrant email (Gmail dots and +tags removed), as in challenge_answers. */
+  email: string;
+  kind: ChallengePrizeKind;
+  /** Final leaderboard position. */
+  rank: number;
+  handle: string;
+  notifiedAt: string | null;
+  grantedAt: string | null;
+  grantedUserId: string | null;
+  accessUntil: string | null;
+  createdAt: string;
+}
+
+export type ChallengePrizeInput = Pick<ChallengePrize, 'challengeId' | 'email' | 'kind' | 'rank' | 'handle'>;
+
 export interface Storage {
   getOrCreateUser(clerkId: string, email: string, username?: string): Promise<User>;
   upsertUserFromWebhook(clerkId: string, email: string, username?: string): Promise<User>;
@@ -159,6 +179,19 @@ export interface Storage {
   /** Save a challenge answer. Returns false when this email already answered this day. */
   addChallengeAnswer(input: ChallengeAnswerInput): Promise<boolean>;
   listChallengeAnswers(challengeId: string): Promise<ChallengeAnswer[]>;
+
+  /** Insert prize rows; a row that already exists (same challenge and email) is left untouched. */
+  addChallengePrizes(rows: ChallengePrizeInput[]): Promise<void>;
+  listChallengePrizes(challengeId: string): Promise<ChallengePrize[]>;
+  markChallengePrizeNotified(challengeId: string, email: string): Promise<void>;
+  /**
+   * Atomically claim an unclaimed access prize (kind year or month) for this
+   * email. Returns the claimed row, or null if there is none or it was already
+   * claimed, so two simultaneous sign-ins can never apply it twice.
+   */
+  claimChallengePrize(challengeId: string, email: string, userId: string): Promise<ChallengePrize | null>;
+  /** Record the access end date on a claimed prize, or release the claim (grantedAt back to null) if applying it failed. */
+  finishChallengePrizeClaim(challengeId: string, email: string, accessUntil: string | null): Promise<void>;
 }
 
 export const STREETS: Street[] = ['preflop', 'flop', 'turn', 'river'];

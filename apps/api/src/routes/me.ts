@@ -4,12 +4,14 @@ import { isOwner } from '../lib/owners';
 import { tagGhlCustomer } from '../lib/ghl';
 import { grantSchema } from './schemas';
 import { isEntitled, expireIfDue } from '../lib/entitlement';
+import { claimChallengePrize } from '../challenge/prizes';
 
 export const me = Router();
 
 /** The client-side purchase gate reads `entitled` from here on every load. */
 me.get('/me', async (req: Request, res) => {
-  const u = await expireIfDue(req.user!);
+  // A Live Read Challenge winner's prize is applied here, on their first sign-in after the challenge ends.
+  const { user: u, prize } = await claimChallengePrize(await expireIfDue(req.user!));
   const owner = isOwner(u);
   const entitled = owner || isEntitled(u);
   const plan = entitled ? (u.plan === 'lifetime' ? 'lifetime' : 'pro') : 'free';
@@ -22,6 +24,8 @@ me.get('/me', async (req: Request, res) => {
     hasSubscription: !!u.paypalSubscriptionId,
     /** Set when Pro is paid up to a date: renews on it if hasSubscription, ends on it otherwise. */
     proUntil: u.plan === 'pro' ? u.proUntil : null,
+    /** Set when this account's access came from a Live Read Challenge prize. */
+    challengePrize: prize,
   });
 });
 

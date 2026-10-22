@@ -136,7 +136,8 @@ function ChallengePanel() {
     <div className="max-w-3xl mx-auto px-4 pb-16">
       <div className="felt-card rounded-2xl p-8">
         <h2 className="font-display text-2xl font-semibold mb-1">Live Read Challenge</h2>
-        <p className="text-ink-300 text-sm mb-4">Owner view. Emails are never shown on the public page. Grant prizes with the form above, using the email in this table.</p>
+        <p className="text-ink-300 text-sm mb-4">Owner view. Emails are never shown on the public page. Prizes are automatic: when Day 7 closes, winners are emailed and their access turns on the first time they sign in with their entry email.</p>
+        {data.prizes && data.prizes.length > 0 && <PrizeTable prizes={data.prizes} />}
         <table className="w-full text-sm mb-8">
           <thead className="text-xs text-ink-500 text-left"><tr><th className="py-2">Day</th><th>Hand</th><th>Status</th><th>Answer</th><th className="text-right">Equity / needed</th><th className="text-right">Entries</th></tr></thead>
           <tbody>
@@ -168,6 +169,33 @@ function ChallengePanel() {
         </table>
       </div>
     </div>
+  );
+}
+
+const PRIZE_NAME = { year: '1 year access', month: '1 month access', chapters: 'Free chapters' } as const;
+const shortDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : null);
+
+function PrizeTable({ prizes }: { prizes: NonNullable<AdminChallenge['prizes']> }) {
+  return (
+    <>
+      <h3 className="font-semibold mb-2">Prizes</h3>
+      <table className="w-full text-sm mb-8">
+        <thead className="text-xs text-ink-500 text-left"><tr><th className="py-2">#</th><th>Name</th><th>Prize</th><th>Emailed</th><th>Access</th></tr></thead>
+        <tbody>
+          {prizes.map((p) => (
+            <tr key={p.email} className="border-t border-felt-800/60">
+              <td className="py-2 num">{p.rank}</td>
+              <td>{p.handle}<span className="block text-xs text-ink-500 break-all">{p.email}</span></td>
+              <td>{PRIZE_NAME[p.kind]}</td>
+              <td className="text-ink-300">{shortDate(p.notifiedAt) ?? 'Not yet'}</td>
+              <td className="text-ink-300">
+                {p.kind === 'chapters' ? 'n/a' : p.grantedAt ? `On until ${shortDate(p.accessUntil) ?? '?'}` : 'Waiting for sign in'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
 

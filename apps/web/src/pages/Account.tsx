@@ -115,7 +115,9 @@ function AccountPanel() {
   const proUntilText = proUntil
     ? proUntil.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
     : null;
-  const cancelled = isPaid && !me.hasSubscription && !!proUntil;
+  const prize = isPaid && !me.hasSubscription ? me.challengePrize ?? null : null;
+  const prizeLabel = prize ? `Live Read Challenge prize, ${placeName(prize.place)} place` : null;
+  const cancelled = isPaid && !me.hasSubscription && !!proUntil && !prize;
 
   return (
     <div className="flex flex-col gap-5">
@@ -132,7 +134,7 @@ function AccountPanel() {
             </div>
             {isPaid && proUntilText && (
               <div className="text-ink-500 text-xs mt-1">
-                {cancelled ? `Cancelled. Access ends ${proUntilText}` : `Renews ${proUntilText}`}
+                {prize ? `Prize access ends ${proUntilText}` : cancelled ? `Cancelled. Access ends ${proUntilText}` : `Renews ${proUntilText}`}
               </div>
             )}
           </div>
@@ -165,7 +167,9 @@ function AccountPanel() {
               </button>
             ) : (
               <p className="text-ink-500 text-sm">
-                {cancelled
+                {prizeLabel
+                  ? `${prizeLabel}. You have full access until ${proUntilText}. Nothing is billed and nothing renews.`
+                  : cancelled
                   ? `Your subscription is cancelled and will not renew. You keep full access until ${proUntilText}.`
                   : 'No PayPal subscription is on file for this account. If you believe you are being billed, manage it on PayPal or contact support.'}
               </p>
@@ -221,4 +225,10 @@ function AccountPanel() {
       </section>
     </div>
   );
+}
+
+/** 1 -> 1st, 2 -> 2nd, 3 -> 3rd, 4 -> 4th. */
+function placeName(place: number): string {
+  const suffix = place % 100 >= 11 && place % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[place % 10] ?? 'th';
+  return `${place}${suffix}`;
 }
