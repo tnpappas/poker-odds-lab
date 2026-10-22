@@ -1,10 +1,10 @@
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, isNull, ne } from 'drizzle-orm';
 import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import * as schema from '../db/schema';
 import {
   Storage, User, Session, Decision, Adversary, Leak, Usage, Plan, SessionMode,
   DecisionInput, DecisionSummary, AdversaryInput, summarize, Street, DecisionType, Action,
-  ChallengeAnswer, ChallengeAnswerInput,
+  ChallengeAnswer, ChallengeAnswerInput, ChallengePrize, ChallengePrizeInput, ChallengePrizeKind,
 } from './types';
 
 type DB = NeonHttpDatabase<typeof schema>;
@@ -41,8 +41,49 @@ function mapAdversary(r: AdversaryRow): Adversary {
 }
 
 /** Postgres-backed storage via Drizzle + Neon. */
+type PrizeRow = typeof schema.challengePrizes.$inferSelect;
+
+function mapPrize(r: PrizeRow): ChallengePrize {
+  const iso = (d: Date | null) => (d ? d.toISOString() : null);
+  return {
+    challengeId: r.challengeId, email: r.email, kind: r.kind as ChallengePrizeKind, rank: r.rank, handle: r.handle,
+    notifiedAt: iso(r.notifiedAt), grantedAt: iso(r.grantedAt), grantedUserId: r.grantedUserId,
+    accessUntil: iso(r.accessUntil), createdAt: r.createdAt.toISOString(),
+  };
+}
+
 export class DrizzleStorage implements Storage {
   constructor(private db: DB) {}
+
+  private prizeTableReady: Promise<void> | null = null;
+
+  /**
+   * Create challenge_prizes if it is not there yet (same SQL as migration
+   * 0004, idempotent), so the prize feature works without a manual step in the
+   * Neon console. Runs once per process; a failure is retried on the next call.
+   */
+  private ensurePrizeTable(): Promise<void> {
+    this.prizeTableReady ??= this.db
+      .execute(sql`CREATE TABLE IF NOT EXISTS challenge_prizes (
+        challenge_id text NOT NULL,
+        email text NOT NULL,
+        kind text NOT NULL,
+        rank integer NOT NULL,
+        handle text NOT NULL,
+        notified_at timestamptz,
+        granted_at timestamptz,
+        granted_user_id uuid,
+        access_until timestamptz,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        CONSTRAINT challenge_prizes_pk PRIMARY KEY (challenge_id, email)
+      )`)
+      .then(() => undefined)
+      .catch((err: unknown) => {
+        this.prizeTableReady = null;
+        throw err;
+      });
+    return this.prizeTableReady;
+  }
 
   async getOrCreateUser(clerkId: string, email: string, username?: string): Promise<User> {
     const found = await this.db.select().from(schema.users).where(eq(schema.users.clerkId, clerkId)).limit(1);
@@ -241,5 +282,49 @@ export class DrizzleStorage implements Storage {
       id: r.id, challengeId: r.challengeId, day: r.day, email: r.email, handle: r.handle,
       action: r.action as 'call' | 'fold', equityGuess: r.equityGuess, ipHash: r.ipHash, createdAt: r.createdAt.toISOString(),
     }));
+  }
+
+  async addChallengePrizes(rows: ChallengePrizeInput[]): Promise<void> {
+    if (!rows.length) return;
+    await this.ensurePrizeTable();
+    await this.db.insert(schema.challengePrizes).values(rows).onConflictDoNothing();
+  }
+
+  async listChallengePrizes(challengeId: string): Promise<ChallengePrize[]> {
+    await this.ensurePrizeTable();
+    const rows = await this.db.select().from(schema.challengePrizes).where(eq(schema.challengePrizes.challengeId, challengeId));
+    return rows.map(mapPrize);
+  }
+
+  async markChallengePrizeNotified(challengeId: string, email: string): Promise<void> {
+    await this.ensurePrizeTable();
+    await this.db
+      .update(schema.challengePrizes)
+      .set({ notifiedAt: new Date() })
+      .where(and(eq(schema.challengePrizes.challengeId, challengeId), eq(schema.challengePrizes.email, email), isNull(schema.challengePrizes.notifiedAt)));
+  }
+
+  async claimChallengePrize(challengeId: string, email: string, userId: string): Promise<ChallengePrize | null> {
+    await this.ensurePrizeTable();
+    const r = await this.db
+      .update(schema.challengePrizes)
+      .set({ grantedAt: new Date(), grantedUserId: userId })
+      .where(and(
+        eq(schema.challengePrizes.challengeId, challengeId),
+        eq(schema.challengePrizes.email, email),
+        isNull(schema.challengePrizes.grantedAt),
+        ne(schema.challengePrizes.kind, 'chapters'),
+      ))
+      .returning();
+    return r[0] ? mapPrize(r[0]) : null;
+  }
+
+  async finishChallengePrizeClaim(challengeId: string, email: string, accessUntil: string | null): Promise<void> {
+    await this.ensurePrizeTable();
+    const where = and(eq(schema.challengePrizes.challengeId, challengeId), eq(schema.challengePrizes.email, email));
+    await this.db
+      .update(schema.challengePrizes)
+      .set(accessUntil ? { accessUntil: new Date(accessUntil) } : { grantedAt: null, grantedUserId: null })
+      .where(where);
   }
 }

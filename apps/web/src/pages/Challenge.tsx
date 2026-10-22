@@ -157,7 +157,7 @@ function StatusLine({ state, notStarted }: { state: ChallengeState; notStarted: 
   const text = notStarted
     ? `Day 1 drops ${et(state.startsAt)}.`
     : state.finished
-      ? 'The challenge is over. Final standings below.'
+      ? 'The challenge is over. Final standings below. Winners: sign in with the email you entered with and your prize turns on by itself.'
       : `${state.entrants} ${state.entrants === 1 ? 'player' : 'players'} in so far.`;
   return <p className="text-gold-400 mt-4 text-sm font-medium">{text}</p>;
 }

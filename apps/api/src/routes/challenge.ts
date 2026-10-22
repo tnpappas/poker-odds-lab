@@ -13,6 +13,7 @@ import { isOwner } from '../lib/owners';
 import { tagGhlContact } from '../lib/ghl';
 import { CHALLENGE, SPOTS } from '../challenge/spots';
 import { dayStatus, leaderboard, publicState } from '../challenge/scoring';
+import { ensurePrizesWritten } from '../challenge/prizes';
 import { challengeAnswerSchema, challengeSignupSchema } from './schemas';
 
 /** GHL tag on every challenge contact: drives the challenge emails. */
@@ -57,15 +58,18 @@ challenge.post('/challenge/answer', async (req, res) => {
 
 export const challengeAdmin = Router();
 
-/** Owner only: every spot with its answer, and the full leaderboard with emails for prize fulfillment. */
+/** Owner only: every spot with its answer, the full leaderboard with emails, and prize status. */
 challengeAdmin.get('/admin/challenge', async (req: Request, res) => {
   if (!isOwner(req.user!)) return res.status(403).json({ error: 'Owner only.' });
   const answers = await storage.listChallengeAnswers(CHALLENGE.id);
   const now = Date.now();
+  const prizes = await ensurePrizesWritten(now).catch(() => []);
   res.json({
     challenge: CHALLENGE,
     spots: SPOTS.map((s) => ({ ...s, status: dayStatus(s.day, now), entries: answers.filter((a) => a.day === s.day).length })),
     leaderboard: leaderboard(answers, now).map((row) => ({ ...row, sharedIpWith: sharedIp(answers, row.email) })),
+    /** Empty until Day 7 closes; then one row per winner with emailed / applied status. */
+    prizes: prizes.sort((a, b) => a.rank - b.rank),
   });
 });
 

@@ -12,7 +12,7 @@
  * before the code that depends on them deploys (see docs/RUNBOOK.md).
  */
 import {
-  pgTable, pgEnum, uuid, text, integer, doublePrecision, timestamp, date, unique, index,
+  pgTable, pgEnum, uuid, text, integer, doublePrecision, timestamp, date, unique, index, primaryKey,
 } from 'drizzle-orm/pg-core';
 
 /** 'lifetime' is kept for the handful of accounts from the one-time-purchase era. */
@@ -165,5 +165,32 @@ export const challengeAnswers = pgTable(
   (t) => ({
     onePerDay: unique('challenge_answers_one_per_day').on(t.challengeId, t.day, t.email),
     challengeIdx: index('challenge_answers_challenge_idx').on(t.challengeId),
+  }),
+);
+
+/**
+ * Live Read Challenge prizes (migration 0004). Written once when the challenge
+ * ends: the top five get an access prize, everyone who answered all seven days
+ * gets the free chapters. A ranked prize is applied (granted_at) the first time
+ * the winner signs in with the email they entered with. One row per entrant.
+ */
+export const challengePrizes = pgTable(
+  'challenge_prizes',
+  {
+    challengeId: text('challenge_id').notNull(),
+    /** Normalized entrant email, as stored in challenge_answers. */
+    email: text('email').notNull(),
+    kind: text('kind').notNull(), // 'year' | 'month' | 'chapters'
+    rank: integer('rank').notNull(),
+    handle: text('handle').notNull(),
+    /** When the GHL tag that sends the prize email was added. */
+    notifiedAt: timestamp('notified_at', { withTimezone: true }),
+    grantedAt: timestamp('granted_at', { withTimezone: true }),
+    grantedUserId: uuid('granted_user_id'),
+    accessUntil: timestamp('access_until', { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => ({
+    pk: primaryKey({ name: 'challenge_prizes_pk', columns: [t.challengeId, t.email] }),
   }),
 );
