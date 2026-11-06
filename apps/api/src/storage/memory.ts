@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import {
   Storage, User, Session, Decision, Adversary, Leak, Usage, Plan, SessionMode,
   DecisionInput, DecisionSummary, AdversaryInput, summarize, ChallengeAnswer, ChallengeAnswerInput,
+  ChallengePrize, ChallengePrizeInput,
 } from './types';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -18,6 +19,7 @@ export class MemoryStorage implements Storage {
   private usage = new Map<string, Usage>(); // `${userId}:${date}` -> usage
   private webhookEvents = new Set<string>();
   private challengeAnswers: ChallengeAnswer[] = [];
+  private challengePrizes: ChallengePrize[] = [];
 
   async getOrCreateUser(clerkId: string, email: string, username?: string): Promise<User> {
     const existingId = this.byClerk.get(clerkId);
@@ -191,5 +193,44 @@ export class MemoryStorage implements Storage {
 
   async listChallengeAnswers(challengeId: string): Promise<ChallengeAnswer[]> {
     return this.challengeAnswers.filter((a) => a.challengeId === challengeId);
+  }
+
+  async addChallengePrizes(rows: ChallengePrizeInput[]): Promise<void> {
+    for (const r of rows) {
+      if (this.findPrize(r.challengeId, r.email)) continue;
+      this.challengePrizes.push({ ...r, notifiedAt: null, grantedAt: null, grantedUserId: null, accessUntil: null, createdAt: now() });
+    }
+  }
+
+  async listChallengePrizes(challengeId: string): Promise<ChallengePrize[]> {
+    return this.challengePrizes.filter((p) => p.challengeId === challengeId).map((p) => ({ ...p }));
+  }
+
+  async markChallengePrizeNotified(challengeId: string, email: string): Promise<void> {
+    const p = this.findPrize(challengeId, email);
+    if (p && !p.notifiedAt) p.notifiedAt = now();
+  }
+
+  async claimChallengePrize(challengeId: string, email: string, userId: string): Promise<ChallengePrize | null> {
+    const p = this.findPrize(challengeId, email);
+    if (!p || p.kind === 'chapters' || p.grantedAt) return null;
+    p.grantedAt = now();
+    p.grantedUserId = userId;
+    return { ...p };
+  }
+
+  async finishChallengePrizeClaim(challengeId: string, email: string, accessUntil: string | null): Promise<void> {
+    const p = this.findPrize(challengeId, email);
+    if (!p) return;
+    if (accessUntil) {
+      p.accessUntil = accessUntil;
+    } else {
+      p.grantedAt = null;
+      p.grantedUserId = null;
+    }
+  }
+
+  private findPrize(challengeId: string, email: string): ChallengePrize | undefined {
+    return this.challengePrizes.find((p) => p.challengeId === challengeId && p.email === email);
   }
 }

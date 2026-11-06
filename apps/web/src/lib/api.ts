@@ -149,6 +149,8 @@ export interface Me {
   hasSubscription?: boolean;
   /** ISO date Pro is paid through: the next charge if hasSubscription, otherwise when access ends. */
   proUntil?: string | null;
+  /** Set when this account's access came from a Live Read Challenge prize. */
+  challengePrize?: { place: number; kind: 'year' | 'month'; accessUntil: string | null } | null;
 }
 
 /** Fetch the signed-in user's entitlement from the server. Null if unavailable. */
@@ -306,6 +308,8 @@ const freeChapters = (email: string, source: string) => publicPost('/api/leads/f
 export interface AdminChallenge {
   spots: { day: number; title: string; status: ChallengeDay['status']; entries: number; correct: ChallengeAction; equityPct: number; requiredPct: number }[];
   leaderboard: { handle: string; email: string; points: number; correct: number; answered: number; totalError: number; firstAnswerAt: string; sharedIpWith: string[] }[];
+  /** Empty until Day 7 closes. */
+  prizes?: { email: string; handle: string; rank: number; kind: 'year' | 'month' | 'chapters'; notifiedAt: string | null; grantedAt: string | null; accessUntil: string | null }[];
 }
 
 /** Owner only: every spot with its answer and the full leaderboard with emails. */

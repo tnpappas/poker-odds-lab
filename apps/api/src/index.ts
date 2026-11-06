@@ -5,6 +5,7 @@ import { createApp } from './app';
 import { storageBackend } from './storage/index';
 import { logger } from './lib/logger';
 import { captureException } from './lib/sentry';
+import { startPrizeJob } from './challenge/prizes';
 
 const app = createApp();
 
@@ -32,4 +33,6 @@ app.listen(config.PORT, () => {
     payments: config.paypalConfigured ? `paypal:${config.PAYPAL_ENV}` : 'disabled',
     errorTracking: config.SENTRY_DSN ? 'sentry' : 'disabled',
   });
+  // Live Read Challenge: writes the prizes and sends the winner emails once Day 7 closes.
+  startPrizeJob();
 });

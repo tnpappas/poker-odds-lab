@@ -2,6 +2,14 @@
 
 All notable changes, newest first. Dates are the day the change went live on pokerlogiclab.com.
 
+## 2026-10-22
+
+### Live Read Challenge prizes are automatic
+- When Day 7 closes (Oct 26, 7pm ET), the API writes one prize row per winner from the final leaderboard: 1st place a year of unlimited access, 2nd to 5th a month, and everyone else who answered all seven days the free chapters (table `challenge_prizes`, migration 0004; the API creates the table itself on startup).
+- Each winner is tagged in GHL (`lrc-prize-1st`, `lrc-prize-top5`, `lrc-all-7`; a top 5 winner who answered all seven days gets the chapters tag too). The tag fires the winner email. A failed tag is retried every 10 minutes.
+- A ranked prize turns on the first time the winner signs in with the email they entered with (Gmail dots and +tags match). Access starts when applied and ends on a real date (`users.pro_until`), so it expires on its own. It is applied once and never stacks.
+- Account page shows "Live Read Challenge prize" with the end date instead of "Cancelled". The owner page lists every prize with emailed and applied status. The manual grant form is no longer needed for prizes.
+
 ## 2026-10-11
 
 ### Footer
