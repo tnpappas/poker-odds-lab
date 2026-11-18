@@ -25,15 +25,15 @@ const INCLUDED = [
 ];
 
 const TIERS: { plan: CheckoutPlan; label: string; price: string; period: string; note: string; highlight?: boolean }[] = [
-  { plan: 'monthly', label: 'Monthly', price: '$7.99', period: '/mo', note: 'Cancel anytime', highlight: true },
-  { plan: 'annual', label: 'Annual', price: '$49', period: '/yr', note: 'Save 49%, about $4.08/mo' },
+  { plan: 'annual', label: 'Annual', price: '$29', period: '/yr', note: 'Save 51%, about $2.42/mo', highlight: true },
+  { plan: 'monthly', label: 'Monthly', price: '$4.99', period: '/mo', note: 'Cancel anytime' },
 ];
 
 /**
  * Public pricing page.
  *
  * Free tier: 3 replays/day, 2 blitz rounds/day, Visualizer and Calculator free.
- * Paid tiers: Monthly $7.99/mo or Annual $49/yr, billed through PayPal.
+ * Paid tiers: Monthly $4.99/mo or Annual $29/yr, billed through PayPal.
  */
 export function Pricing() {
   return (

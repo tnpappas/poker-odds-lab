@@ -54,7 +54,7 @@ function EntitlementGate({ children }: { children: ReactNode }) {
   if (plan === 'free') {
     return (
       <Paywall
-        reason="This tool is part of unlimited access. Go unlimited for $7.99/mo."
+        reason="This tool is part of unlimited access. Go unlimited for $29/year."
         onClose={() => window.history.back()}
       />
     );
@@ -68,7 +68,7 @@ function SignInWall() {
       <img src={LOGO_WORDMARK_DATA_URI} alt="Poker Logic Lab" className="h-12 mb-7" />
       <h2 className="font-display text-2xl font-semibold mb-2">This tool is part of unlimited access</h2>
       <p className="text-ink-300 text-sm mb-7 max-w-sm text-center">
-        Unlimited access starts at $7.99/mo. It unlocks every tool in the lab, the complete book,
+        Unlimited access from $29/year ($2.42/mo). It unlocks every tool in the lab, the complete book,
         and new Lab Notes every week.
       </p>
       <Link

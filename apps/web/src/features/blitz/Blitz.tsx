@@ -111,7 +111,7 @@ export function Blitz() {
     setScenario(generateBlitzScenario(difficulty, focus));
   };
 
-  if (paywall) return <Paywall reason="You've used all 2 free Blitz rounds today. Go unlimited for $7.99/mo." onClose={() => setPaywall(false)} />;
+  if (paywall) return <Paywall reason="You've used all 2 free Blitz rounds today. Go unlimited for $29/year." onClose={() => setPaywall(false)} />;
 
   const accuracy = total ? Math.round((hits / total) * 100) : 0;
 

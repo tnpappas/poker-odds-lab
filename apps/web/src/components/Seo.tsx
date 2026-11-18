@@ -12,8 +12,8 @@ const DEFAULT = {
 const META: Record<string, { title: string; desc: string }> = {
   '/': DEFAULT,
   '/pricing': {
-    title: 'Pricing: Unlimited Access from $7.99/mo | Poker Logic Lab',
-    desc: 'Try 3 hands free every day. Unlimited access from $7.99/mo or $49/yr. Every tool, the complete book, and new Lab Notes every week. Cancel anytime.',
+    title: 'Pricing: Unlimited Access from $29/year | Poker Logic Lab',
+    desc: 'Try 3 hands free every day. Unlimited access from $29/yr or $4.99/mo. Every tool, the complete book, and new Lab Notes every week. Cancel anytime.',
   },
   '/guide': {
     title: 'How it works | Poker Logic Lab',

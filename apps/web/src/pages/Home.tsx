@@ -198,7 +198,7 @@ export function Home() {
               Every tool, plus the complete book.
             </h2>
             <p className="text-ink-300 mt-3 text-[15px] leading-relaxed max-w-xl">
-              One payment of $49/year (or $7.99/month) unlocks every trainer in the lab and the full guide,
+              One payment of $29/year (or $4.99/month) unlocks every trainer in the lab and the full guide,
               <span className="text-ink-100"> Playing Online Texas Hold’em</span>. All 19 chapters,
               yours to download and keep. New Lab Notes every week. Cancel anytime.
             </p>

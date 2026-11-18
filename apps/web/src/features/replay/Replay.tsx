@@ -166,7 +166,7 @@ export function Replay() {
     }
   };
 
-  if (paywall) return <Paywall reason="You've used all 3 free replays today. Go unlimited for $7.99/mo." onClose={() => setPaywall(false)} />;
+  if (paywall) return <Paywall reason="You've used all 3 free replays today. Go unlimited for $29/year." onClose={() => setPaywall(false)} />;
 
   if (phase === 'loading' || !hand || !node) {
     return <div className="text-center text-ink-300 py-24 animate-pulse">Dealing a hand…</div>;

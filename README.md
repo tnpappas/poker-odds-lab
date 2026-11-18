@@ -6,7 +6,7 @@ Start with `docs/ARCHITECTURE.md`. The original product spec in `CLAUDE.md` is h
 
 ## Status (September 2026)
 
-Live with freemium plus subscription billing through PayPal ($7.99/mo or $49/yr). Frontend on Vercel, API on Railway, Postgres on Neon, auth by Clerk, errors to Sentry. `docs/KNOWN-ISSUES.md` lists what is still open.
+Live with freemium plus subscription billing through PayPal ($4.99/mo or $29/yr). Frontend on Vercel, API on Railway, Postgres on Neon, auth by Clerk, errors to Sentry. `docs/KNOWN-ISSUES.md` lists what is still open.
 
 ## Structure
 
