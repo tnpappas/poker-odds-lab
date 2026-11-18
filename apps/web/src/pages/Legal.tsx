@@ -29,7 +29,7 @@ const DOCS: Record<'terms' | 'privacy' | 'refunds', Doc> = {
         'Sign-in and accounts are handled by our identity provider, Clerk. You are responsible for activity under your account and for keeping your login secure. Tell us at ' + SUPPORT + ' if you suspect unauthorized use.',
       ] },
       { h: 'Subscriptions and billing', body: [
-        'Poker Logic Lab is offered as a monthly subscription at $7.99/month (USD) or an annual subscription at $49/year (USD). Subscriptions renew automatically until cancelled.',
+        'Poker Logic Lab is offered as a monthly subscription at $4.99/month (USD) or an annual subscription at $29/year (USD). Subscriptions renew automatically until cancelled.',
         'A free tier is available with daily limits: 3 Hand Replay hands and 2 Mental Math Blitz rounds per day, plus the Equity Visualizer and Equity Calculator.',
         'Payments are processed by our payment provider, PayPal. We do not receive or store your full card details.',
         'You can cancel your subscription at any time from your account or by emailing ' + SUPPORT + '. Cancellation takes effect at the end of your billing period.',

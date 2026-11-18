@@ -6,8 +6,8 @@ import { api, apiEnabled, type CheckoutPlan } from '../lib/api';
 import { trackInitiateCheckout } from '../lib/fbpixel';
 
 const TIERS: { name: string; price: string; note: string; plan: CheckoutPlan; highlight?: boolean }[] = [
-  { name: 'Monthly', price: '$7.99/mo', note: 'cancel anytime', plan: 'monthly', highlight: true },
-  { name: 'Annual', price: '$49/yr', note: 'save 49%, about $4.08/mo', plan: 'annual' },
+  { name: 'Annual', price: '$29/yr', note: 'save 51%, about $2.42/mo', plan: 'annual', highlight: true },
+  { name: 'Monthly', price: '$4.99/mo', note: 'cancel anytime', plan: 'monthly' },
 ];
 
 export function Paywall({ reason, onClose }: { reason: string; onClose: () => void }) {

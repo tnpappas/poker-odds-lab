@@ -2,6 +2,13 @@
 
 All notable changes, newest first. Dates are the day the change went live on pokerlogiclab.com.
 
+## 2026-11-17
+
+### Permanent price change: $29/year and $4.99/month
+- Poker Logic Lab Pro is now $29/year (the lead offer) or $4.99/month, down from $49/year and $7.99/month. This is the permanent price, not a sale: no expiry, no countdown, no switch back. The free tier is unchanged.
+- The pricing page and the paywall lead with the annual plan ($29/year, about $2.42/month, save 51 percent); monthly ($4.99/month) is the alternative.
+- Checkout uses the new PayPal plans (annual $29, monthly $4.99), so the amount charged matches the price shown on the site.
+
 ## 2026-10-22
 
 ### Live Read Challenge prizes are automatic

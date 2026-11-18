@@ -28,7 +28,7 @@ const CONSENT_KEY = 'pol-tracking-consent';
 export type ConsentChoice = 'granted' | 'declined';
 
 /** Prices by plan. Keep in sync with Pricing.tsx and the PayPal plans. */
-export const PRICE_USD = { monthly: 7.99, annual: 49 } as const;
+export const PRICE_USD = { monthly: 4.99, annual: 29 } as const;
 export type PricedPlan = keyof typeof PRICE_USD;
 
 function readChoice(): ConsentChoice | null {
