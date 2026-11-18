@@ -199,8 +199,8 @@ function BuyBlock() {
         <div className="text-center">
           <SignUpButton
             mode="modal"
-            forceRedirectUrl="/pricing?buy=monthly"
-            signInForceRedirectUrl="/pricing?buy=monthly"
+            forceRedirectUrl="/pricing?buy=annual"
+            signInForceRedirectUrl="/pricing?buy=annual"
           >
             <button className={`${BTN} max-w-xs mx-auto`}>
               <Spade size={16} /> Start unlimited
@@ -211,14 +211,14 @@ function BuyBlock() {
           </p>
           <p className="text-sm text-ink-500 mt-3 text-center">
             Already a member?{' '}
-            <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing?buy=monthly">
+            <SignInButton mode="modal" forceRedirectUrl="/pricing" signUpForceRedirectUrl="/pricing?buy=annual">
               <button className="text-brand-400 hover:text-brand-300 font-medium">Sign in</button>
             </SignInButton>
           </p>
         </div>
       </SignedOut>
       <SignedIn>
-        <SignedInBuy plan="monthly" label="Start unlimited" showAlreadyPro />
+        <SignedInBuy plan="annual" label="Start unlimited" showAlreadyPro />
       </SignedIn>
     </>
   );
