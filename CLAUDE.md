@@ -11,7 +11,7 @@ Detail lives in docs/. Read docs/DECISIONS.md before proposing to redo anything.
 - Keep lib/paypal.ts the only PayPal-aware file
 
 ## Pricing (source of truth: docs/DECISIONS.md)
-- Pro: $7.99/month or $49/year. No lifetime plan
+- Pro: $4.99/month or $29/year. No lifetime plan
 - Free: 3 Hand Replay hands/day, 2 Blitz rounds/day, Equity Visualizer, Calculator, 1 free Lab Note
 - Cancelled subscribers keep Pro until the paid period ends (users.pro_until)
 
